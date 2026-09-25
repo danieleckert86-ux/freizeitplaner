@@ -1,38 +1,471 @@
 <!doctype html>
 <html lang="de">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/><title>FREIZEITPLANER</title><meta name="theme-color" content="#253d31"/><link rel="icon" href="./favicon.svg" type="image/svg+xml"/><link rel="apple-touch-icon" href="./favicon.svg"/><link rel="manifest" href="./site.webmanifest"/><link rel="stylesheet" href="./src/styles.css"/></head>
-<body><div id="app"><main class="shell">
-<header class="hero"><div><p class="eyebrow">FREIZEITPLANER · AUGSBURG</p><h1>Wochenende auf einen Blick</h1><p class="sub">25.–27. September 2026 · Das aktuelle Wochenende im Fokus.</p></div></header>
-<div class="filter-bar"><nav class="filters" aria-label="Tage filtern"><button class="filter active" data-day="all">Alles</button><button class="filter" data-day="fr">Freitag</button><button class="filter" data-day="sa">Samstag</button><button class="filter" data-day="so">Sonntag</button></nav><a class="saved-jump" href="#favorites">★ <span id="savedCount">0</span> gemerkt</a></div>
-<details class="filter-drawer"><summary>Filtern</summary><nav class="category-filters main-category-filters" aria-label="Aktuelle Vorschläge nach Kategorie filtern"><button class="category-filter active" data-category="all">Alle Kategorien</button><button class="category-filter" data-category="wandern">🥾 Wandern</button><button class="category-filter" data-category="fahrrad">🚲 Fahrrad</button><button class="category-filter" data-category="kajak">🌊 Kajak</button><button class="category-filter" data-category="wellness">♨️ Schwimmen/Wellness</button><button class="category-filter" data-category="musik">🎤 Musik</button><button class="category-filter" data-category="gastro">🍽️ Gastro</button><button class="category-filter" data-category="kultur">🎬 Kultur/Kino</button><button class="category-filter" data-category="markt">🧺 Märkte/Feste</button><button class="category-filter" data-category="camper">🚐 Camper</button><button class="category-filter" data-category="wildcard">🎲 Wildcard</button></nav></details>
-<section class="panel weekday-panel" id="weekdaySection"><div class="section-head"><div><p class="eyebrow">FEIERABEND · MO–DO</p><h2>Diese Woche abgeschlossen</h2></div></div><div class="alt-list" id="weekdayTips"></div></section>
-<section class="section" id="topSection"><div class="section-head"><div><p class="eyebrow">DIE BESTEN IDEEN</p><h2>Dieses Wochenende</h2></div><span id="statusText">4 Top-Empfehlungen</span></div><div class="cards" id="topCards">
-<article class="card" data-day="fr" data-category="kultur"><div class="card-top"><span class="day">FR · 20:00</span><span class="badge">Kultur</span></div><h3>Matilde Keizer · Lasagne im Bett</h3><div class="card-actions"><a class="info-link" href="https://www.kresslesmuehle.de/programm/2490042/" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn" type="button" data-favorite data-id="matilde-keizer-2026-09-25" data-title="Matilde Keizer – Lasagne im Bett" data-day-label="Freitag" data-category-label="Kultur" data-description="Persönliche Geschichten, Selbstironie, Schmerz und Humor in der Kresslesmühle." data-url="https://www.kresslesmuehle.de/programm/2490042/">☆ Merken</button></div><p>Persönliche Geschichten, Selbstironie, Schmerz und Humor in der Kresslesmühle.</p><div class="facts"><span>🕗 20:00</span><span>📍 Augsburg</span></div><div class="why">Warum passend? Charakterstark, persönlich und humorvoll statt beliebiger Freitagabend-Termin.</div></article>
-<article class="card" data-day="sa" data-category="fahrrad"><div class="card-top"><span class="day">SA · FAHRRAD</span><span class="badge">Top-Tipp</span></div><h3>Kloster Thierhaupten</h3><div class="card-actions"><a class="info-link" href="https://www.komoot.com/de-de/smarttour/33224301" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn" type="button" data-favorite data-id="rad-kloster-thierhaupten-2026-09-26" data-title="Radtour Kloster Thierhaupten" data-day-label="Samstag" data-category-label="Fahrrad" data-description="Radrunde direkt ab Augsburg mit Kloster und Einkehr als Ziel." data-url="https://www.komoot.com/de-de/smarttour/33224301">☆ Merken</button></div><p>Radrunde direkt ab Augsburg mit echtem Ziel: Kloster und Einkehr. Für Samstag ist trockenes, sonniges Wetter angekündigt.</p><div class="stats"><div><b>55,7</b><small>km</small></div><div><b>190</b><small>hm</small></div><div><b>3:26</b><small>h</small></div></div><div class="why">Warum passend? Landschaft + Ziel unterwegs + Start in Augsburg.</div></article>
-<article class="card" data-day="sa" data-category="musik"><div class="card-top"><span class="day">SA · 19:00</span><span class="badge">Entdecker-Tipp</span></div><h3>Kegelbahnkonzerte #12 · Provino</h3><div class="card-actions"><a class="info-link" href="https://www.augsburg-city.de/events/57873-kegelbahnkonzerte-12/" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn" type="button" data-favorite data-id="kegelbahnkonzerte-12-2026-09-26" data-title="Kegelbahnkonzerte #12 · Provino" data-day-label="Samstag" data-category-label="Musik" data-description="Fünf aufstrebende Acts mit kurzen Sets auf der alten Kegelbahn im Provino Club." data-url="https://www.augsburg-city.de/events/57873-kegelbahnkonzerte-12/">☆ Merken</button></div><p>Fünf aufstrebende Acts spielen jeweils rund 30 Minuten auf der alten Kegelbahn im Provino Club.</p><div class="facts"><span>📍 Augsburg</span><span>🎟️ VVK 15 €</span></div><div class="why">Könnte passen, weil ihr kleine Locations und musikalische Entdeckungen mögt.</div></article>
-<article class="card" data-day="so" data-category="musik"><div class="card-top"><span class="day">SO · 19:30</span><span class="badge">Sehr starker Fit</span></div><h3>Black Sea Dahu · Kantine</h3><div class="card-actions"><a class="info-link" href="https://www.musikkantine.de/home/2026-09-27-black-sea-dahu/" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn" type="button" data-favorite data-id="black-sea-dahu-augsburg-2026-09-27" data-title="Black Sea Dahu · Augsburg" data-day-label="Sonntag" data-category-label="Musik" data-description="Indie-Folk, Chamber Pop und Art Rock mit emotionalem Songwriting in der Kantine Augsburg." data-url="https://www.musikkantine.de/home/2026-09-27-black-sea-dahu/">☆ Merken</button></div><p>Indie-Folk, Chamber Pop und Art Rock mit verletzlichem, persönlichem Songwriting und markanter Stimme.</p><div class="facts"><span>📍 Kantine Augsburg</span><span>🎟️ ab 35 €</span></div><div class="why">Sehr starker Match zu euren Indie-Folk-/Singer-Songwriter-Referenzen.</div></article>
-</div></section>
-<section class="panel outdoor-panel" id="outdoorSection"><div class="section-head"><div><p class="eyebrow">DRAUSSEN</p><h2>Raus, wenn das Wetter passt</h2><p class="section-note">Wandern und Fahrrad kompakt an einem Ort.</p></div></div><div class="outdoor-list" id="outdoorList"></div></section>
-<section class="grid2" id="weekendSection"><div class="panel"><div class="alt-head"><div><p class="eyebrow">MEHR GUTE IDEEN</p><h2>Wenn ihr spontan umplant</h2></div></div><div class="alt-list" id="alternativeList">
-<div class="alt" data-day="sa" data-category="wandern"><span>🥾</span><div><b>Alpspitzrunde mit Wasserfall · Pfronten/Nesselwang</b><p>10,2 km · 762 hm · ca. 4:15 h. Abwechslungsreiche Rundtour über Wasserfallweg, Alpen und Aussichtspunkte. Mittelschwer; bei Nässe kann der Wiesenabstieg rutschig sein, alternativ ist dort ein Forstweg möglich.</p><div class="alt-actions"><a class="info-link" href="https://www.allgaeu.de/touren/alpspitzrunde-mit-wasserfall" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn compact" type="button" data-favorite data-id="alpspitzrunde-wasserfall-2026-09-26" data-title="Alpspitzrunde mit Wasserfall" data-day-label="Samstag" data-category-label="Wandern" data-description="10,2 km, 762 hm, Wasserfall und Alpenpanorama ab Pfronten-Kappel." data-url="https://www.allgaeu.de/touren/alpspitzrunde-mit-wasserfall">☆ Merken</button></div></div></div>
-<div class="alt" data-day="so" data-category="wandern"><span>🥾</span><div><b>Bad Hindelang – Hinterstein · Zipfelsfall</b><p>13,7 km · 273 hm · ca. 4 h. Leichte, abwechslungsreiche Tour entlang der Ostrach zum Zipfelsfall und über Bad Oberdorf zurück – Wasser, Alpenblicke und deutlich weniger Höhenmeter.</p><div class="alt-actions"><a class="info-link" href="https://www.allgaeu.de/draussen/wandern/halbtages-tagestouren" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn compact" type="button" data-favorite data-id="hindelang-hinterstein-zipfelsfall-2026-09-27" data-title="Bad Hindelang – Hinterstein · Zipfelsfall" data-day-label="Sonntag" data-category-label="Wandern" data-description="13,7 km, 273 hm, leichte Tour entlang der Ostrach zum Zipfelsfall." data-url="https://www.allgaeu.de/draussen/wandern/halbtages-tagestouren">☆ Merken</button></div></div></div>
-<div class="alt" data-day="so" data-category="fahrrad"><span>🚲</span><div><b>Holzwinkel- & Weldenbahn-Runde</b><p>Rund 40 km · 120 hm ab Neusäß. Auf der ehemaligen Weldenbahntrasse durch Wälder und Felder nach Welden und über den Holzwinkel zurück – wenig Steigung und klar anderer Charakter als die Lech-/Thierhaupten-Runde.</p><div class="alt-actions"><a class="info-link" href="https://www.avv-augsburg.de/service/freizeit/outdoor-aktivitaeten/fahrradtouren/holzwinkel-und-weldenbahnstrecke" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn compact" type="button" data-favorite data-id="holzwinkel-weldenbahn-2026-09-27" data-title="Holzwinkel- & Weldenbahn-Runde" data-day-label="Sonntag" data-category-label="Fahrrad" data-description="Rund 40 km und 120 hm ab Neusäß durch Wälder, Felder und den Holzwinkel." data-url="https://www.avv-augsburg.de/service/freizeit/outdoor-aktivitaeten/fahrradtouren/holzwinkel-und-weldenbahnstrecke">☆ Merken</button></div></div></div>
-<div class="alt" data-day="fr" data-category="musik"><span>🎸</span><div><b>Jon McKiel · Singer-Songwriter Night</b><p>Freitag 20 Uhr im Grandhotel Cosmopolis: Experimental-Indie-Pop, Lo-Fi-Psychedelia, subtile Melancholie und eigenwilliges Songwriting; Eintritt auf Spendenbasis.</p><div class="alt-actions"><a class="info-link" href="https://grandhotel-cosmopolis.org/events/jon-mckiel-singer-songwriter-night/" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn compact" type="button" data-favorite data-id="jon-mckiel-augsburg-2026-09-25" data-title="Jon McKiel · Singer-Songwriter Night" data-day-label="Freitag" data-category-label="Musik" data-description="Experimental-Indie-Pop und eigenwilliges Songwriting im Grandhotel Cosmopolis." data-url="https://grandhotel-cosmopolis.org/events/jon-mckiel-singer-songwriter-night/">☆ Merken</button></div></div></div>
-<div class="alt" data-day="fr" data-category="kultur"><span>📚</span><div><b>Franz K. und leere Bierflaschen</b><p>Freitag 19–21 Uhr im Brechthaus: Kurzgeschichten, Alltagsabsurdität und schwarzer Humor. Telefonische Anmeldung erforderlich.</p><div class="alt-actions"><a class="info-link" href="https://kunstsammlungen-museen.augsburg.de/brechthaus-termine/franz-k-und-leere-bierflaschen" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn compact" type="button" data-favorite data-id="franz-k-leere-bierflaschen-2026-09-25" data-title="Franz K. und leere Bierflaschen" data-day-label="Freitag" data-category-label="Kultur" data-description="Lesung im Brechthaus mit Alltagsabsurdität und schwarzem Humor." data-url="https://kunstsammlungen-museen.augsburg.de/brechthaus-termine/franz-k-und-leere-bierflaschen">☆ Merken</button></div></div></div>
-<div class="alt" data-day="sa" data-category="kultur"><span>🎭</span><div><b>GTD Comedy Slam · Kresslesmühle</b><p>Samstag 20 Uhr: mindestens vier Newcomer-Comedians, Publikumsentscheidung und kleine Location.</p><div class="alt-actions"><a class="info-link" href="https://www.kresslesmuehle.de/programm/2498116/" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn compact" type="button" data-favorite data-id="gtd-comedy-slam-2026-09-26" data-title="GTD Comedy Slam · Augsburg" data-day-label="Samstag" data-category-label="Kultur" data-description="Comedy Slam mit Newcomern in der Kresslesmühle." data-url="https://www.kresslesmuehle.de/programm/2498116/">☆ Merken</button></div></div></div>
-<div class="alt" data-day="sa" data-category="camper"><span>🚐</span><div><b>Camping Waldesruh · Wertach</b><p>Ruhiger kleiner Platz am Ortsrand mit Sanitäranlagen und zwei Waschhäusern – passend für euren Van ohne eigene Toilette. Für eine Nacht vorher anfragen.</p><div class="alt-actions"><a class="info-link" href="https://www.camping-wertach.de/" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn compact" type="button" data-favorite data-id="camping-waldesruh-wertach" data-title="Camping Waldesruh · Wertach" data-day-label="Samstag–Sonntag" data-category-label="Camper" data-description="Ruhiger Campingplatz in Wertach mit Sanitäranlagen." data-url="https://www.camping-wertach.de/">☆ Merken</button></div></div></div>
-<div class="alt" data-day="sa" data-category="markt"><span>🍜</span><div><b>Schmeckfestival · Neusäß</b><p>Street Food, Weinfest, Picknickwiese und Livemusik auf zwei Bühnen; Samstag 12–22 Uhr, Eintritt frei.</p><div class="alt-actions"><a class="info-link" href="https://www.schmeckfestival.de/" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn compact" type="button" data-favorite data-id="schmeckfestival-neusaess-2026-09-26" data-title="Schmeckfestival · Neusäß" data-day-label="Samstag" data-category-label="Märkte/Feste" data-description="Street Food, Weinfest, Picknickwiese und Livemusik auf zwei Bühnen." data-url="https://www.schmeckfestival.de/">☆ Merken</button></div></div></div>
-<div class="alt" data-day="sa" data-category="kultur"><span>🎬</span><div><b>Lovebox · Liliom</b><p>Samstag 18 Uhr: ungewöhnlicher Dokumentarfilm über Begegnung, Liebe und Gemeinschaft rund um AfrikaBurn. Ein deutlich persönlicherer Kino-Tipp als Standard-Multiplexware.</p><div class="alt-actions"><a class="info-link" href="https://augsburg.critic.de/kinoprogramm/film/lovebox-418716/" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn compact" type="button" data-favorite data-id="lovebox-liliom-2026-09-26" data-title="Lovebox · Liliom" data-day-label="Samstag" data-category-label="Kultur/Kino" data-description="Dokumentarfilm über Begegnung, Liebe und Gemeinschaft rund um AfrikaBurn." data-url="https://augsburg.critic.de/kinoprogramm/film/lovebox-418716/">☆ Merken</button></div></div></div>
-<div class="alt" data-day="so" data-category="wellness"><span>♨️</span><div><b>THERME Bad Wörishofen · Vitalbad & Saunen</b><p>Wetterunabhängiger Plan mit großer Saunalandschaft und täglichem Aufgussprogramm.</p><div class="alt-actions"><a class="info-link" href="https://www.therme-badwoerishofen.de/vitalbad-saunen/aufgussprogramm/" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn compact" type="button" data-favorite data-id="therme-bad-woerishofen" data-title="THERME Bad Wörishofen" data-day-label="Sonntag" data-category-label="Schwimmen/Wellness" data-description="Große Therme und Saunalandschaft mit umfangreichem Aufgussprogramm." data-url="https://www.therme-badwoerishofen.de/vitalbad-saunen/aufgussprogramm/">☆ Merken</button></div></div></div>
-<div class="alt" data-day="so" data-category="markt"><span>🧺</span><div><b>Regionalmarkt Dinkelscherben</b><p>Sonntag 11–17 Uhr: Direktvermarkter und regionale Produkte – als eigenständiges Ziel geeignet.</p><div class="alt-actions"><a class="info-link" href="https://naturpark-augsburg.de/aktuelles-np/regionalmarkt-2026/" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn compact" type="button" data-favorite data-id="regionalmarkt-dinkelscherben-2026-09-27" data-title="Regionalmarkt Dinkelscherben" data-day-label="Sonntag" data-category-label="Markt" data-description="Regionalmarkt mit Direktvermarktern und regionalen Produkten." data-url="https://naturpark-augsburg.de/aktuelles-np/regionalmarkt-2026/">☆ Merken</button></div></div></div>
-</div></div>
-<div class="panel excluded"><p class="eyebrow">AKTUELL RAUS</p><h2>Nicht empfehlen</h2><div class="excluded-list"><div><b>🌊 Eiskanal Hauptkanal</b><p>Offizieller Bachablass vom 19.09. bis 02.10.2026: Olympiakanustrecke und weitere Lechkanäle reduziert.</p></div><div><b>🚐 Buron-Stellplatz</b><p>Eigene Toilette erforderlich · für euren Van ungeeignet.</p></div><div><b>🥾 Reuterwanne</b><p>Weiterhin nicht als Top-Tipp: Die offizielle Tourenseite zeigt noch Sperrhinweise zu Wegabschnitten. Der gespeicherte Favorit bleibt selbstverständlich erhalten.</p></div></div></div></section>
-<section class="panel discovery-panel" id="discoveries"><div class="section-head"><div><p class="eyebrow">SCHON MAL VORMERKEN</p><h2>Besondere Entdeckungen · nächste 3 Wochen</h2><p class="section-note">Augsburg zuerst. München und Ulm nur, wenn sich der Weg wirklich lohnt.</p></div></div><div class="discovery-timeline">
-<article class="discovery-item" data-category="musik"><time>08.10.</time><div><span class="mini-badge">Musik · München</span><h3>TOBIAS · Feierwerk</h3><p>Deutschsprachiger Indie-Pop zwischen Singer-Songwriter, Folk und Country. Kleine Location und sehr starker Musik-Match.</p><div class="alt-actions"><a class="info-link" href="https://www.feierwerk.de/konzert-kulturprogramm/detail/08-10-2026_tobias" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn compact" type="button" data-favorite data-id="tobias-feierwerk-2026-10-08" data-title="TOBIAS · Feierwerk" data-day-label="Donnerstag, 08.10." data-category-label="Musik" data-description="Deutschsprachiger Indie-Pop zwischen Singer-Songwriter, Folk und Country im Feierwerk München." data-url="https://www.feierwerk.de/konzert-kulturprogramm/detail/08-10-2026_tobias">☆ Merken</button></div></div></article>
-<article class="discovery-item" data-category="musik"><time>09.–10.10.</time><div><span class="mini-badge">Festival · München</span><h3>25 Jahre Digitalanalog · Muffatwerk</h3><p>Musik trifft eigens entwickelte Videokunst und audiovisuelle Arbeiten – ungewöhnlicher als ein klassischer Konzertabend.</p><div class="alt-actions"><a class="info-link" href="https://www.muffatwerk.de/de/events/view/8234/25-jahre-digitalanalog-musik-festival" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn compact" type="button" data-favorite data-id="digitalanalog-muenchen-2026-10-09" data-title="25 Jahre Digitalanalog · Muffatwerk" data-day-label="09.–10.10." data-category-label="Musik" data-description="Musikfestival mit Videokunst und audiovisuellen Arbeiten im Muffatwerk." data-url="https://www.muffatwerk.de/de/events/view/8234/25-jahre-digitalanalog-musik-festival">☆ Merken</button></div></div></article>
-<article class="discovery-item" data-category="musik"><time>10.10.</time><div><span class="mini-badge">Musik · München</span><h3>Feierwerk Sessions · Orangehouse</h3><p>Drei junge Acts, kleine Bühne und Pay-what-you-want – genau die Art musikalische Entdeckung, die leicht untergeht.</p><div class="alt-actions"><a class="info-link" href="https://www.feierwerk.de/konzert-kulturprogramm/detail/10-10-2026_feierwerk-session-floralia-luvbite-victoryaz" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn compact" type="button" data-favorite data-id="feierwerk-sessions-2026-10-10" data-title="Feierwerk Sessions · Orangehouse" data-day-label="Samstag, 10.10." data-category-label="Musik" data-description="Drei junge Acts in kleiner Location, Pay what you want." data-url="https://www.feierwerk.de/konzert-kulturprogramm/detail/10-10-2026_feierwerk-session-floralia-luvbite-victoryaz">☆ Merken</button></div></div></article>
-<article class="discovery-item" data-category="kultur"><time>10.10.</time><div><span class="mini-badge">Kultur · Ulm</span><h3>Poetry Slam · ROXY</h3><p>Ein starker Kultur-Ausflug nach Ulm: Slam, kleine Bühne und Publikumsentscheidung statt Standardprogramm.</p><div class="alt-actions"><a class="info-link" href="https://www.roxy.ulm.de/programm/programm.php?j=2026&m=10&vid=5508" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn compact" type="button" data-favorite data-id="poetry-slam-roxy-ulm-2026-10-10" data-title="Poetry Slam · ROXY Ulm" data-day-label="Samstag, 10.10." data-category-label="Kultur" data-description="Poetry Slam im ROXY Ulm mit Publikumsentscheidung." data-url="https://www.roxy.ulm.de/programm/programm.php?j=2026&m=10&vid=5508">☆ Merken</button></div></div></article>
-<article class="discovery-item" data-category="kultur"><time>14.10.</time><div><span class="mini-badge">Konzert × Literatur · München</span><h3>Kafka Band + Jaroslav Rudiš · Ampere</h3><p>Lesung und Konzert in einem – textorientiert, ungewöhnlich und deshalb ein echter München-Ausnahmetipp.</p><div class="alt-actions"><a class="info-link" href="https://www.muffatwerk.de/de/events/concert" target="_blank" rel="noopener noreferrer">Mehr Infos ↗</a><button class="favorite-btn compact" type="button" data-favorite data-id="kafka-band-rudis-2026-10-14" data-title="Kafka Band + Jaroslav Rudiš · Ampere" data-day-label="Mittwoch, 14.10." data-category-label="Kultur" data-description="Konzert und Literatur mit Kafka Band und Jaroslav Rudiš im Ampere." data-url="https://www.muffatwerk.de/de/events/concert">☆ Merken</button></div></div></article>
-</div></section>
-<section class="panel favorites-panel" id="favorites"><div class="favorites-head"><div><p class="eyebrow">MERKLISTE</p><h2>Für später behalten</h2><p class="favorites-note">Gemerkte Vorschläge bleiben hier auch erhalten, wenn die aktuellen Wochenendtipps später aktualisiert werden.</p></div></div><nav class="category-filters favorite-category-filters" aria-label="Merkliste nach Kategorie filtern"><button class="favorite-category-filter active" data-favorite-category="all">Alle Kategorien</button><button class="favorite-category-filter" data-favorite-category="wandern">🥾 Wandern</button><button class="favorite-category-filter" data-favorite-category="fahrrad">🚲 Fahrrad</button><button class="favorite-category-filter" data-favorite-category="kajak">🌊 Kajak</button><button class="favorite-category-filter" data-favorite-category="wellness">♨️ Schwimmen/Wellness</button><button class="favorite-category-filter" data-favorite-category="musik">🎤 Musik</button><button class="favorite-category-filter" data-favorite-category="gastro">🍽️ Gastro</button><button class="favorite-category-filter" data-favorite-category="kultur">🎬 Kultur/Kino</button><button class="favorite-category-filter" data-favorite-category="markt">🧺 Märkte/Feste</button><button class="favorite-category-filter" data-favorite-category="camper">🚐 Camper</button><button class="favorite-category-filter" data-favorite-category="wildcard">🎲 Wildcard</button></nav><div id="favoritesMessage" class="favorites-message" aria-live="polite"></div><div id="favoritesEmpty" class="favorites-empty">Noch nichts gemerkt. Tippe bei einer Empfehlung auf „☆ Merken“.</div><div id="favoritesList" class="favorites-list"></div></section>
-</main></div><script type="module" src="./src/main.ts"></script></body></html>
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Freizeitplaner · Augsburg & Umgebung</title>
+  <meta name="theme-color" content="#F7F6F2"/>
+  <meta name="description" content="Persönliche Freizeitideen für Augsburg und Umgebung."/>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"/>
+  <link rel="apple-touch-icon" href="./favicon.svg"/>
+  <link rel="manifest" href="./site.webmanifest"/>
+  <link rel="stylesheet" href="./src/styles.css"/>
+</head>
+<body>
+<div id="app">
+  <main class="shell" id="top">
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 19c3-5 6-8 14-14"/>
+            <path d="M7 7h5v5"/>
+            <path d="M4 15v5h5"/>
+          </svg>
+        </span>
+        <div>
+          <p class="brand-title">Freizeitplaner</p>
+          <p class="brand-subtitle">Augsburg &amp; Umgebung</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <span class="data-state">Datenstand Freizeit-Tipps: 25.09.2026</span>
+        <a class="saved-jump" href="#favorites" aria-label="Merkliste öffnen">
+          <span class="saved-label">Merkliste</span>
+          <span class="saved-count" id="savedCount">0</span>
+        </a>
+      </div>
+    </header>
+
+    <section class="weekend-overview" aria-labelledby="weekendTitle">
+      <div class="overview-copy">
+        <p class="section-kicker">Wochenendplanung</p>
+        <h1 id="weekendTitle">Dein Wochenende</h1>
+        <p class="weekend-range">Freitag, 25. bis Sonntag, 27. September 2026</p>
+        <p>Persönliche Ideen mit Augsburg im Mittelpunkt. München und Ulm nur bei besonderen Highlights.</p>
+      </div>
+      <div class="weather-grid" aria-label="Wetterübersicht Freitag bis Sonntag">
+        <div class="weather-day" data-weather-date="2026-09-25">
+          <strong>Freitag</strong>
+          <div class="weather-date">25.09.</div>
+          <div class="weather-value">Wetter derzeit nicht verfügbar</div>
+        </div>
+        <div class="weather-day" data-weather-date="2026-09-26">
+          <strong>Samstag</strong>
+          <div class="weather-date">26.09.</div>
+          <div class="weather-value">Wetter derzeit nicht verfügbar</div>
+        </div>
+        <div class="weather-day" data-weather-date="2026-09-27">
+          <strong>Sonntag</strong>
+          <div class="weather-date">27.09.</div>
+          <div class="weather-value">Wetter derzeit nicht verfügbar</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="filter-panel" aria-label="Freizeitideen filtern">
+      <div class="filter-row">
+        <div class="filter-group">
+          <span class="filter-label">Tag</span>
+          <nav class="filters" aria-label="Nach Tag filtern">
+            <button class="filter active" type="button" data-day="all">Ganzes Wochenende</button>
+            <button class="filter" type="button" data-day="fr">Freitag</button>
+            <button class="filter" type="button" data-day="sa">Samstag</button>
+            <button class="filter" type="button" data-day="so">Sonntag</button>
+          </nav>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">Kategorie</span>
+          <nav class="category-filters main-category-filters" aria-label="Nach Kategorie filtern">
+            <button class="category-filter active" type="button" data-category="all">Alle</button>
+            <button class="category-filter" type="button" data-category="outdoor">Draußen</button>
+            <button class="category-filter" type="button" data-category="kultur">Kultur</button>
+            <button class="category-filter" type="button" data-category="musik">Musik</button>
+            <button class="category-filter" type="button" data-category="essen">Essen &amp; Trinken</button>
+            <button class="category-filter" type="button" data-category="wellness">Wellness</button>
+          </nav>
+        </div>
+      </div>
+      <div class="filter-meta">
+        <span class="filter-hit-count" id="resultCount">0 passende Ideen</span>
+        <button class="reset-filter" id="resetFilters" type="button" hidden>Filter zurücksetzen</button>
+      </div>
+    </section>
+
+    <section class="panel weekday-panel" id="weekdaySection" hidden>
+      <div id="weekdayTips"></div>
+    </section>
+
+    <section class="section" id="topSection" aria-labelledby="topHeading">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Besonders passend</p>
+          <h2 id="topHeading">Das könnte euch gefallen</h2>
+          <p class="section-note">Die stärksten vorhandenen Empfehlungen für dieses Wochenende.</p>
+        </div>
+        <p class="section-status" id="statusText"></p>
+      </div>
+      <div class="cards" id="topCards">
+        <article class="card filterable" data-day="fr" data-category="kultur" data-date="2026-09-25">
+          <div class="card-top"><span class="day">Freitag · 20:00</span><span class="badge">Kultur</span></div>
+          <h3>Matilde Keizer · Lasagne im Bett</h3>
+          <p>Persönliche Geschichten, Selbstironie, Schmerz und Humor in der Kresslesmühle.</p>
+          <div class="facts"><span>20:00</span><span>Augsburg</span></div>
+          <div class="why">Charakterstark, persönlich und humorvoll statt beliebiger Freitagabend-Termin.</div>
+          <div class="card-actions item-actions">
+            <a class="info-link" href="https://www.kresslesmuehle.de/programm/2490042/" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+            <button class="favorite-btn" type="button" data-favorite data-id="matilde-keizer-2026-09-25" data-title="Matilde Keizer – Lasagne im Bett" data-day-label="Freitag" data-category-label="Kultur" data-description="Persönliche Geschichten, Selbstironie, Schmerz und Humor in der Kresslesmühle." data-url="https://www.kresslesmuehle.de/programm/2490042/">Merken</button>
+          </div>
+        </article>
+
+        <article class="card filterable" data-day="sa" data-category="musik" data-date="2026-09-26">
+          <div class="card-top"><span class="day">Samstag · 19:00</span><span class="badge">Musik</span></div>
+          <h3>Kegelbahnkonzerte #12 · Provino</h3>
+          <p>Fünf aufstrebende Acts spielen jeweils rund 30 Minuten auf der alten Kegelbahn im Provino Club.</p>
+          <div class="facts"><span>Augsburg</span><span>VVK 15 €</span></div>
+          <div class="why">Kleine Location und mehrere musikalische Entdeckungen an einem Abend.</div>
+          <div class="card-actions item-actions">
+            <a class="info-link" href="https://www.augsburg-city.de/events/57873-kegelbahnkonzerte-12/" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+            <button class="favorite-btn" type="button" data-favorite data-id="kegelbahnkonzerte-12-2026-09-26" data-title="Kegelbahnkonzerte #12 · Provino" data-day-label="Samstag" data-category-label="Musik" data-description="Fünf aufstrebende Acts mit kurzen Sets auf der alten Kegelbahn im Provino Club." data-url="https://www.augsburg-city.de/events/57873-kegelbahnkonzerte-12/">Merken</button>
+          </div>
+        </article>
+
+        <article class="card filterable" data-day="so" data-category="musik" data-date="2026-09-27">
+          <div class="card-top"><span class="day">Sonntag · 19:30</span><span class="badge">Musik</span></div>
+          <h3>Black Sea Dahu · Kantine</h3>
+          <p>Indie-Folk, Chamber Pop und Art Rock mit persönlichem Songwriting und markanter Stimme.</p>
+          <div class="facts"><span>Kantine Augsburg</span><span>ab 35 €</span></div>
+          <div class="why">Sehr nah an euren Indie-Folk- und Singer-Songwriter-Referenzen.</div>
+          <div class="card-actions item-actions">
+            <a class="info-link" href="https://www.musikkantine.de/home/2026-09-27-black-sea-dahu/" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+            <button class="favorite-btn" type="button" data-favorite data-id="black-sea-dahu-augsburg-2026-09-27" data-title="Black Sea Dahu · Augsburg" data-day-label="Sonntag" data-category-label="Musik" data-description="Indie-Folk, Chamber Pop und Art Rock mit emotionalem Songwriting in der Kantine Augsburg." data-url="https://www.musikkantine.de/home/2026-09-27-black-sea-dahu/">Merken</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="weekendSection" aria-labelledby="ideasHeading">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Mehr Auswahl</p>
+          <h2 id="ideasHeading">Weitere Ideen fürs Wochenende</h2>
+          <p class="section-note">Kompakt sortiert, damit ihr schnell vergleichen könnt.</p>
+        </div>
+      </div>
+      <div class="ideas-grid" id="alternativeList">
+        <article class="idea-card filterable" data-day="fr" data-category="musik" data-date="2026-09-25">
+          <div class="idea-visual" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l10-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="16" cy="16" r="3"/></svg></div>
+          <div class="idea-content">
+            <span class="idea-category">Musik</span>
+            <h3>Jon McKiel · Singer-Songwriter Night</h3>
+            <p>Experimental-Indie-Pop, Lo-Fi-Psychedelia, subtile Melancholie und eigenwilliges Songwriting im Grandhotel Cosmopolis.</p>
+            <div class="idea-meta"><span>Freitag · 20:00</span><span>Augsburg</span><span>Spendenbasis</span></div>
+            <div class="item-actions">
+              <a class="info-link" href="https://grandhotel-cosmopolis.org/events/jon-mckiel-singer-songwriter-night/" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+              <button class="favorite-btn compact" type="button" data-favorite data-id="jon-mckiel-augsburg-2026-09-25" data-title="Jon McKiel · Singer-Songwriter Night" data-day-label="Freitag" data-category-label="Musik" data-description="Experimental-Indie-Pop und eigenwilliges Songwriting im Grandhotel Cosmopolis." data-url="https://grandhotel-cosmopolis.org/events/jon-mckiel-singer-songwriter-night/">Merken</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="idea-card filterable" data-day="fr" data-category="kultur" data-date="2026-09-25">
+          <div class="idea-visual" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4Z"/><path d="M8 4v16"/></svg></div>
+          <div class="idea-content">
+            <span class="idea-category">Kultur</span>
+            <h3>Franz K. und leere Bierflaschen</h3>
+            <p>Kurzgeschichten, Alltagsabsurdität und schwarzer Humor im Brechthaus. Telefonische Anmeldung erforderlich.</p>
+            <div class="idea-meta"><span>Freitag · 19–21 Uhr</span><span>Augsburg</span></div>
+            <div class="item-actions">
+              <a class="info-link" href="https://kunstsammlungen-museen.augsburg.de/brechthaus-termine/franz-k-und-leere-bierflaschen" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+              <button class="favorite-btn compact" type="button" data-favorite data-id="franz-k-leere-bierflaschen-2026-09-25" data-title="Franz K. und leere Bierflaschen" data-day-label="Freitag" data-category-label="Kultur" data-description="Lesung im Brechthaus mit Alltagsabsurdität und schwarzem Humor." data-url="https://kunstsammlungen-museen.augsburg.de/brechthaus-termine/franz-k-und-leere-bierflaschen">Merken</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="idea-card filterable" data-day="sa" data-category="kultur" data-date="2026-09-26">
+          <div class="idea-visual" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16v11H4z"/><path d="m8 7 2-3h4l2 3"/></svg></div>
+          <div class="idea-content">
+            <span class="idea-category">Kultur</span>
+            <h3>GTD Comedy Slam · Kresslesmühle</h3>
+            <p>Mindestens vier Newcomer-Comedians, Publikumsentscheidung und kleine Location.</p>
+            <div class="idea-meta"><span>Samstag · 20:00</span><span>Augsburg</span></div>
+            <div class="item-actions">
+              <a class="info-link" href="https://www.kresslesmuehle.de/programm/2498116/" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+              <button class="favorite-btn compact" type="button" data-favorite data-id="gtd-comedy-slam-2026-09-26" data-title="GTD Comedy Slam · Augsburg" data-day-label="Samstag" data-category-label="Kultur" data-description="Comedy Slam mit Newcomern in der Kresslesmühle." data-url="https://www.kresslesmuehle.de/programm/2498116/">Merken</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="idea-card filterable" data-day="sa" data-category="camper" data-date="2026-09-26">
+          <div class="idea-visual" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h12l4 5v5H3z"/><path d="M15 7v5h4"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></div>
+          <div class="idea-content">
+            <span class="idea-category">Draußen</span>
+            <h3>Camping Waldesruh · Wertach</h3>
+            <p>Ruhiger kleiner Platz am Ortsrand mit Sanitäranlagen und zwei Waschhäusern. Für eine Nacht vorher anfragen.</p>
+            <div class="idea-meta"><span>Samstag–Sonntag</span><span>Wertach</span></div>
+            <div class="item-actions">
+              <a class="info-link" href="https://www.camping-wertach.de/" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+              <button class="favorite-btn compact" type="button" data-favorite data-id="camping-waldesruh-wertach" data-title="Camping Waldesruh · Wertach" data-day-label="Samstag–Sonntag" data-category-label="Camper" data-description="Ruhiger Campingplatz in Wertach mit Sanitäranlagen." data-url="https://www.camping-wertach.de/">Merken</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="idea-card filterable" data-day="sa" data-category="markt" data-date="2026-09-26">
+          <div class="idea-visual" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 10h16l-1 10H5L4 10Z"/><path d="M8 10a4 4 0 0 1 8 0"/></svg></div>
+          <div class="idea-content">
+            <span class="idea-category">Essen &amp; Trinken</span>
+            <h3>Schmeckfestival · Neusäß</h3>
+            <p>Street Food, Weinfest, Picknickwiese und Livemusik auf zwei Bühnen.</p>
+            <div class="idea-meta"><span>Samstag · 12–22 Uhr</span><span>Neusäß</span><span>Eintritt frei</span></div>
+            <div class="item-actions">
+              <a class="info-link" href="https://www.schmeckfestival.de/" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+              <button class="favorite-btn compact" type="button" data-favorite data-id="schmeckfestival-neusaess-2026-09-26" data-title="Schmeckfestival · Neusäß" data-day-label="Samstag" data-category-label="Märkte/Feste" data-description="Street Food, Weinfest, Picknickwiese und Livemusik auf zwei Bühnen." data-url="https://www.schmeckfestival.de/">Merken</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="idea-card filterable" data-day="sa" data-category="kultur" data-date="2026-09-26">
+          <div class="idea-visual" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m10 9 5 3-5 3z"/></svg></div>
+          <div class="idea-content">
+            <span class="idea-category">Kultur</span>
+            <h3>Lovebox · Liliom</h3>
+            <p>Ungewöhnlicher Dokumentarfilm über Begegnung, Liebe und Gemeinschaft rund um AfrikaBurn.</p>
+            <div class="idea-meta"><span>Samstag · 18:00</span><span>Liliom Augsburg</span></div>
+            <div class="item-actions">
+              <a class="info-link" href="https://augsburg.critic.de/kinoprogramm/film/lovebox-418716/" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+              <button class="favorite-btn compact" type="button" data-favorite data-id="lovebox-liliom-2026-09-26" data-title="Lovebox · Liliom" data-day-label="Samstag" data-category-label="Kultur/Kino" data-description="Dokumentarfilm über Begegnung, Liebe und Gemeinschaft rund um AfrikaBurn." data-url="https://augsburg.critic.de/kinoprogramm/film/lovebox-418716/">Merken</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="idea-card filterable" data-day="so" data-category="wellness" data-date="2026-09-27">
+          <div class="idea-visual" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 20c0-3 2-4 2-7s-2-4-2-7"/><path d="M12 20c0-3 2-4 2-7s-2-4-2-7"/><path d="M18 20c0-3 2-4 2-7s-2-4-2-7"/></svg></div>
+          <div class="idea-content">
+            <span class="idea-category">Wellness</span>
+            <h3>THERME Bad Wörishofen · Vitalbad &amp; Saunen</h3>
+            <p>Wetterunabhängiger Plan mit großer Saunalandschaft und täglichem Aufgussprogramm.</p>
+            <div class="idea-meta"><span>Sonntag</span><span>Bad Wörishofen</span></div>
+            <div class="item-actions">
+              <a class="info-link" href="https://www.therme-badwoerishofen.de/vitalbad-saunen/aufgussprogramm/" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+              <button class="favorite-btn compact" type="button" data-favorite data-id="therme-bad-woerishofen" data-title="THERME Bad Wörishofen" data-day-label="Sonntag" data-category-label="Schwimmen/Wellness" data-description="Große Therme und Saunalandschaft mit umfangreichem Aufgussprogramm." data-url="https://www.therme-badwoerishofen.de/vitalbad-saunen/aufgussprogramm/">Merken</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="idea-card filterable" data-day="so" data-category="markt" data-date="2026-09-27">
+          <div class="idea-visual" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 8h14l-1 12H6L5 8Z"/><path d="M8 8a4 4 0 0 1 8 0"/></svg></div>
+          <div class="idea-content">
+            <span class="idea-category">Essen &amp; Trinken</span>
+            <h3>Regionalmarkt Dinkelscherben</h3>
+            <p>Direktvermarkter und regionale Produkte als eigenständiges Sonntagsziel.</p>
+            <div class="idea-meta"><span>Sonntag · 11–17 Uhr</span><span>Dinkelscherben</span></div>
+            <div class="item-actions">
+              <a class="info-link" href="https://naturpark-augsburg.de/aktuelles-np/regionalmarkt-2026/" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+              <button class="favorite-btn compact" type="button" data-favorite data-id="regionalmarkt-dinkelscherben-2026-09-27" data-title="Regionalmarkt Dinkelscherben" data-day-label="Sonntag" data-category-label="Markt" data-description="Regionalmarkt mit Direktvermarktern und regionalen Produkten." data-url="https://naturpark-augsburg.de/aktuelles-np/regionalmarkt-2026/">Merken</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="outdoor-section" id="outdoorSection" aria-labelledby="outdoorHeading">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Draußen</p>
+          <h2 id="outdoorHeading">Raus ins Grüne</h2>
+          <p class="section-note">Wanderungen und Radtouren zusätzlich zu den übrigen Freizeitideen.</p>
+        </div>
+      </div>
+      <div class="outdoor-columns">
+        <div class="outdoor-group" id="hikeGroup">
+          <h3>Wanderungen</h3>
+          <div class="tour-list">
+            <article class="tour-card filterable" data-day="sa" data-category="wandern" data-date="2026-09-26">
+              <div class="tour-top"><span class="tour-category">Wandern</span><span class="meta-label">Rundtour</span></div>
+              <h4>Alpspitzrunde mit Wasserfall · Pfronten/Nesselwang</h4>
+              <p>Abwechslungsreiche Runde über Wasserfallweg, Alpen und Aussichtspunkte. Bei Nässe kann der Wiesenabstieg rutschig sein; alternativ ist dort ein Forstweg möglich.</p>
+              <div class="tour-meta"><span>10,2 km</span><span>762 hm</span><span>ca. 4:15 h</span><span>Allgäu</span></div>
+              <div class="item-actions">
+                <a class="info-link" href="https://www.allgaeu.de/touren/alpspitzrunde-mit-wasserfall" target="_blank" rel="noopener noreferrer">Tour öffnen</a>
+                <button class="favorite-btn compact" type="button" data-favorite data-id="alpspitzrunde-wasserfall-2026-09-26" data-title="Alpspitzrunde mit Wasserfall" data-day-label="Samstag" data-category-label="Wandern" data-description="10,2 km, 762 hm, Wasserfall und Alpenpanorama ab Pfronten-Kappel." data-url="https://www.allgaeu.de/touren/alpspitzrunde-mit-wasserfall">Merken</button>
+              </div>
+            </article>
+
+            <article class="tour-card filterable" data-day="so" data-category="wandern" data-date="2026-09-27">
+              <div class="tour-top"><span class="tour-category">Wandern</span><span class="meta-label">leichter</span></div>
+              <h4>Bad Hindelang – Hinterstein · Zipfelsfall</h4>
+              <p>Abwechslungsreiche Tour entlang der Ostrach zum Zipfelsfall und über Bad Oberdorf zurück – Wasser, Alpenblicke und wenig Höhenmeter.</p>
+              <div class="tour-meta"><span>13,7 km</span><span>273 hm</span><span>ca. 4 h</span><span>Allgäu</span></div>
+              <div class="item-actions">
+                <a class="info-link" href="https://www.allgaeu.de/draussen/wandern/halbtages-tagestouren" target="_blank" rel="noopener noreferrer">Tour öffnen</a>
+                <button class="favorite-btn compact" type="button" data-favorite data-id="hindelang-hinterstein-zipfelsfall-2026-09-27" data-title="Bad Hindelang – Hinterstein · Zipfelsfall" data-day-label="Sonntag" data-category-label="Wandern" data-description="13,7 km, 273 hm, leichte Tour entlang der Ostrach zum Zipfelsfall." data-url="https://www.allgaeu.de/draussen/wandern/halbtages-tagestouren">Merken</button>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="outdoor-group" id="bikeGroup">
+          <h3>Radtouren</h3>
+          <div class="tour-list">
+            <article class="tour-card filterable" data-day="sa" data-category="fahrrad" data-date="2026-09-26">
+              <div class="tour-top"><span class="tour-category">Radtour</span><span class="meta-label">ab Augsburg</span></div>
+              <h4>Kloster Thierhaupten</h4>
+              <p>Radrunde direkt ab Augsburg mit Kloster und Einkehr als Ziel.</p>
+              <div class="tour-meta"><span>55,7 km</span><span>190 hm</span><span>ca. 3:26 h</span></div>
+              <div class="item-actions">
+                <a class="info-link" href="https://www.komoot.com/de-de/smarttour/33224301" target="_blank" rel="noopener noreferrer">Tour öffnen</a>
+                <button class="favorite-btn compact" type="button" data-favorite data-id="rad-kloster-thierhaupten-2026-09-26" data-title="Radtour Kloster Thierhaupten" data-day-label="Samstag" data-category-label="Fahrrad" data-description="Radrunde direkt ab Augsburg mit Kloster und Einkehr als Ziel." data-url="https://www.komoot.com/de-de/smarttour/33224301">Merken</button>
+              </div>
+            </article>
+
+            <article class="tour-card filterable" data-day="so" data-category="fahrrad" data-date="2026-09-27">
+              <div class="tour-top"><span class="tour-category">Radtour</span><span class="meta-label">wenig Steigung</span></div>
+              <h4>Holzwinkel- &amp; Weldenbahn-Runde</h4>
+              <p>Auf der ehemaligen Weldenbahntrasse durch Wälder und Felder nach Welden und über den Holzwinkel zurück.</p>
+              <div class="tour-meta"><span>rund 40 km</span><span>120 hm</span><span>ab Neusäß</span></div>
+              <div class="item-actions">
+                <a class="info-link" href="https://www.avv-augsburg.de/service/freizeit/outdoor-aktivitaeten/fahrradtouren/holzwinkel-und-weldenbahnstrecke" target="_blank" rel="noopener noreferrer">Tour öffnen</a>
+                <button class="favorite-btn compact" type="button" data-favorite data-id="holzwinkel-weldenbahn-2026-09-27" data-title="Holzwinkel- & Weldenbahn-Runde" data-day-label="Sonntag" data-category-label="Fahrrad" data-description="Rund 40 km und 120 hm ab Neusäß durch Wälder, Felder und den Holzwinkel." data-url="https://www.avv-augsburg.de/service/freizeit/outdoor-aktivitaeten/fahrradtouren/holzwinkel-und-weldenbahnstrecke">Merken</button>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel discovery-panel" id="discoveries" aria-labelledby="discoveriesHeading">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Schon mal vormerken</p>
+          <h2 id="discoveriesHeading">Besondere Entdeckungen · nächste 3 Wochen</h2>
+          <p class="section-note">Augsburg zuerst. München und Ulm nur, wenn sich der Weg wirklich lohnt.</p>
+        </div>
+      </div>
+      <div class="discovery-timeline">
+        <article class="discovery-item">
+          <time>08.10.</time>
+          <div>
+            <span class="mini-badge">Musik · München</span>
+            <h3>TOBIAS · Feierwerk</h3>
+            <p>Deutschsprachiger Indie-Pop zwischen Singer-Songwriter, Folk und Country. Kleine Location und starker Musik-Match.</p>
+            <div class="item-actions">
+              <a class="info-link" href="https://www.feierwerk.de/konzert-kulturprogramm/detail/08-10-2026_tobias" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+              <button class="favorite-btn compact" type="button" data-favorite data-id="tobias-feierwerk-2026-10-08" data-title="TOBIAS · Feierwerk" data-day-label="Donnerstag, 08.10." data-category-label="Musik" data-description="Deutschsprachiger Indie-Pop zwischen Singer-Songwriter, Folk und Country im Feierwerk München." data-url="https://www.feierwerk.de/konzert-kulturprogramm/detail/08-10-2026_tobias">Merken</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="discovery-item">
+          <time>09.–10.10.</time>
+          <div>
+            <span class="mini-badge">Festival · München</span>
+            <h3>25 Jahre Digitalanalog · Muffatwerk</h3>
+            <p>Musik trifft eigens entwickelte Videokunst und audiovisuelle Arbeiten – ungewöhnlicher als ein klassischer Konzertabend.</p>
+            <div class="item-actions">
+              <a class="info-link" href="https://www.muffatwerk.de/de/events/view/8234/25-jahre-digitalanalog-musik-festival" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+              <button class="favorite-btn compact" type="button" data-favorite data-id="digitalanalog-muenchen-2026-10-09" data-title="25 Jahre Digitalanalog · Muffatwerk" data-day-label="09.–10.10." data-category-label="Musik" data-description="Musikfestival mit Videokunst und audiovisuellen Arbeiten im Muffatwerk." data-url="https://www.muffatwerk.de/de/events/view/8234/25-jahre-digitalanalog-musik-festival">Merken</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="discovery-item">
+          <time>10.10.</time>
+          <div>
+            <span class="mini-badge">Musik · München</span>
+            <h3>Feierwerk Sessions · Orangehouse</h3>
+            <p>Drei junge Acts, kleine Bühne und Pay-what-you-want – die Art musikalische Entdeckung, die leicht untergeht.</p>
+            <div class="item-actions">
+              <a class="info-link" href="https://www.feierwerk.de/konzert-kulturprogramm/detail/10-10-2026_feierwerk-session-floralia-luvbite-victoryaz" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+              <button class="favorite-btn compact" type="button" data-favorite data-id="feierwerk-sessions-2026-10-10" data-title="Feierwerk Sessions · Orangehouse" data-day-label="Samstag, 10.10." data-category-label="Musik" data-description="Drei junge Acts in kleiner Location, Pay what you want." data-url="https://www.feierwerk.de/konzert-kulturprogramm/detail/10-10-2026_feierwerk-session-floralia-luvbite-victoryaz">Merken</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="discovery-item">
+          <time>10.10.</time>
+          <div>
+            <span class="mini-badge">Kultur · Ulm</span>
+            <h3>Poetry Slam · ROXY</h3>
+            <p>Slam, kleine Bühne und Publikumsentscheidung statt Standardprogramm.</p>
+            <div class="item-actions">
+              <a class="info-link" href="https://www.roxy.ulm.de/programm/programm.php?j=2026&m=10&vid=5508" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+              <button class="favorite-btn compact" type="button" data-favorite data-id="poetry-slam-roxy-ulm-2026-10-10" data-title="Poetry Slam · ROXY Ulm" data-day-label="Samstag, 10.10." data-category-label="Kultur" data-description="Poetry Slam im ROXY Ulm mit Publikumsentscheidung." data-url="https://www.roxy.ulm.de/programm/programm.php?j=2026&m=10&vid=5508">Merken</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="discovery-item">
+          <time>14.10.</time>
+          <div>
+            <span class="mini-badge">Konzert × Literatur · München</span>
+            <h3>Kafka Band + Jaroslav Rudiš · Ampere</h3>
+            <p>Lesung und Konzert in einem – textorientiert, ungewöhnlich und deshalb ein München-Ausnahmetipp.</p>
+            <div class="item-actions">
+              <a class="info-link" href="https://www.muffatwerk.de/de/events/concert" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+              <button class="favorite-btn compact" type="button" data-favorite data-id="kafka-band-rudis-2026-10-14" data-title="Kafka Band + Jaroslav Rudiš · Ampere" data-day-label="Mittwoch, 14.10." data-category-label="Kultur" data-description="Konzert und Literatur mit Kafka Band und Jaroslav Rudiš im Ampere." data-url="https://www.muffatwerk.de/de/events/concert">Merken</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel excluded-panel" aria-labelledby="excludedHeading">
+      <div class="section-head">
+        <div>
+          <p class="section-kicker">Aktuell nicht passend</p>
+          <h2 id="excludedHeading">Warum manche Ideen fehlen</h2>
+        </div>
+      </div>
+      <div class="excluded-list">
+        <div class="excluded-item"><strong>Eiskanal Hauptkanal</strong><p>Offizieller Bachablass vom 19.09. bis 02.10.2026: Olympiakanustrecke und weitere Lechkanäle reduziert.</p></div>
+        <div class="excluded-item"><strong>Buron-Stellplatz</strong><p>Eigene Toilette erforderlich und damit für euren Van ungeeignet.</p></div>
+        <div class="excluded-item"><strong>Reuterwanne</strong><p>Nicht als Top-Tipp geführt, weil die offizielle Tourenseite noch Sperrhinweise zu Wegabschnitten zeigt.</p></div>
+      </div>
+    </section>
+
+    <section class="panel favorites-panel" id="favorites" aria-labelledby="favoritesHeading">
+      <div class="favorites-head">
+        <div>
+          <p class="section-kicker">Merkliste</p>
+          <h2 id="favoritesHeading">Für später behalten</h2>
+          <p class="favorites-note">Gemerkte Vorschläge bleiben erhalten, wenn die Wochenendtipps aktualisiert werden.</p>
+        </div>
+      </div>
+      <nav class="category-filters favorite-category-filters" aria-label="Merkliste nach Kategorie filtern">
+        <button class="favorite-category-filter active" type="button" data-favorite-category="all">Alle</button>
+        <button class="favorite-category-filter" type="button" data-favorite-category="outdoor">Draußen</button>
+        <button class="favorite-category-filter" type="button" data-favorite-category="kultur">Kultur</button>
+        <button class="favorite-category-filter" type="button" data-favorite-category="musik">Musik</button>
+        <button class="favorite-category-filter" type="button" data-favorite-category="essen">Essen &amp; Trinken</button>
+        <button class="favorite-category-filter" type="button" data-favorite-category="wellness">Wellness</button>
+      </nav>
+      <div id="favoritesMessage" class="favorites-message" aria-live="polite"></div>
+      <div id="favoritesEmpty" class="favorites-empty">Noch nichts gemerkt.</div>
+      <div id="favoritesList" class="favorites-list"></div>
+    </section>
+  </main>
+
+  <dialog class="detail-dialog" id="detailDialog" aria-labelledby="detailTitle">
+    <div class="dialog-shell">
+      <div class="dialog-head">
+        <strong>Details</strong>
+        <button class="dialog-close" id="detailClose" type="button" aria-label="Detailansicht schließen">×</button>
+      </div>
+      <div class="dialog-body">
+        <span class="dialog-badge" id="detailBadge"></span>
+        <h2 id="detailTitle"></h2>
+        <p class="dialog-meta" id="detailMeta"></p>
+        <p class="dialog-description" id="detailDescription"></p>
+        <div class="dialog-facts" id="detailFacts"></div>
+        <div class="dialog-actions">
+          <a class="info-link" id="detailSource" href="#" target="_blank" rel="noopener noreferrer">Originalquelle</a>
+          <button class="favorite-btn" id="detailFavorite" type="button">Merken</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <button class="back-to-top" id="backToTop" type="button" aria-label="Nach oben" hidden>↑</button>
+</div>
+<script type="module" src="./src/main.ts"></script>
+</body>
+</html>

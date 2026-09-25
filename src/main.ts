@@ -28,6 +28,13 @@ const favoriteButtons = Array.from(document.querySelectorAll<HTMLButtonElement>(
 const favoritesList = document.querySelector<HTMLElement>('#favoritesList');
 const favoritesEmpty = document.querySelector<HTMLElement>('#favoritesEmpty');
 const favoritesMessage = document.querySelector<HTMLElement>('#favoritesMessage');
+const savedCount = document.querySelector<HTMLElement>('#savedCount');
+const outdoorList = document.querySelector<HTMLElement>('#outdoorList');
+
+// Keep outdoor decisions separate from event alternatives without duplicating data.
+if (outdoorList) {
+  alternatives.filter(item => ['wandern', 'fahrrad'].includes(item.dataset.category ?? '')).forEach(item => outdoorList.appendChild(item));
+}
 
 let activeDay = 'all';
 let activeCategory = 'all';
@@ -102,6 +109,7 @@ function renderCurrentFilters() {
 }
 
 function updateFavoriteButtons() {
+  if (savedCount) savedCount.textContent = String(favorites.length);
   const savedIds = new Set(favorites.map(item => item.suggestionId));
   favoriteButtons.forEach(button => {
     const saved = savedIds.has(button.dataset.id ?? '');

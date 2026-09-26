@@ -4,12 +4,13 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Freizeitplaner · Augsburg & Umgebung</title>
-  <meta name="theme-color" content="#F7F6F2"/>
+  <meta name="theme-color" content="#f4f7fc"/>
   <meta name="description" content="Persönliche Freizeitideen für Augsburg und Umgebung."/>
   <link rel="icon" href="./favicon.svg" type="image/svg+xml"/>
   <link rel="apple-touch-icon" href="./favicon.svg"/>
   <link rel="manifest" href="./site.webmanifest"/>
   <link rel="stylesheet" href="./src/styles.css"/>
+  <link rel="stylesheet" href="./src/redesign.css"/>
 </head>
 <body>
 <div id="app">
@@ -36,13 +37,19 @@
         </a>
       </div>
     </header>
+    <nav class="section-nav" aria-label="Bereiche">
+      <a href="#weekendTitle">Wochenende</a>
+      <a href="#outdoorSection">Raus ins Grüne</a>
+      <a href="#discoveries">Entdecken</a>
+      <a href="#favorites">Gemerkt</a>
+    </nav>
 
     <section class="weekend-overview" aria-labelledby="weekendTitle">
       <div class="overview-copy">
         <p class="section-kicker">Wochenendplanung</p>
-        <h1 id="weekendTitle">Dein Wochenende</h1>
+        <h1 id="weekendTitle">Zeit für ein gutes<br><span>Wochenende.</span></h1>
         <p class="weekend-range">Freitag, 25. bis Sonntag, 27. September 2026</p>
-        <p>Persönliche Ideen mit Augsburg im Mittelpunkt. München und Ulm nur bei besonderen Highlights.</p>
+        
       </div>
       <div class="weather-grid" aria-label="Wetterübersicht Freitag bis Sonntag">
         <div class="weather-day" data-weather-date="2026-09-25">
@@ -101,7 +108,7 @@
         <div>
           <p class="section-kicker">Besonders passend</p>
           <h2 id="topHeading">Das könnte euch gefallen</h2>
-          <p class="section-note">Die stärksten vorhandenen Empfehlungen für dieses Wochenende.</p>
+          <p class="section-note">Für euch ausgewählt, direkt vor der Haustür.</p>
         </div>
         <p class="section-status" id="statusText"></p>
       </div>
@@ -336,8 +343,8 @@
       <div class="section-head">
         <div>
           <p class="section-kicker">Schon mal vormerken</p>
-          <h2 id="discoveriesHeading">Besondere Entdeckungen · nächste 3 Wochen</h2>
-          <p class="section-note">Augsburg zuerst. München und Ulm nur, wenn sich der Weg wirklich lohnt.</p>
+          <h2 id="discoveriesHeading">Schon etwas vor?</h2>
+          <p class="section-note">Besondere Entdeckungen für die nächsten drei Wochen.</p>
         </div>
       </div>
       <div class="discovery-timeline">

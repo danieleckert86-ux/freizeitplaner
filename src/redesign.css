@@ -115,3 +115,10 @@ section[id],h1[id]{scroll-margin-top:85px}
  .favorites-panel{padding:18px}.saved-jump .saved-label{display:inline}.saved-jump{font-size:13px;padding:8px}
  .detail-dialog{border-radius:24px 24px 0 0}.dialog-body{padding:22px}.back-to-top{bottom:18px}
 }
+
+/* Keep all weekend-card actions visible after dynamic Details enhancement */
+.idea-card .idea-content{display:flex;flex-direction:column;min-width:0;height:100%}
+.idea-card .item-actions{display:flex;align-items:center;flex-wrap:wrap;gap:7px;width:100%;margin-top:auto;padding-top:14px}
+.idea-card .item-actions .details-btn,.idea-card .item-actions .info-link,.idea-card .item-actions .favorite-btn{display:inline-flex;visibility:visible;opacity:1;flex:0 0 auto}
+.idea-card .item-actions .favorite-btn{margin-left:auto}
+@media(max-width:760px){.idea-card .item-actions{margin-left:0}.idea-card .item-actions .favorite-btn{margin-left:0}}

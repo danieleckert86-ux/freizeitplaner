@@ -55,9 +55,10 @@ section[id],h1[id]{scroll-margin-top:85px}
 .info-link,.favorite-btn,.details-btn,.remove-favorite{font-size:14px;min-height:42px;border-radius:10px;padding:9px 12px}
 .details-btn{background:#2856dc;color:white;border-color:#2856dc}
 .info-link{background:transparent;color:#465b7d;border-color:transparent;text-decoration:underline;text-underline-offset:4px;font-weight:600}
-.favorite-btn{background:white;border-color:#d5dfef;color:#2856dc}
-.favorite-btn::before{content:"";width:10px;height:13px;border:1.6px solid currentColor;clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%);margin-right:7px}
-.favorite-btn.saved{background:#e9efff;color:#244dbc;border-color:#bccdfb}
+.favorite-btn{background:#eef3ff;border-color:#d5e0ff;color:#244dbc;font-weight:750;box-shadow:none}
+.favorite-btn::before{content:none}
+.favorite-btn:hover{background:#e4ecff;border-color:#bfd0ff}
+.favorite-btn.saved{background:#2856dc;color:white;border-color:#2856dc}
 .ideas-grid{gap:14px}
 .idea-card{grid-template-columns:48px minmax(0,1fr);padding:20px;gap:15px;align-items:start}
 .idea-visual{width:48px;height:48px;min-height:48px;background:#edf1fc;border-radius:14px}

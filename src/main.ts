@@ -396,7 +396,7 @@ function renderFavorites() {
     row.className = 'favorite-row';
     row.innerHTML =
       '<div class="favorite-copy">' +
-      '<div class="favorite-meta">' + escapeHtml(normalizeCategory(item.category) === 'wandern' ? item.category : [item.day, item.category].filter(Boolean).join(' · ')) + '</div>' +
+      '<div class="favorite-meta">' + escapeHtml(['wandern', 'fahrrad'].includes(normalizeCategory(item.category)) ? item.category : [item.day, item.category].filter(Boolean).join(' · ')) + '</div>' +
       '<h3>' + escapeHtml(item.title) + '</h3>' +
       '<p>' + escapeHtml(item.description) + '</p>' +
       '</div>' +
@@ -476,7 +476,7 @@ favoriteButtons.forEach(button => {
       const record = {
         suggestion_id: suggestionId,
         title: button.dataset.title ?? '',
-        day: normalizeCategory(category) === 'wandern' ? '' : (button.dataset.dayLabel ?? ''),
+        day: ['wandern', 'fahrrad'].includes(normalizeCategory(category)) ? '' : (button.dataset.dayLabel ?? ''),
         category,
         description: button.dataset.description ?? '',
         url: button.dataset.url ?? '',

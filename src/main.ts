@@ -396,7 +396,7 @@ function renderFavorites() {
     row.className = 'favorite-row';
     row.innerHTML =
       '<div class="favorite-copy">' +
-      '<div class="favorite-meta">' + escapeHtml(item.day) + ' · ' + escapeHtml(item.category) + '</div>' +
+      '<div class="favorite-meta">' + escapeHtml(normalizeCategory(item.category) === 'wandern' ? item.category : [item.day, item.category].filter(Boolean).join(' · ')) + '</div>' +
       '<h3>' + escapeHtml(item.title) + '</h3>' +
       '<p>' + escapeHtml(item.description) + '</p>' +
       '</div>' +
@@ -472,11 +472,12 @@ favoriteButtons.forEach(button => {
     showFavoriteMessage('Wird gespeichert …');
 
     try {
+      const category = button.dataset.categoryLabel ?? '';
       const record = {
         suggestion_id: suggestionId,
         title: button.dataset.title ?? '',
-        day: button.dataset.dayLabel ?? '',
-        category: button.dataset.categoryLabel ?? '',
+        day: normalizeCategory(category) === 'wandern' ? '' : (button.dataset.dayLabel ?? ''),
+        category,
         description: button.dataset.description ?? '',
         url: button.dataset.url ?? '',
       };

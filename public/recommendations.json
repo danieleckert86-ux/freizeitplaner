@@ -183,25 +183,25 @@
       ]
     },
     {
-      "day": "sa",
-      "category": "kultur",
-      "date": "2026-10-03",
-      "title": "Daniel He · Kresslesmühle",
-      "description": "Konzertabend in einer kleinen, persönlichen Kultur-Location – eine ruhigere Alternative zum Post-Punk in der Soho Stage.",
-      "url": "https://www.kresslesmuehle.de/programm/",
+      "day": "fr",
+      "category": "musik",
+      "date": "2026-10-02",
+      "title": "Soho Song Slam · Soho Stage",
+      "description": "Sechs Acts aus der Region und darüber hinaus bekommen jeweils zehn Minuten; das Publikum schickt zwei ins Finale und kürt am Ende den Sieger.",
+      "url": "https://www.musikkantine.de/home/2026-10-02-soho-song-slam/",
       "sourceLabel": "Originalquelle",
       "favorite": {
-        "id": "daniel-he-kresslesmuehle-2026-10-03",
-        "title": "Daniel He · Kresslesmühle",
-        "dayLabel": "Samstag",
+        "id": "soho-song-slam-2026-10-02",
+        "title": "Soho Song Slam · Soho Stage",
+        "dayLabel": "Freitag · 19:30",
         "categoryLabel": "Musik",
-        "description": "Konzertabend in einer kleinen, persönlichen Kultur-Location – eine ruhigere Alternative zum Post-Punk in der Soho Stage.",
-        "url": "https://www.kresslesmuehle.de/programm/"
+        "description": "Song-Slam mit sechs Acts, kurzen Sets und Publikumsfinale in der kleinen Soho Stage.",
+        "url": "https://www.musikkantine.de/home/2026-10-02-soho-song-slam/"
       },
       "label": "Musik",
       "meta": [
-        "Samstag",
-        "Kresslesmühle Augsburg"
+        "Freitag · 19:30",
+        "Soho Stage · ab 13 €"
       ]
     },
     {

@@ -58,6 +58,14 @@ function sourceMarkup(item: Recommendation) {
     dataEscape(item.sourceLabel || 'Originalquelle') + '</a>';
 }
 
+function lifestyleFavoriteMarkup(item: LifestyleRecommendation, section: 'restaurants' | 'cinema' | 'stream') {
+  const category = section === 'restaurants' ? 'Restaurant' : (section === 'cinema' ? 'Kino' : 'Streaming');
+  return '<button class="favorite-btn compact" type="button" data-favorite ' +
+    'data-id="' + dataEscape('lifestyle-' + item.id) + '" data-title="' + dataEscape(item.title) + '" ' +
+    'data-day-label="" data-category-label="' + category + '" data-description="' + dataEscape(item.description) + '" ' +
+    'data-url="' + dataEscape(item.url) + '">Merken</button>';
+}
+
 function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<string>()) {
   const state = document.querySelector<HTMLElement>('.data-state');
   if (state) state.textContent = 'Datenstand Freizeit-Tipps: ' + data.dataUpdated;
@@ -126,7 +134,8 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       (item.imdbRating ? '<a class="imdb-rating" href="' + dataEscape(item.imdbUrl || item.url) + '" target="_blank" rel="noopener noreferrer">IMDb ' + dataEscape(item.imdbRating.toFixed(1).replace('.', ',')) + '</a>' : '') + '</div>' +
       '<div class="lifestyle-actions"><div class="lifestyle-links"><a class="info-link" href="' + dataEscape(item.url) + '" target="_blank" rel="noopener noreferrer">Mehr erfahren</a>' +
       (item.trailerUrl ? '<a class="trailer-link" href="' + dataEscape(item.trailerUrl) + '" target="_blank" rel="noopener noreferrer">▶ Deutscher Trailer</a>' : '') + '</div>' +
-      '<button class="hide-card-btn" type="button" data-hide-card data-id="' + dataEscape(item.id) + '" data-section="' + section + '" data-title="' + dataEscape(item.title) + '">Ausblenden</button></div></article>'
+      '<div class="lifestyle-card-buttons">' + lifestyleFavoriteMarkup(item, section) +
+      '<button class="hide-card-btn" type="button" data-hide-card data-id="' + dataEscape(item.id) + '" data-section="' + section + '" data-title="' + dataEscape(item.title) + '">Ausblenden</button></div></div></article>'
     ).join('');
   };
   renderLifestyle('#restaurantList', data.restaurants ?? [], 'restaurants');
@@ -557,7 +566,7 @@ function updateFavoriteButtons() {
   if (savedCount) savedCount.textContent = String(favorites.length);
   const savedIds = new Set(favorites.map(item => item.suggestionId));
 
-  favoriteButtons.forEach(button => {
+  document.querySelectorAll<HTMLButtonElement>('[data-favorite]').forEach(button => {
     const saved = savedIds.has(button.dataset.id ?? '');
     button.classList.toggle('saved', saved);
     button.textContent = saved ? 'Gemerkt' : 'Merken';

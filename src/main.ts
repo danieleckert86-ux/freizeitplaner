@@ -58,7 +58,7 @@ function sourceMarkup(item: Recommendation) {
     dataEscape(item.sourceLabel || 'Originalquelle') + '</a>';
 }
 
-function renderRecommendationData(data: RecommendationData) {
+function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<string>()) {
   const state = document.querySelector<HTMLElement>('.data-state');
   if (state) state.textContent = 'Datenstand Freizeit-Tipps: ' + data.dataUpdated;
 
@@ -115,23 +115,33 @@ function renderRecommendationData(data: RecommendationData) {
     sourceMarkup(item) + favoriteMarkup(item, true) + '</div></div></article>'
   ).join('');
 
-  const renderLifestyle = (selector: string, items: LifestyleRecommendation[]) => {
+  const renderLifestyle = (selector: string, items: LifestyleRecommendation[], section: 'restaurants' | 'cinema' | 'stream') => {
     const list = document.querySelector<HTMLElement>(selector);
     if (!list) return;
-    list.innerHTML = items.map(item =>
-      '<article class="lifestyle-card">' +
+    list.innerHTML = items.filter(item => !hiddenIds.has(item.id)).map(item =>
+      '<article class="lifestyle-card" data-lifestyle-id="' + dataEscape(item.id) + '">' +
       '<div class="lifestyle-top"><span class="lifestyle-type">' + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(item.badge) + '</span></div>' +
       '<h3>' + dataEscape(item.title) + '</h3><p>' + dataEscape(item.description) + '</p>' +
       '<div class="lifestyle-meta">' + item.meta.map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +
-      '<a class="info-link" href="' + dataEscape(item.url) + '" target="_blank" rel="noopener noreferrer">Mehr erfahren</a></article>'
+      '<div class="lifestyle-actions"><a class="info-link" href="' + dataEscape(item.url) + '" target="_blank" rel="noopener noreferrer">Mehr erfahren</a>' +
+      '<button class="hide-card-btn" type="button" data-hide-card data-id="' + dataEscape(item.id) + '" data-section="' + section + '" data-title="' + dataEscape(item.title) + '">Ausblenden</button></div></article>'
     ).join('');
   };
-  renderLifestyle('#restaurantList', data.restaurants ?? []);
-  renderLifestyle('#cinemaList', data.cinema ?? []);
+  renderLifestyle('#restaurantList', data.restaurants ?? [], 'restaurants');
+  renderLifestyle('#cinemaList', data.cinema ?? [], 'cinema');
   renderLifestyle('#streamList', (data.stream ?? []).filter(item => {
     const age = (Date.now() - new Date(item.releaseDate + 'T00:00:00').getTime()) / 86400000;
     return age >= 0 && age <= 60;
-  }));
+  }), 'stream');
+}
+
+async function loadHiddenRecommendationIds() {
+  const { data, error } = await supabase.from('hidden_recommendations').select('suggestion_id');
+  if (error) {
+    console.error('Hidden recommendations could not be loaded', error);
+    return new Set<string>();
+  }
+  return new Set((data ?? []).map(row => row.suggestion_id as string));
 }
 
 async function loadRecommendationData() {
@@ -139,7 +149,8 @@ async function loadRecommendationData() {
   if (!response.ok) throw new Error('Recommendation data could not be loaded');
   const data = await response.json() as RecommendationData;
   if (![1, 2].includes(data.schemaVersion)) throw new Error('Unsupported recommendation schema');
-  renderRecommendationData(data);
+  const hiddenIds = await loadHiddenRecommendationIds();
+  renderRecommendationData(data, hiddenIds);
 }
 
 type Favorite = {
@@ -155,6 +166,27 @@ type Favorite = {
 
 async function bootstrap() {
   await loadRecommendationData();
+
+  document.querySelectorAll<HTMLButtonElement>('[data-hide-card]').forEach(button => {
+    button.addEventListener('click', async () => {
+      const id = button.dataset.id ?? '';
+      const section = button.dataset.section ?? '';
+      const title = button.dataset.title ?? '';
+      if (!id || !['restaurants', 'cinema', 'stream'].includes(section)) return;
+      button.disabled = true;
+      button.textContent = 'Wird ausgeblendet …';
+      const { error } = await supabase.from('hidden_recommendations').upsert({
+        suggestion_id: id, section, title, hidden_at: new Date().toISOString(),
+      }, { onConflict: 'suggestion_id' });
+      if (error) {
+        console.error('Recommendation could not be hidden', error);
+        button.disabled = false;
+        button.textContent = 'Ausblenden';
+        return;
+      }
+      button.closest<HTMLElement>('.lifestyle-card')?.remove();
+    });
+  });
 
   const viewButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-view]'));
   const viewSections = Array.from(document.querySelectorAll<HTMLElement>('[data-app-view]'));

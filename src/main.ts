@@ -112,8 +112,6 @@ async function loadRecommendationData() {
   renderRecommendationData(data);
 }
 
-await loadRecommendationData();
-
 type Favorite = {
   id: string;
   suggestionId: string;
@@ -124,6 +122,9 @@ type Favorite = {
   url: string;
   savedAt: string;
 };
+
+async function bootstrap() {
+  await loadRecommendationData();
 
 const dayButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.filter'));
 const categoryButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.category-filter'));
@@ -736,3 +737,6 @@ enhanceDetails();
 renderCurrentFilters();
 void loadFavorites();
 void loadWeather();
+}
+
+void bootstrap();

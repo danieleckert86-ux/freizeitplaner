@@ -55,7 +55,7 @@ function favoriteMarkup(item: Recommendation, compact = false) {
 
 function sourceMarkup(item: Recommendation) {
   return '<a class="info-link" href="' + dataEscape(item.url) + '" target="_blank" rel="noopener noreferrer">' +
-    dataEscape(item.sourceLabel || 'Originalquelle') + '</a>';
+    dataEscape((item.sourceLabel || 'Originalquelle').replace('Originalquelle', 'Quelle')) + '</a>';
 }
 
 function ratingMarkup(id: string, title: string, section: string) {

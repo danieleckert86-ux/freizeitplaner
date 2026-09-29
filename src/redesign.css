@@ -392,3 +392,20 @@ section[id],h1[id]{scroll-margin-top:85px}
  .lifestyle-meta>span,.lifestyle-meta .imdb-rating,.trailer-link.trailer-meta{font-size:11.5px;padding:6px 8px;white-space:nowrap}
  .lifestyle-actions{margin-top:12px}
 }
+
+/* Final compact lifestyle layout on phones */
+@media(max-width:760px){
+ .lifestyle-meta{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:5px!important;overflow-x:auto!important;scrollbar-width:none}
+ .lifestyle-meta::-webkit-scrollbar{display:none}
+ .lifestyle-meta>span,.lifestyle-meta .imdb-rating,.lifestyle-meta .trailer-meta{
+   flex:0 0 auto!important;white-space:nowrap!important;font-size:10.5px!important;padding:6px 7px!important;min-height:30px!important;
+ }
+ .lifestyle-actions{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:5px!important;margin-top:12px!important}
+ .lifestyle-links{display:flex!important;flex:0 0 auto!important}
+ .lifestyle-links .info-link{font-size:11px!important;line-height:1.1!important;white-space:nowrap!important;padding:5px 2px!important}
+ .lifestyle-card-buttons{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:4px!important;margin-left:auto!important}
+ .lifestyle-card-buttons .rating-actions{display:flex!important;gap:2px!important;flex:0 0 auto!important}
+ .lifestyle-card-buttons .rating-btn{width:28px!important;min-width:28px!important;height:30px!important;padding:2px!important;font-size:13px!important}
+ .lifestyle-card-buttons .favorite-btn{min-width:58px!important;min-height:32px!important;padding:5px 6px!important;font-size:11px!important}
+ .lifestyle-card-buttons .hide-card-btn{min-height:32px!important;padding:5px 2px!important;font-size:10.5px!important;white-space:nowrap!important}
+}

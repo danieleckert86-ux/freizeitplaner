@@ -38,15 +38,14 @@
       </div>
     </header>
     <nav class="section-nav" aria-label="Bereiche">
-      <a href="#weekendTitle">Wochenende</a>
-      <a href="#outdoorSection">Raus ins Grüne</a>
-      <a href="#restaurants">Restaurants</a>
-      <a href="#movies">Filme &amp; Serien</a>
-      <a href="#discoveries">Entdecken</a>
-      <a href="#favorites">Gemerkt</a>
+      <button class="section-nav-btn active" type="button" data-view="weekend">Wochenende</button>
+      <button class="section-nav-btn" type="button" data-view="outdoor">Raus ins Grüne</button>
+      <button class="section-nav-btn" type="button" data-view="restaurants">Restaurants</button>
+      <button class="section-nav-btn" type="button" data-view="movies">Filme &amp; Serien</button>
+      <button class="section-nav-btn" type="button" data-view="favorites">Gemerkt</button>
     </nav>
 
-    <section class="weekend-overview" aria-labelledby="weekendTitle">
+    <section class="weekend-overview view-section" data-app-view="weekend" aria-labelledby="weekendTitle">
       <div class="overview-copy">
         <p class="section-kicker">Wochenendplanung</p>
         <h1 id="weekendTitle">Zeit für ein gutes<br><span>Wochenende.</span></h1>
@@ -72,7 +71,7 @@
       </div>
     </section>
 
-    <section class="filter-panel" aria-label="Freizeitideen filtern">
+    <section class="filter-panel view-section" data-app-view="weekend" aria-label="Freizeitideen filtern">
       <div class="filter-row">
         <div class="filter-group">
           <span class="filter-label">Tag</span>
@@ -101,11 +100,11 @@
       </div>
     </section>
 
-    <section class="panel weekday-panel" id="weekdaySection" hidden>
+    <section class="panel weekday-panel view-section" data-app-view="weekend" id="weekdaySection" hidden>
       <div id="weekdayTips"></div>
     </section>
 
-    <section class="section" id="topSection" aria-labelledby="topHeading">
+    <section class="section view-section" data-app-view="weekend" id="topSection" aria-labelledby="topHeading">
       <div class="section-head">
         <div>
           <p class="section-kicker">Besonders passend</p>
@@ -118,7 +117,7 @@
       </div>
     </section>
 
-    <section class="section" id="weekendSection" aria-labelledby="ideasHeading">
+    <section class="section view-section" data-app-view="weekend" id="weekendSection" aria-labelledby="ideasHeading">
       <div class="section-head">
         <div>
           <p class="section-kicker">Mehr Auswahl</p>
@@ -130,7 +129,7 @@
       </div>
     </section>
 
-    <section class="outdoor-section" id="outdoorSection" aria-labelledby="outdoorHeading">
+    <section class="outdoor-section view-section" data-app-view="outdoor" id="outdoorSection" aria-labelledby="outdoorHeading">
       <div class="section-head"><div><p class="section-kicker">Draußen</p><h2 id="outdoorHeading">Raus ins Grüne</h2><p class="section-note">Wanderungen und Radtouren zusätzlich zu den übrigen Freizeitideen.</p></div></div>
       <div class="outdoor-columns">
         <div class="outdoor-group" id="hikeGroup"><h3>Wanderungen</h3><div class="tour-list">
@@ -140,14 +139,14 @@
       </div>
     </section>
 
-    <section class="independent-section" id="restaurants" aria-labelledby="restaurantsHeading">
+    <section class="independent-section view-section" data-app-view="restaurants" id="restaurants" aria-labelledby="restaurantsHeading">
       <div class="section-head">
         <div><p class="section-kicker">Essen &amp; entdecken</p><h2 id="restaurantsHeading">Restaurants &amp; Cafés</h2><p class="section-note">Persönliche Empfehlungen und interessante Neueröffnungen in Augsburg – unabhängig vom Wochenende.</p></div>
       </div>
       <div class="lifestyle-grid" id="restaurantList"></div>
     </section>
 
-    <section class="independent-section" id="movies" aria-labelledby="moviesHeading">
+    <section class="independent-section view-section" data-app-view="movies" id="movies" aria-labelledby="moviesHeading">
       <div class="section-head">
         <div><p class="section-kicker">Für Leinwand &amp; Sofa</p><h2 id="moviesHeading">Filme &amp; Serien</h2><p class="section-note">Aktuelles Augsburger Kinoprogramm und neue Streaming-Titel passend zu deinem Geschmack.</p></div>
       </div>
@@ -159,7 +158,7 @@
       <div class="media-panel" data-media-panel="stream" hidden><p class="media-note">Nur Neuerscheinungen der letzten 60 Tage auf Netflix, Disney+, RTL+, ARD und ZDF.</p><div class="lifestyle-grid" id="streamList"></div></div>
     </section>
 
-    <section class="panel discovery-panel" id="discoveries" aria-labelledby="discoveriesHeading">
+    <section class="panel discovery-panel view-section" data-app-view="weekend" id="discoveries" aria-labelledby="discoveriesHeading">
       <div class="section-head">
         <div>
           <p class="section-kicker">Schon mal vormerken</p>
@@ -171,7 +170,7 @@
       </div>
     </section>
 
-    <section class="panel excluded-panel" aria-labelledby="excludedHeading">
+    <section class="panel excluded-panel view-section" data-app-view="weekend" aria-labelledby="excludedHeading">
       <div class="section-head">
         <div>
           <p class="section-kicker">Aktuell nicht passend</p>
@@ -185,7 +184,7 @@
       </div>
     </section>
 
-    <section class="panel favorites-panel" id="favorites" aria-labelledby="favoritesHeading">
+    <section class="panel favorites-panel view-section" data-app-view="favorites" id="favorites" aria-labelledby="favoritesHeading">
       <div class="favorites-head">
         <div>
           <p class="section-kicker">Merkliste</p>

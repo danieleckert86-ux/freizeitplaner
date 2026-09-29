@@ -15,6 +15,15 @@ type Recommendation = {
   label?: string; meta?: string[]; metaLabel?: string; time?: string;
 };
 
+type LifestyleRecommendation = {
+  id: string; title: string; type: string; description: string; meta: string[];
+  url: string; badge: string;
+};
+
+type StreamRecommendation = LifestyleRecommendation & {
+  platform: string; releaseDate: string;
+};
+
 type RecommendationData = {
   schemaVersion: number;
   dataUpdated: string;
@@ -25,6 +34,9 @@ type RecommendationData = {
   hikes: Recommendation[];
   bikes: Recommendation[];
   discoveries: Recommendation[];
+  restaurants: LifestyleRecommendation[];
+  cinema: LifestyleRecommendation[];
+  stream: StreamRecommendation[];
 };
 
 function dataEscape(value = '') {
@@ -102,13 +114,31 @@ function renderRecommendationData(data: RecommendationData) {
     '<h3>' + dataEscape(item.title) + '</h3><p>' + dataEscape(item.description) + '</p><div class="item-actions">' +
     sourceMarkup(item) + favoriteMarkup(item, true) + '</div></div></article>'
   ).join('');
+
+  const renderLifestyle = (selector: string, items: LifestyleRecommendation[]) => {
+    const list = document.querySelector<HTMLElement>(selector);
+    if (!list) return;
+    list.innerHTML = items.map(item =>
+      '<article class="lifestyle-card">' +
+      '<div class="lifestyle-top"><span class="lifestyle-type">' + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(item.badge) + '</span></div>' +
+      '<h3>' + dataEscape(item.title) + '</h3><p>' + dataEscape(item.description) + '</p>' +
+      '<div class="lifestyle-meta">' + item.meta.map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +
+      '<a class="info-link" href="' + dataEscape(item.url) + '" target="_blank" rel="noopener noreferrer">Mehr erfahren</a></article>'
+    ).join('');
+  };
+  renderLifestyle('#restaurantList', data.restaurants ?? []);
+  renderLifestyle('#cinemaList', data.cinema ?? []);
+  renderLifestyle('#streamList', (data.stream ?? []).filter(item => {
+    const age = (Date.now() - new Date(item.releaseDate + 'T00:00:00').getTime()) / 86400000;
+    return age >= 0 && age <= 60;
+  }));
 }
 
 async function loadRecommendationData() {
   const response = await fetch('/recommendations.json', { cache: 'no-store' });
   if (!response.ok) throw new Error('Recommendation data could not be loaded');
   const data = await response.json() as RecommendationData;
-  if (data.schemaVersion !== 1) throw new Error('Unsupported recommendation schema');
+  if (![1, 2].includes(data.schemaVersion)) throw new Error('Unsupported recommendation schema');
   renderRecommendationData(data);
 }
 
@@ -125,6 +155,18 @@ type Favorite = {
 
 async function bootstrap() {
   await loadRecommendationData();
+
+  const mediaTabs = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-media-tab]'));
+  const mediaPanels = Array.from(document.querySelectorAll<HTMLElement>('[data-media-panel]'));
+  mediaTabs.forEach(tab => tab.addEventListener('click', () => {
+    const target = tab.dataset.mediaTab;
+    mediaTabs.forEach(button => button.classList.toggle('active', button === tab));
+    mediaPanels.forEach(panel => {
+      const active = panel.dataset.mediaPanel === target;
+      panel.classList.toggle('active', active);
+      panel.hidden = !active;
+    });
+  }));
 
 const dayButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.filter'));
 const categoryButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.category-filter'));

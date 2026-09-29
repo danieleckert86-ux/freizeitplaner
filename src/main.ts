@@ -58,6 +58,12 @@ function sourceMarkup(item: Recommendation) {
     dataEscape(item.sourceLabel || 'Originalquelle') + '</a>';
 }
 
+function ratingMarkup(id: string, title: string, section: string) {
+  return '<div class="rating-actions" data-rating-wrap>' +
+    '<button class="rating-btn" type="button" data-rate="1" data-id="' + dataEscape(id) + '" data-section="' + dataEscape(section) + '" data-title="' + dataEscape(title) + '" aria-label="Gefällt mir">👍</button>' +
+    '<button class="rating-btn" type="button" data-rate="-1" data-id="' + dataEscape(id) + '" data-section="' + dataEscape(section) + '" data-title="' + dataEscape(title) + '" aria-label="Gefällt mir nicht">👎</button></div>';
+}
+
 function lifestyleFavoriteMarkup(item: LifestyleRecommendation, section: 'restaurants' | 'cinema' | 'stream') {
   const category = section === 'restaurants' ? 'Restaurant' : (section === 'cinema' ? 'Kino' : 'Streaming');
   return '<button class="favorite-btn compact" type="button" data-favorite ' +
@@ -90,7 +96,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
     '<h3>' + dataEscape(item.title) + '</h3><p>' + dataEscape(item.description) + '</p>' +
     '<div class="facts">' + (item.facts ?? []).map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +
     '<div class="why">' + dataEscape(item.why) + '</div><div class="card-actions item-actions">' +
-    sourceMarkup(item) + favoriteMarkup(item) + '</div></article>'
+    sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, 'weekend') + favoriteMarkup(item) + '</div></article>'
   ).join('');
 
   const ideas = document.querySelector<HTMLElement>('#alternativeList');
@@ -99,7 +105,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
     '<div class="idea-visual" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="8"/></svg></div>' +
     '<div class="idea-content"><span class="idea-category">' + dataEscape(item.label) + '</span><h3>' + dataEscape(item.title) + '</h3><p>' + dataEscape(item.description) + '</p>' +
     '<div class="idea-meta">' + (item.meta ?? []).map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +
-    '<div class="item-actions">' + sourceMarkup(item) + favoriteMarkup(item, true) + '</div></div></article>'
+    '<div class="item-actions">' + sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, 'weekend') + favoriteMarkup(item, true) + '</div></div></article>'
   ).join('');
 
   const renderTours = (selector: string, items: Recommendation[]) => {
@@ -110,7 +116,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       '<div class="tour-top"><span class="tour-category">' + dataEscape(item.label) + '</span><span class="meta-label">' + dataEscape(item.metaLabel) + '</span></div>' +
       '<h4>' + dataEscape(item.title) + '</h4><p>' + dataEscape(item.description) + '</p>' +
       '<div class="tour-meta">' + (item.meta ?? []).map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +
-      '<div class="item-actions">' + sourceMarkup(item) + favoriteMarkup(item, true) + '</div></article>'
+      '<div class="item-actions">' + sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, item.category) + favoriteMarkup(item, true) + '</div></article>'
     ).join('');
   };
   renderTours('#hikeGroup', data.hikes);
@@ -120,7 +126,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   if (discoveries) discoveries.innerHTML = data.discoveries.map(item =>
     '<article class="discovery-item"><time>' + dataEscape(item.time) + '</time><div><span class="mini-badge">' + dataEscape(item.badge) + '</span>' +
     '<h3>' + dataEscape(item.title) + '</h3><p>' + dataEscape(item.description) + '</p><div class="item-actions">' +
-    sourceMarkup(item) + favoriteMarkup(item, true) + '</div></div></article>'
+    sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, 'discoveries') + favoriteMarkup(item, true) + '</div></div></article>'
   ).join('');
 
   const renderLifestyle = (selector: string, items: LifestyleRecommendation[], section: 'restaurants' | 'cinema' | 'stream') => {
@@ -134,7 +140,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       (item.imdbRating ? '<a class="imdb-rating" href="' + dataEscape(item.imdbUrl || item.url) + '" target="_blank" rel="noopener noreferrer">IMDb ' + dataEscape(item.imdbRating.toFixed(1).replace('.', ',')) + '</a>' : '') + '</div>' +
       '<div class="lifestyle-actions"><div class="lifestyle-links"><a class="info-link" href="' + dataEscape(item.url) + '" target="_blank" rel="noopener noreferrer">Mehr erfahren</a>' +
       (item.trailerUrl ? '<a class="trailer-link" href="' + dataEscape(item.trailerUrl) + '" target="_blank" rel="noopener noreferrer">▶ Deutscher Trailer</a>' : '') + '</div>' +
-      '<div class="lifestyle-card-buttons">' + lifestyleFavoriteMarkup(item, section) +
+      '<div class="lifestyle-card-buttons">' + ratingMarkup(item.id, item.title, section) + lifestyleFavoriteMarkup(item, section) +
       '<button class="hide-card-btn" type="button" data-hide-card data-id="' + dataEscape(item.id) + '" data-section="' + section + '" data-title="' + dataEscape(item.title) + '">Ausblenden</button></div></div></article>'
     ).join('');
   };
@@ -144,6 +150,39 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
     const age = (Date.now() - new Date(item.releaseDate + 'T00:00:00').getTime()) / 86400000;
     return age >= 0 && age <= 60;
   }), 'stream');
+}
+
+async function loadRecommendationRatings() {
+  const { data, error } = await supabase.from('recommendation_ratings').select('suggestion_id,rating');
+  if (error) return new Map<string, number>();
+  return new Map((data ?? []).map(row => [row.suggestion_id as string, row.rating as number]));
+}
+
+function wireRatingButtons(ratings: Map<string, number>) {
+  document.querySelectorAll<HTMLButtonElement>('[data-rate]').forEach(button => {
+    const id = button.dataset.id ?? '';
+    const value = Number(button.dataset.rate);
+    button.classList.toggle('active', ratings.get(id) === value);
+    button.addEventListener('click', async () => {
+      const current = ratings.get(id);
+      if (current === value) {
+        const { error } = await supabase.from('recommendation_ratings').delete().eq('suggestion_id', id);
+        if (!error) ratings.delete(id);
+      } else {
+        const { error } = await supabase.from('recommendation_ratings').upsert({
+          suggestion_id: id,
+          section: button.dataset.section ?? '',
+          title: button.dataset.title ?? '',
+          rating: value,
+          rated_at: new Date().toISOString(),
+        });
+        if (!error) ratings.set(id, value);
+      }
+      document.querySelectorAll<HTMLButtonElement>('[data-rate][data-id="' + CSS.escape(id) + '"]').forEach(b =>
+        b.classList.toggle('active', ratings.get(id) === Number(b.dataset.rate))
+      );
+    });
+  });
 }
 
 async function loadHiddenRecommendationIds() {
@@ -160,8 +199,9 @@ async function loadRecommendationData() {
   if (!response.ok) throw new Error('Recommendation data could not be loaded');
   const data = await response.json() as RecommendationData;
   if (![1, 2].includes(data.schemaVersion)) throw new Error('Unsupported recommendation schema');
-  const hiddenIds = await loadHiddenRecommendationIds();
+  const [hiddenIds, ratings] = await Promise.all([loadHiddenRecommendationIds(), loadRecommendationRatings()]);
   renderRecommendationData(data, hiddenIds);
+  wireRatingButtons(ratings);
 }
 
 type Favorite = {

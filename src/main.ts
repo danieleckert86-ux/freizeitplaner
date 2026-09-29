@@ -136,7 +136,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       '<article class="lifestyle-card" data-lifestyle-id="' + dataEscape(item.id) + '">' +
       '<div class="lifestyle-top"><span class="lifestyle-type">' + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(item.badge) + '</span></div>' +
       '<h3>' + dataEscape(item.title) + '</h3><p>' + dataEscape(item.description) + '</p>' +
-      '<div class="lifestyle-meta">' + item.meta.map(v => '<span>' + dataEscape(v.replace(/^Neu seit (\\d{2})\\.(\\d{2})\\.\\d{4}$/, "Seit $1.$2.")) + '</span>').join('') +
+      '<div class="lifestyle-meta">' + item.meta.map(v => '<span>' + dataEscape(v.replace(/^Neu seit (\d{2})\.(\d{2})\.\d{4}$/, "Seit $1.$2.")) + '</span>').join('') +
       (item.imdbRating ? '<a class="imdb-rating" href="' + dataEscape(item.imdbUrl || item.url) + '" target="_blank" rel="noopener noreferrer">IMDb ' + dataEscape(item.imdbRating.toFixed(1).replace('.', ',')) + '</a>' : '') +
       (item.trailerUrl ? '<a class="trailer-link trailer-meta" href="' + dataEscape(item.trailerUrl) + '" target="_blank" rel="noopener noreferrer">▶ Trailer</a>' : '') + '</div>' +
       '<div class="lifestyle-actions"><div class="lifestyle-links"><a class="info-link" href="' + dataEscape(item.url) + '" target="_blank" rel="noopener noreferrer">Mehr erfahren</a></div>' +

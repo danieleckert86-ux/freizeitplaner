@@ -156,6 +156,19 @@ type Favorite = {
 async function bootstrap() {
   await loadRecommendationData();
 
+  const viewButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-view]'));
+  const viewSections = Array.from(document.querySelectorAll<HTMLElement>('[data-app-view]'));
+  const setAppView = (view: string) => {
+    viewButtons.forEach(button => button.classList.toggle('active', button.dataset.view === view));
+    viewSections.forEach(section => {
+      const active = section.dataset.appView === view;
+      section.hidden = !active;
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  viewButtons.forEach(button => button.addEventListener('click', () => setAppView(button.dataset.view ?? 'weekend')));
+  setAppView('weekend');
+
   const mediaTabs = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-media-tab]'));
   const mediaPanels = Array.from(document.querySelectorAll<HTMLElement>('[data-media-panel]'));
   mediaTabs.forEach(tab => tab.addEventListener('click', () => {

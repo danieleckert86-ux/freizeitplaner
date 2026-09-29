@@ -6,6 +6,114 @@ const supabase = createClient(
   'sb_publishable_LKYbSfFZ4WBWPnRpLfxyFQ_tqMGThd2'
 );
 
+
+type Recommendation = {
+  day: string; category: string; date: string; title: string; description: string;
+  url: string; sourceLabel: string;
+  favorite: { id: string; title: string; dayLabel: string; categoryLabel: string; description: string; url: string };
+  dayText?: string; badge?: string; facts?: string[]; why?: string;
+  label?: string; meta?: string[]; metaLabel?: string; time?: string;
+};
+
+type RecommendationData = {
+  schemaVersion: number;
+  dataUpdated: string;
+  weekendRange: string;
+  weatherDays: Array<{ date: string; label: string; display: string }>;
+  top: Recommendation[];
+  ideas: Recommendation[];
+  hikes: Recommendation[];
+  bikes: Recommendation[];
+  discoveries: Recommendation[];
+};
+
+function dataEscape(value = '') {
+  return value.replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;',
+  })[char] ?? char);
+}
+
+function favoriteMarkup(item: Recommendation, compact = false) {
+  const f = item.favorite;
+  return '<button class="favorite-btn' + (compact ? ' compact' : '') + '" type="button" data-favorite ' +
+    'data-id="' + dataEscape(f.id) + '" data-title="' + dataEscape(f.title) + '" ' +
+    'data-day-label="' + dataEscape(f.dayLabel) + '" data-category-label="' + dataEscape(f.categoryLabel) + '" ' +
+    'data-description="' + dataEscape(f.description) + '" data-url="' + dataEscape(f.url) + '">Merken</button>';
+}
+
+function sourceMarkup(item: Recommendation) {
+  return '<a class="info-link" href="' + dataEscape(item.url) + '" target="_blank" rel="noopener noreferrer">' +
+    dataEscape(item.sourceLabel || 'Originalquelle') + '</a>';
+}
+
+function renderRecommendationData(data: RecommendationData) {
+  const state = document.querySelector<HTMLElement>('.data-state');
+  if (state) state.textContent = 'Datenstand Freizeit-Tipps: ' + data.dataUpdated;
+
+  const range = document.querySelector<HTMLElement>('.weekend-range');
+  if (range) range.textContent = data.weekendRange;
+
+  const weather = document.querySelector<HTMLElement>('.weather-grid');
+  if (weather) {
+    weather.innerHTML = data.weatherDays.map(day =>
+      '<div class="weather-day" data-weather-date="' + dataEscape(day.date) + '">' +
+      '<strong>' + dataEscape(day.label) + '</strong>' +
+      '<div class="weather-date">' + dataEscape(day.display) + '</div>' +
+      '<div class="weather-value">Wetter derzeit nicht verfügbar</div></div>'
+    ).join('');
+  }
+
+  const top = document.querySelector<HTMLElement>('#topCards');
+  if (top) top.innerHTML = data.top.map(item =>
+    '<article class="card filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '">' +
+    '<div class="card-top"><span class="day">' + dataEscape(item.dayText) + '</span><span class="badge">' + dataEscape(item.badge) + '</span></div>' +
+    '<h3>' + dataEscape(item.title) + '</h3><p>' + dataEscape(item.description) + '</p>' +
+    '<div class="facts">' + (item.facts ?? []).map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +
+    '<div class="why">' + dataEscape(item.why) + '</div><div class="card-actions item-actions">' +
+    sourceMarkup(item) + favoriteMarkup(item) + '</div></article>'
+  ).join('');
+
+  const ideas = document.querySelector<HTMLElement>('#alternativeList');
+  if (ideas) ideas.innerHTML = data.ideas.map(item =>
+    '<article class="idea-card filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '">' +
+    '<div class="idea-visual" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="8"/></svg></div>' +
+    '<div class="idea-content"><span class="idea-category">' + dataEscape(item.label) + '</span><h3>' + dataEscape(item.title) + '</h3><p>' + dataEscape(item.description) + '</p>' +
+    '<div class="idea-meta">' + (item.meta ?? []).map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +
+    '<div class="item-actions">' + sourceMarkup(item) + favoriteMarkup(item, true) + '</div></div></article>'
+  ).join('');
+
+  const renderTours = (selector: string, items: Recommendation[]) => {
+    const list = document.querySelector<HTMLElement>(selector + ' .tour-list');
+    if (!list) return;
+    list.innerHTML = items.map(item =>
+      '<article class="tour-card filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '">' +
+      '<div class="tour-top"><span class="tour-category">' + dataEscape(item.label) + '</span><span class="meta-label">' + dataEscape(item.metaLabel) + '</span></div>' +
+      '<h4>' + dataEscape(item.title) + '</h4><p>' + dataEscape(item.description) + '</p>' +
+      '<div class="tour-meta">' + (item.meta ?? []).map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +
+      '<div class="item-actions">' + sourceMarkup(item) + favoriteMarkup(item, true) + '</div></article>'
+    ).join('');
+  };
+  renderTours('#hikeGroup', data.hikes);
+  renderTours('#bikeGroup', data.bikes);
+
+  const discoveries = document.querySelector<HTMLElement>('#discoveries .discovery-timeline');
+  if (discoveries) discoveries.innerHTML = data.discoveries.map(item =>
+    '<article class="discovery-item"><time>' + dataEscape(item.time) + '</time><div><span class="mini-badge">' + dataEscape(item.badge) + '</span>' +
+    '<h3>' + dataEscape(item.title) + '</h3><p>' + dataEscape(item.description) + '</p><div class="item-actions">' +
+    sourceMarkup(item) + favoriteMarkup(item, true) + '</div></div></article>'
+  ).join('');
+}
+
+async function loadRecommendationData() {
+  const response = await fetch('/recommendations.json', { cache: 'no-store' });
+  if (!response.ok) throw new Error('Recommendation data could not be loaded');
+  const data = await response.json() as RecommendationData;
+  if (data.schemaVersion !== 1) throw new Error('Unsupported recommendation schema');
+  renderRecommendationData(data);
+}
+
+await loadRecommendationData();
+
 type Favorite = {
   id: string;
   suggestionId: string;

@@ -305,3 +305,12 @@ section[id],h1[id]{scroll-margin-top:85px}
    grid-column:3!important;width:82px!important;justify-content:center!important;justify-self:end!important;margin:0!important;
  }
 }
+
+/* Lifestyle card favorite + hide actions */
+.lifestyle-card-buttons{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.lifestyle-card-buttons .favorite-btn,.lifestyle-card-buttons .hide-card-btn{margin:0}
+@media(max-width:760px){
+ .lifestyle-actions{align-items:flex-end}
+ .lifestyle-card-buttons{gap:6px}
+ .lifestyle-card-buttons .favorite-btn,.lifestyle-card-buttons .hide-card-btn{min-height:34px;padding:6px 9px;font-size:12px}
+}

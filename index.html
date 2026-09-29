@@ -40,6 +40,8 @@
     <nav class="section-nav" aria-label="Bereiche">
       <a href="#weekendTitle">Wochenende</a>
       <a href="#outdoorSection">Raus ins Grüne</a>
+      <a href="#restaurants">Restaurants</a>
+      <a href="#movies">Filme &amp; Serien</a>
       <a href="#discoveries">Entdecken</a>
       <a href="#favorites">Gemerkt</a>
     </nav>
@@ -136,6 +138,25 @@
         <div class="outdoor-group" id="bikeGroup"><h3>Radtouren</h3><div class="tour-list">
         </div></div>
       </div>
+    </section>
+
+    <section class="independent-section" id="restaurants" aria-labelledby="restaurantsHeading">
+      <div class="section-head">
+        <div><p class="section-kicker">Essen &amp; entdecken</p><h2 id="restaurantsHeading">Restaurants &amp; Cafés</h2><p class="section-note">Persönliche Empfehlungen und interessante Neueröffnungen in Augsburg – unabhängig vom Wochenende.</p></div>
+      </div>
+      <div class="lifestyle-grid" id="restaurantList"></div>
+    </section>
+
+    <section class="independent-section" id="movies" aria-labelledby="moviesHeading">
+      <div class="section-head">
+        <div><p class="section-kicker">Für Leinwand &amp; Sofa</p><h2 id="moviesHeading">Filme &amp; Serien</h2><p class="section-note">Aktuelles Augsburger Kinoprogramm und neue Streaming-Titel passend zu deinem Geschmack.</p></div>
+      </div>
+      <div class="media-switch" role="tablist" aria-label="Filme und Serien auswählen">
+        <button class="media-tab active" type="button" data-media-tab="cinema">Kino</button>
+        <button class="media-tab" type="button" data-media-tab="stream">Stream</button>
+      </div>
+      <div class="media-panel active" data-media-panel="cinema"><p class="media-note">Aktuell im Augsburger Kinoprogramm – unabhängig vom Wochentag.</p><div class="lifestyle-grid" id="cinemaList"></div></div>
+      <div class="media-panel" data-media-panel="stream" hidden><p class="media-note">Nur Neuerscheinungen der letzten 60 Tage auf Netflix, Disney+, RTL+, ARD und ZDF.</p><div class="lifestyle-grid" id="streamList"></div></div>
     </section>
 
     <section class="panel discovery-panel" id="discoveries" aria-labelledby="discoveriesHeading">

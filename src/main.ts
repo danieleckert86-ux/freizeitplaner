@@ -263,6 +263,19 @@ function weatherLabel(code: number) {
   return 'Wechselhaft';
 }
 
+
+function weatherIcon(code: number) {
+  if (code === 0) return '☀️';
+  if ([1, 2].includes(code)) return '🌤️';
+  if (code === 3) return '☁️';
+  if ([45, 48].includes(code)) return '🌫️';
+  if ([51, 53, 55, 56, 57].includes(code)) return '🌦️';
+  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return '🌧️';
+  if ([71, 73, 75, 77, 85, 86].includes(code)) return '🌨️';
+  if ([95, 96, 99].includes(code)) return '⛈️';
+  return '🌥️';
+}
+
 function renderWeatherHint(daily: WeatherDaily) {
   if (!weatherGrid) return;
 
@@ -277,15 +290,16 @@ function renderWeatherHint(daily: WeatherDaily) {
       precipitation: daily.precipitation_sum[index] ?? 99,
       code: daily.weather_code[index] ?? 99,
     }))
-    .filter(item => item.date >= today && ['2026-09-25', '2026-09-26', '2026-09-27'].includes(item.date));
+    .filter(item => item.date >= today && Array.from(document.querySelectorAll<HTMLElement>('[data-weather-date]')).some(day => day.dataset.weatherDate === item.date));
 
   if (candidates.length === 0) return;
 
-  const dayNames: Record<string, string> = {
-    '2026-09-25': 'Freitag',
-    '2026-09-26': 'Samstag',
-    '2026-09-27': 'Sonntag',
-  };
+  const dayNames = Object.fromEntries(
+    Array.from(document.querySelectorAll<HTMLElement>('[data-weather-date]')).map(day => [
+      day.dataset.weatherDate ?? '',
+      day.querySelector('strong')?.textContent?.trim() ?? 'Der Tag',
+    ])
+  ) as Record<string, string>;
 
   const ranked = [...candidates].sort((a, b) => {
     const scoreA = a.probability + a.precipitation * 12 + (a.code >= 51 ? 25 : 0);
@@ -362,8 +376,15 @@ async function loadWeather() {
       const precipitation = data.daily!.precipitation_sum[index];
 
       value.innerHTML =
-        '<b>' + escapeHtml(weatherLabel(code)) + ' · ' + max + '° / ' + min + '°</b>' +
-        '<span>' + probability + '% Regen · ' + precipitation.toFixed(1) + ' mm</span>';
+        '<div class="weather-main">' +
+          '<span class="weather-icon" aria-hidden="true">' + weatherIcon(code) + '</span>' +
+          '<div class="weather-reading">' +
+            '<span class="weather-temp">' + max + '°</span>' +
+            '<span class="weather-low">' + min + '°</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="weather-condition">' + escapeHtml(weatherLabel(code)) + '</div>' +
+        '<div class="weather-rain"><span aria-hidden="true">💧</span> ' + probability + '% · ' + precipitation.toFixed(1) + ' mm</div>';
     });
 
     renderWeatherHint(data.daily);

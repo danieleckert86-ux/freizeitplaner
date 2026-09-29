@@ -325,3 +325,32 @@ section[id],h1[id]{scroll-margin-top:85px}
  .rating-btn{min-width:30px;width:30px;height:30px;padding:2px;font-size:14px}
  .lifestyle-card-buttons{flex-wrap:wrap;justify-content:flex-end}
 }
+
+/* Mobile action layout after adding taste ratings */
+@media(max-width:760px){
+ .card .item-actions,.card .card-actions,
+ .idea-card .item-actions,.tour-card .item-actions,.discovery-item .item-actions{
+   display:grid!important;
+   grid-template-columns:auto minmax(0,1fr)!important;
+   grid-template-areas:"details source" "rating favorite"!important;
+   column-gap:10px!important;
+   row-gap:8px!important;
+   align-items:center!important;
+ }
+ .card .details-btn,.idea-card .details-btn,.tour-card .details-btn,.discovery-item .details-btn{
+   grid-area:details!important;width:88px!important;
+ }
+ .card .info-link,.idea-card .info-link,.tour-card .info-link,.discovery-item .info-link{
+   grid-area:source!important;justify-self:start!important;
+ }
+ .card .rating-actions,.idea-card .rating-actions,.tour-card .rating-actions,.discovery-item .rating-actions{
+   grid-area:rating!important;justify-self:start!important;
+ }
+ .card .favorite-btn,.idea-card .favorite-btn,.tour-card .favorite-btn,.discovery-item .favorite-btn{
+   grid-area:favorite!important;width:auto!important;min-width:82px!important;justify-self:end!important;
+ }
+ .discovery-item .item-actions{
+   margin-left:-64px!important;
+   width:calc(100% + 64px)!important;
+ }
+}

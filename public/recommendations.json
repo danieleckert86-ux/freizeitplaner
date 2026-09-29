@@ -140,24 +140,24 @@
     },
     {
       "day": "fr",
-      "category": "markt",
+      "category": "kultur",
       "date": "2026-10-02",
-      "title": "Shopping Night · Augsburger Innenstadt",
-      "description": "Innenstadtbummel am Freitagabend mit verlängerten Öffnungszeiten bis 22 Uhr – gut kombinierbar mit Essen oder Konzert.",
-      "url": "https://www.augsburg-marketing.de/sponsoring-events/shopping-night/",
+      "title": "Lagerfeuerabend · Märchenzelt",
+      "description": "Asa Mohr erzählt im Märchenzelt hinter dem abraxas Märchen über die unsterbliche Liebe – in kleiner Runde am knisternden Feuer, mit Witzigem, Staunenswertem und Kulinarischem. Findet bei jedem Wetter statt.",
+      "url": "https://www.kulturhaus-abraxas.de/spielplan/lagerfeuerabend-mit-maerchen-ueber-die-unsterbliche-liebe-mit-asa-mohr-20261002-2000-2200",
       "sourceLabel": "Originalquelle",
       "favorite": {
-        "id": "shopping-night-augsburg-2026-10-02",
-        "title": "Shopping Night · Augsburger Innenstadt",
-        "dayLabel": "Freitag · bis 22 Uhr",
-        "categoryLabel": "Stadtleben",
-        "description": "Innenstadtbummel am Freitagabend mit verlängerten Öffnungszeiten bis 22 Uhr – gut kombinierbar mit Essen oder Konzert.",
-        "url": "https://www.augsburg-marketing.de/sponsoring-events/shopping-night/"
+        "id": "lagerfeuerabend-maerchenzelt-2026-10-02",
+        "title": "Lagerfeuerabend · Märchenzelt",
+        "dayLabel": "Freitag · 20:00",
+        "categoryLabel": "Kultur",
+        "description": "Charaktervoller Märchenabend über die unsterbliche Liebe in kleiner Runde am Lagerfeuer hinter dem abraxas.",
+        "url": "https://www.kulturhaus-abraxas.de/spielplan/lagerfeuerabend-mit-maerchen-ueber-die-unsterbliche-liebe-mit-asa-mohr-20261002-2000-2200"
       },
-      "label": "Stadtleben",
+      "label": "Kultur · Literatur",
       "meta": [
-        "Freitag · bis 22 Uhr",
-        "Innenstadt Augsburg"
+        "Freitag · 20:00",
+        "Märchenzelt am abraxas · 21 €"
       ]
     },
     {
@@ -451,23 +451,23 @@
       "badge": "Kunst · Augsburg"
     },
     {
-      "day": "",
-      "category": "musik",
-      "date": "2026-10-18",
-      "title": "Kapa Tult · Kantine",
-      "description": "Textorientierter Indie mit rohem, intimem Gitarrensound und leichtfüßigen Hooks.",
-      "url": "https://www.musikkantine.de/home/2026-10-18-kapa-tult/",
+      "day": "sa",
+      "category": "gastronomie",
+      "date": "2026-10-10",
+      "title": "Le Grand Brunch · Grandhotel Cosmopolis",
+      "description": "Vegetarisch-veganes internationales Buffet mit wechselnden Einflüssen, glutenfreien Optionen, Säften, Tee und Kaffee – eine sehr passende besondere Frühstücks-/Brunch-Entdeckung mitten in Augsburg.",
+      "url": "https://grandhotel-cosmopolis.org/events/le-grand-brunch-internationale-spezialitaten-3/",
       "sourceLabel": "Originalquelle",
       "favorite": {
-        "id": "kapa-tult-augsburg-2026-10-18",
-        "title": "Kapa Tult · Kantine",
-        "dayLabel": "Sonntag, 18.10.",
-        "categoryLabel": "Musik",
-        "description": "Textorientierter Indie in der Kantine Augsburg.",
-        "url": "https://www.musikkantine.de/home/2026-10-18-kapa-tult/"
+        "id": "le-grand-brunch-cosmopolis-2026-10-10",
+        "title": "Le Grand Brunch · Grandhotel Cosmopolis",
+        "dayLabel": "Samstag, 10.10. · 11–14 Uhr",
+        "categoryLabel": "Gastronomie",
+        "description": "Vegetarisch-veganer internationaler Brunch im Grandhotel Cosmopolis.",
+        "url": "https://grandhotel-cosmopolis.org/events/le-grand-brunch-internationale-spezialitaten-3/"
       },
-      "time": "18.10.",
-      "badge": "Musik · Augsburg"
+      "time": "10.10.",
+      "badge": "Gastronomie"
     }
   ]
 }

@@ -531,7 +531,10 @@
         "2026"
       ],
       "url": "https://thalia-augsburg.critic.de/kinoprogramm/",
-      "badge": "Arthouse"
+      "badge": "Arthouse",
+      "imdbRating": 7.2,
+      "imdbUrl": "https://www.imdb.com/de/title/tt37304295/",
+      "trailerUrl": "https://trailer.de/trailer/vaterland-trailer"
     }
   ],
   "stream": [
@@ -547,7 +550,10 @@
       "url": "https://www.netflix.com/",
       "badge": "Sehr gute Passung",
       "platform": "Netflix",
-      "releaseDate": "2026-09-24"
+      "releaseDate": "2026-09-24",
+      "imdbRating": 7,
+      "imdbUrl": "https://www.imdb.com/de/title/tt15740596/",
+      "trailerUrl": "https://www.youtube.com/watch?v=Bg7etDgdhe4"
     },
     {
       "id": "toy-story-5-disney-2026-09-23",
@@ -561,7 +567,10 @@
       "url": "https://www.disneyplus.com/",
       "badge": "Gute Passung",
       "platform": "Disney+",
-      "releaseDate": "2026-09-23"
+      "releaseDate": "2026-09-23",
+      "imdbRating": 7.4,
+      "imdbUrl": "https://www.imdb.com/de/title/tt29355505/",
+      "trailerUrl": "https://www.youtube.com/watch?v=GlHL_3smXSE"
     },
     {
       "id": "einfach-mal-was-schoenes-netflix-2026-09-18",
@@ -575,7 +584,10 @@
       "url": "https://www.netflix.com/",
       "badge": "Sehr gute Passung",
       "platform": "Netflix",
-      "releaseDate": "2026-09-18"
+      "releaseDate": "2026-09-18",
+      "imdbRating": 6.3,
+      "imdbUrl": "https://www.imdb.com/de/title/tt21335690/",
+      "trailerUrl": "https://www.youtube.com/watch?v=cTehT-9Sqqw"
     }
   ]
 }

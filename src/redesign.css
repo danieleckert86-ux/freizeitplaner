@@ -159,3 +159,8 @@ section[id],h1[id]{scroll-margin-top:85px}
   .media-switch{display:flex;width:100%}
   .media-tab{flex:1}
 }
+
+.section-nav-btn{appearance:none;border:0;background:transparent;color:inherit;font:inherit;font-weight:750;cursor:pointer;padding:10px 13px;border-radius:999px;white-space:nowrap}
+.section-nav-btn:hover{background:#f0f3f8}
+.section-nav-btn.active{background:#17233d;color:#fff}
+.view-section[hidden]{display:none!important}

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "dataUpdated": "28.09.2026",
+  "dataUpdated": "29.09.2026",
   "weekendRange": "Freitag, 2. bis Sonntag, 4. Oktober 2026",
   "weatherDays": [
     {
@@ -277,7 +277,7 @@
       "category": "wandern",
       "date": "2026-10-03",
       "title": "Alpspitzrunde mit Wasserfall · Pfronten/Nesselwang",
-      "description": "Abwechslungsreiche Runde mit Wasserfall, Alpen und Aussichtspunkten. Samstag ist aktuell überwiegend trocken und wolkig prognostiziert.",
+      "description": "Abwechslungsreiche Runde mit Wasserfall und Alpenblicken. Samstag ist trocken prognostiziert; nach dem Freitagsregen kann der Wiesenweg rutschig sein – für den Abstieg bei Nässe besser die offizielle Forstweg-Alternative wählen.",
       "url": "https://www.allgaeu.de/touren/alpspitzrunde-mit-wasserfall",
       "sourceLabel": "Tour öffnen",
       "favorite": {
@@ -329,7 +329,7 @@
       "category": "fahrrad",
       "date": "2026-10-04",
       "title": "Ein Fluss in neuem Gewand · Wertach",
-      "description": "Dreistündige geführte Radtour zur Revitalisierung der Wertach – lokal und informativer als eine gewöhnliche Trainingsrunde.",
+      "description": "Dreistündige geführte Radtour zur Revitalisierung der Wertach. Wichtig: Anmeldung laut Veranstalter nur bis heute, 29.09.; 15 km, 15 € pro Erwachsenem.",
       "url": "https://www.umweltbildungszentrum-augsburg.de/willkommen/8/",
       "sourceLabel": "Originalquelle",
       "favorite": {
@@ -337,15 +337,15 @@
         "title": "Ein Fluss in neuem Gewand · Wertach",
         "dayLabel": "Sonntag",
         "categoryLabel": "Fahrrad",
-        "description": "Geführte Radtour zur Revitalisierung der Wertach.",
+        "description": "Geführte 15-km-Radtour zur Revitalisierung der Wertach; Anmeldung bis 29.09.",
         "url": "https://www.umweltbildungszentrum-augsburg.de/willkommen/8/"
       },
       "label": "Radtour",
       "metaLabel": "geführt",
       "meta": [
         "10–13 Uhr",
-        "Augsburg",
-        "Wertach"
+        "15 km · 15 €",
+        "Anmeldung bis 29.09."
       ]
     },
     {

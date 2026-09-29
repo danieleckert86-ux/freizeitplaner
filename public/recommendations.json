@@ -506,6 +506,30 @@
       ],
       "url": "https://grandhotel-cosmopolis.org/",
       "badge": "Passt gut"
+    },
+    {
+      "id": "intermezzo-augsburg",
+      "title": "Intermezzo",
+      "type": "Restaurant · Café · Neueröffnung",
+      "description": "Neue italienisch-mediterrane Adresse in der Fuggerstraße mit Restaurant, Café, Lounge und Innenhof. Urbaner als ein klassischer Italiener und deshalb eine interessante neue Option für Lunch oder Abendessen.",
+      "meta": [
+        "Fuggerstraße 20",
+        "Neu seit Juni 2026"
+      ],
+      "url": "https://intermezzo-augsburg.de/",
+      "badge": "Neu"
+    },
+    {
+      "id": "cafe-noa-augsburg",
+      "title": "Café Noa",
+      "type": "Café · Italienisch",
+      "description": "Familiengeführtes Tagescafé am Stadtmarkt mit Espresso, Cornetti, Panini, hausgemachten Dolci und wechselnder Pasta. Passt gut zu eurem Faible für individuelle Cafés und italienische Küche.",
+      "meta": [
+        "Stadtmarkt Augsburg",
+        "Neu seit April 2026"
+      ],
+      "url": "https://www.augsburg-city.de/listings/2058-cafe-noa/",
+      "badge": "Passt gut"
     }
   ],
   "cinema": [
@@ -588,6 +612,55 @@
       "imdbRating": 6.3,
       "imdbUrl": "https://www.imdb.com/de/title/tt21335690/",
       "trailerUrl": "https://www.youtube.com/watch?v=cTehT-9Sqqw"
+    },
+    {
+      "id": "blackbird-ard-2026-09-30",
+      "title": "Blackbird",
+      "type": "Film",
+      "description": "Coming-of-Age-Drama nach Matthias Brandt über Freundschaft, erste Liebe, Familie und Erinnerungen. Der menschliche, warm-melancholische Stoff mit Bjarne Mädel passt sehr gut zu deinem Profil.",
+      "meta": [
+        "ARD Mediathek",
+        "Neu ab 30.09.2026"
+      ],
+      "url": "https://www.ardmediathek.de/film/blackbird/MzZmOTUyMzQtZjI5YS00ZWUxLTk1NDAtYjllNmUxNzBkM2Ey",
+      "badge": "Sehr gute Passung",
+      "platform": "ARD Mediathek",
+      "releaseDate": "2026-09-30",
+      "imdbUrl": "https://www.imdb.com/de/title/tt42662308/",
+      "trailerUrl": "https://www.ardmediathek.de/video/blackbird/trailer-blackbird/ard/Y3JpZDovL2FyZC5kZS92aWRlby0xNzExOQ"
+    },
+    {
+      "id": "eine-million-minuten-rtlplus-2026-09-02",
+      "title": "Eine Million Minuten",
+      "type": "Film",
+      "description": "Deutsches Familiendrama mit Karoline Herfurth und Tom Schilling über die Frage, was im Leben wirklich wichtig ist. Inhaltlich sehr nah an deinen warmen, menschlichen Filmfavoriten.",
+      "meta": [
+        "RTL+",
+        "Neu seit 02.09.2026"
+      ],
+      "url": "https://www.rtlplus.com/",
+      "badge": "Gute Passung",
+      "platform": "RTL+",
+      "releaseDate": "2026-09-02",
+      "imdbRating": 6.5,
+      "imdbUrl": "https://www.imdb.com/de/title/tt28618089/"
+    },
+    {
+      "id": "top-gun-maverick-rtlplus-2026-09-27",
+      "title": "Top Gun: Maverick",
+      "type": "Film",
+      "description": "Hoch bewerteter moderner Blockbuster mit viel Tempo, aber auch einer ausgeprägten Figuren- und Mentorengeschichte. Eine gute Ergänzung zu deinen sonst stärker charakterorientierten Favoriten.",
+      "meta": [
+        "RTL+",
+        "Neu seit 27.09.2026"
+      ],
+      "url": "https://www.rtlplus.com/",
+      "badge": "Blockbuster-Tipp",
+      "platform": "RTL+",
+      "releaseDate": "2026-09-27",
+      "imdbRating": 8.2,
+      "imdbUrl": "https://www.imdb.com/de/title/tt1745960/",
+      "trailerUrl": "https://www.youtube.com/watch?v=3hO--XhlsfU"
     }
   ]
 }

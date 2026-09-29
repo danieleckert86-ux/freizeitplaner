@@ -265,15 +265,19 @@ function weatherLabel(code: number) {
 
 
 function weatherIcon(code: number) {
-  if (code === 0) return '☀️';
-  if ([1, 2].includes(code)) return '🌤️';
-  if (code === 3) return '☁️';
-  if ([45, 48].includes(code)) return '🌫️';
-  if ([51, 53, 55, 56, 57].includes(code)) return '🌦️';
-  if ([61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return '🌧️';
-  if ([71, 73, 75, 77, 85, 86].includes(code)) return '🌨️';
-  if ([95, 96, 99].includes(code)) return '⛈️';
-  return '🌥️';
+  const sun = '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="7"/><path d="M24 5v6M24 37v6M5 24h6M37 24h6M10.5 10.5l4.3 4.3M33.2 33.2l4.3 4.3M37.5 10.5l-4.3 4.3M14.8 33.2l-4.3 4.3"/></svg>';
+  const cloud = '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M13 34h23a7 7 0 0 0 1-13.9A12 12 0 0 0 14.2 23 5.7 5.7 0 0 0 13 34Z"/></svg>';
+  const rain = '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M13 29h23a7 7 0 0 0 1-13.9A12 12 0 0 0 14.2 18 5.7 5.7 0 0 0 13 29Z"/><path d="M17 34l-2 5M26 34l-2 5M35 34l-2 5"/></svg>';
+  const storm = '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M13 27h23a7 7 0 0 0 1-13.9A12 12 0 0 0 14.2 16 5.7 5.7 0 0 0 13 27Z"/><path d="M25 30l-5 8h5l-2 6 8-10h-5l3-4"/></svg>';
+  const fog = '<svg viewBox="0 0 48 48" aria-hidden="true"><path d="M9 17h30M6 24h36M11 31h28"/></svg>';
+  const mixed = '<svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="18" cy="17" r="6"/><path d="M18 6v4M8 17h4M11 10l3 3"/><path d="M16 33h21a6 6 0 0 0 1-11.9A10 10 0 0 0 19 23a5 5 0 0 0-3 10Z"/></svg>';
+  if (code === 0) return sun;
+  if ([1, 2].includes(code)) return mixed;
+  if (code === 3) return cloud;
+  if ([45, 48].includes(code)) return fog;
+  if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82, 71, 73, 75, 77, 85, 86].includes(code)) return rain;
+  if ([95, 96, 99].includes(code)) return storm;
+  return cloud;
 }
 
 function renderWeatherHint(daily: WeatherDaily) {
@@ -377,14 +381,13 @@ async function loadWeather() {
 
       value.innerHTML =
         '<div class="weather-main">' +
-          '<span class="weather-icon" aria-hidden="true">' + weatherIcon(code) + '</span>' +
+          '<span class="weather-icon">' + weatherIcon(code) + '</span>' +
           '<div class="weather-reading">' +
             '<span class="weather-temp">' + max + '°</span>' +
-            '<span class="weather-low">' + min + '°</span>' +
+            '<span class="weather-low">/ ' + min + '°</span>' +
           '</div>' +
         '</div>' +
-        '<div class="weather-condition">' + escapeHtml(weatherLabel(code)) + '</div>' +
-        '<div class="weather-rain"><span aria-hidden="true">💧</span> ' + probability + '% · ' + precipitation.toFixed(1) + ' mm</div>';
+        '<div class="weather-summary"><span class="weather-condition">' + escapeHtml(weatherLabel(code)) + '</span><span class="weather-rain">' + probability + '% · ' + precipitation.toFixed(1) + ' mm</span></div>';
     });
 
     renderWeatherHint(data.daily);

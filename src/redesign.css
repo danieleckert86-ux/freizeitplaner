@@ -27,11 +27,11 @@ section[id],h1[id]{scroll-margin-top:85px}
 .weather-day.is-past{opacity:.65;box-shadow:none}
 .weather-date{font-size:12px;margin-top:3px;color:var(--muted);position:relative;z-index:1}
 .weather-value{margin-top:13px;position:relative;z-index:1}
-.weather-main{display:flex;align-items:center;gap:8px;min-width:0;margin-top:2px}
+.weather-main{display:flex;align-items:center;gap:6px;min-width:0;margin-top:2px}
 .weather-icon{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;color:#52709f}.weather-icon svg{width:32px;height:32px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .weather-reading{display:flex;align-items:baseline;gap:3px;min-width:0;white-space:nowrap}
-.weather-temp{font-size:25px;line-height:1;font-weight:800;letter-spacing:-1px;color:var(--text)}
-.weather-low{font-size:12px;font-weight:650;color:var(--muted)}
+.weather-temp{font-size:21px;line-height:1;font-weight:800;letter-spacing:-.6px;color:var(--text)}
+.weather-low{font-size:10px;font-weight:650;color:var(--muted)}
 .weather-summary{display:flex;align-items:baseline;flex-wrap:wrap;gap:3px 7px;margin-top:9px}.weather-condition{font-size:13px;font-weight:750;color:#34445f}
 .weather-rain{font-size:11px;color:var(--muted);white-space:nowrap}
 .weather-hint{grid-column:1/-1;display:flex;justify-content:space-between;gap:12px;align-items:center;background:#edf3ff;border:1px solid #dbe6ff;border-radius:12px;padding:9px 12px;font-size:12px;color:#405475;box-shadow:none}
@@ -131,4 +131,4 @@ section[id],h1[id]{scroll-margin-top:85px}
 .idea-card .item-actions .favorite-btn{margin-left:auto}
 @media(max-width:760px){.idea-card .item-actions{margin-left:0}.idea-card .item-actions .favorite-btn{margin-left:0}}
 
-@media(max-width:760px){.weather-day{padding:14px 12px}.weather-icon{width:30px;height:30px;flex-basis:30px}.weather-icon svg{width:29px;height:29px}.weather-temp{font-size:23px}.weather-low{font-size:11px}.weather-summary{margin-top:8px;gap:2px 6px}.weather-rain{font-size:10.5px}.weather-hint{align-items:flex-start;flex-direction:column;gap:3px}.weather-hint small{white-space:normal}}
+@media(max-width:760px){.weather-day{padding:14px 11px}.weather-icon{width:27px;height:27px;flex-basis:27px}.weather-icon svg{width:27px;height:27px}.weather-temp{font-size:20px}.weather-low{font-size:10px}.weather-summary{margin-top:8px;gap:2px 6px}.weather-rain{font-size:10.5px}.weather-hint{align-items:flex-start;flex-direction:column;gap:3px}.weather-hint small{white-space:normal}}

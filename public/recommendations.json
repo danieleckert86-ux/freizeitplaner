@@ -24,76 +24,99 @@
       "day": "fr",
       "category": "musik",
       "date": "2026-10-02",
-      "title": "Breath Attack × Augsburger Kneipenchor · Kantine",
-      "description": "Urban Brass, Balkan Beats und Funk treffen auf vierstimmigen Kneipenchor – ein ungewöhnlicher gemeinsamer Augsburger Konzertabend.",
-      "url": "https://www.musikkantine.de/home/2026-10-02-breath-attack-meets-augsburger-kneipenchor/",
+      "title": "Soho Song Slam · Soho Stage",
+      "description": "Sechs Acts aus der Region und darüber hinaus bekommen jeweils zehn Minuten; das Publikum schickt zwei ins Finale und kürt am Ende den Sieger.",
+      "url": "https://www.musikkantine.de/home/2026-10-02-soho-song-slam/",
       "sourceLabel": "Originalquelle",
       "favorite": {
-        "id": "breath-attack-kneipenchor-2026-10-02",
-        "title": "Breath Attack × Augsburger Kneipenchor",
-        "dayLabel": "Freitag",
+        "id": "soho-song-slam-2026-10-02",
+        "title": "Soho Song Slam · Soho Stage",
+        "dayLabel": "Freitag · 19:30",
         "categoryLabel": "Musik",
-        "description": "Urban Brass, Balkan Beats und Funk treffen auf den Augsburger Kneipenchor.",
-        "url": "https://www.musikkantine.de/home/2026-10-02-breath-attack-meets-augsburger-kneipenchor/"
+        "description": "Song-Slam mit sechs Acts, kurzen Sets und Publikumsfinale in der kleinen Soho Stage.",
+        "url": "https://www.musikkantine.de/home/2026-10-02-soho-song-slam/"
       },
       "dayText": "Freitag · 19:30",
       "badge": "Musik",
       "facts": [
-        "Kantine Augsburg",
-        "ab 18 €"
-      ],
-      "why": "Lokal, eigenständig und deutlich besonderer als ein gewöhnlicher Konzertabend."
-    },
-    {
-      "day": "sa",
-      "category": "musik",
-      "date": "2026-10-03",
-      "title": "TWIN NOIR · Soho Stage",
-      "description": "Berliner Post-Punk, Wave und EBM in einer kleinen Augsburger Location.",
-      "url": "https://www.musikkantine.de/home/2026-10-03-twin-noir/",
-      "sourceLabel": "Originalquelle",
-      "favorite": {
-        "id": "twin-noir-augsburg-2026-10-03",
-        "title": "TWIN NOIR · Soho Stage",
-        "dayLabel": "Samstag",
-        "categoryLabel": "Musik",
-        "description": "Post-Punk, Wave und EBM in der Soho Stage Augsburg.",
-        "url": "https://www.musikkantine.de/home/2026-10-03-twin-noir/"
-      },
-      "dayText": "Samstag · 19:30",
-      "badge": "Musik",
-      "facts": [
         "Soho Stage Augsburg",
-        "ab 25 €"
+        "ab 13 €"
       ],
-      "why": "Kleine Bühne, eigenständiger Sound und eine gute Alternative zu großen Standardkonzerten."
+      "why": "Kurze Sets verschiedener Acts, kleine Bühne und text-/songorientiertes Format – deutlich näher an deinem Musikprofil."
     },
     {
-      "day": "so",
-      "category": "musik",
-      "date": "2026-10-04",
-      "title": "Adjiri Odametey Solo · Kresslesmühle",
-      "description": "Afrikanische Weltmusik als intimer Soloabend in der Kresslesmühle.",
-      "url": "https://www.kresslesmuehle.de/programm/",
+      "day": "fr",
+      "category": "kultur",
+      "date": "2026-10-02",
+      "title": "Lagerfeuerabend · Märchenzelt",
+      "description": "Asa Mohr erzählt im Märchenzelt hinter dem abraxas Märchen über die unsterbliche Liebe – in kleiner Runde am knisternden Feuer, mit Witzigem, Staunenswertem und Kulinarischem. Findet bei jedem Wetter statt.",
+      "url": "https://www.kulturhaus-abraxas.de/spielplan/lagerfeuerabend-mit-maerchen-ueber-die-unsterbliche-liebe-mit-asa-mohr-20261002-2000-2200",
       "sourceLabel": "Originalquelle",
       "favorite": {
-        "id": "adjiri-odametey-2026-10-04",
-        "title": "Adjiri Odametey Solo · Kresslesmühle",
-        "dayLabel": "Sonntag",
-        "categoryLabel": "Musik",
-        "description": "Afrikanische Weltmusik als Soloabend in der Kresslesmühle.",
-        "url": "https://www.kresslesmuehle.de/programm/"
+        "id": "lagerfeuerabend-maerchenzelt-2026-10-02",
+        "title": "Lagerfeuerabend · Märchenzelt",
+        "dayLabel": "Freitag · 20:00",
+        "categoryLabel": "Kultur",
+        "description": "Charaktervoller Märchenabend über die unsterbliche Liebe in kleiner Runde am Lagerfeuer hinter dem abraxas.",
+        "url": "https://www.kulturhaus-abraxas.de/spielplan/lagerfeuerabend-mit-maerchen-ueber-die-unsterbliche-liebe-mit-asa-mohr-20261002-2000-2200"
       },
-      "dayText": "Sonntag",
-      "badge": "Musik",
+      "dayText": "Freitag · 20:00",
+      "badge": "Kultur · Literatur",
       "facts": [
-        "Kresslesmühle Augsburg",
-        "Sonntag"
+        "Märchenzelt am abraxas",
+        "21 €"
       ],
-      "why": "Kleine Kultur-Location und musikalisch etwas außerhalb des Gewöhnlichen."
+      "why": "Kleine, charaktervolle Location und erzählerisches Format statt Standardveranstaltung."
+    },
+    {
+      "day": "fr",
+      "category": "kultur",
+      "date": "2026-10-02",
+      "title": "Lange Nacht der Demokratie · Rathaus",
+      "description": "Kostenloser Abend im Augsburger Rathaus mit vielfältigem Programm rund um Austausch und Demokratie.",
+      "url": "https://www.augsburg.de/veranstaltungen",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "lange-nacht-demokratie-2026-10-02",
+        "title": "Lange Nacht der Demokratie · Rathaus",
+        "dayLabel": "Freitag · 18–22 Uhr",
+        "categoryLabel": "Kultur",
+        "description": "Kostenloser Abend im Augsburger Rathaus mit vielfältigem Programm rund um Austausch und Demokratie.",
+        "url": "https://www.augsburg.de/veranstaltungen"
+      },
+      "dayText": "Freitag · 18–22 Uhr",
+      "badge": "Kultur",
+      "facts": [
+        "Rathaus Augsburg",
+        "Eintritt frei",
+        "inkl. Poetry Slam"
+      ],
+      "why": "Viele kleine Kultur- und Gesprächsformate inklusive Poetry Slam – ungewöhnlicher und vielseitiger Abend mitten in Augsburg."
     }
   ],
   "ideas": [
+    {
+      "day": "sa",
+      "category": "kultur",
+      "date": "2026-10-03",
+      "title": "Goodbye Reese · Fotoausstellung im abraxas",
+      "description": "Fotoausstellung von Martina Vodermayer unter dem Titel „Was lebte, nützte, gehen musste“ – ein ruhiger, ungewöhnlicher Kulturbaustein für Samstag oder Sonntag.",
+      "url": "https://www.kulturhaus-abraxas.de/spielplan",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "goodbye-reese-abraxas-2026-10-03",
+        "title": "Goodbye Reese · Fotoausstellung im abraxas",
+        "dayLabel": "Samstag/Sonntag",
+        "categoryLabel": "Kultur",
+        "description": "Fotoausstellung von Martina Vodermayer im Kulturhaus abraxas.",
+        "url": "https://www.kulturhaus-abraxas.de/spielplan"
+      },
+      "label": "Kunst · Fotografie",
+      "meta": [
+        "Samstag & Sonntag",
+        "Kulturhaus abraxas"
+      ]
+    },
     {
       "day": "fr",
       "category": "kultur",
@@ -117,50 +140,6 @@
       ]
     },
     {
-      "day": "fr",
-      "category": "kultur",
-      "date": "2026-10-02",
-      "title": "Lange Nacht der Demokratie · Rathaus",
-      "description": "Kostenloser Abend im Augsburger Rathaus mit vielfältigem Programm rund um Austausch und Demokratie.",
-      "url": "https://www.augsburg.de/veranstaltungen",
-      "sourceLabel": "Originalquelle",
-      "favorite": {
-        "id": "lange-nacht-demokratie-2026-10-02",
-        "title": "Lange Nacht der Demokratie · Rathaus",
-        "dayLabel": "Freitag · 18–22 Uhr",
-        "categoryLabel": "Kultur",
-        "description": "Kostenloser Abend im Augsburger Rathaus mit vielfältigem Programm rund um Austausch und Demokratie.",
-        "url": "https://www.augsburg.de/veranstaltungen"
-      },
-      "label": "Kultur",
-      "meta": [
-        "Freitag · 18–22 Uhr",
-        "Rathaus Augsburg"
-      ]
-    },
-    {
-      "day": "fr",
-      "category": "kultur",
-      "date": "2026-10-02",
-      "title": "Lagerfeuerabend · Märchenzelt",
-      "description": "Asa Mohr erzählt im Märchenzelt hinter dem abraxas Märchen über die unsterbliche Liebe – in kleiner Runde am knisternden Feuer, mit Witzigem, Staunenswertem und Kulinarischem. Findet bei jedem Wetter statt.",
-      "url": "https://www.kulturhaus-abraxas.de/spielplan/lagerfeuerabend-mit-maerchen-ueber-die-unsterbliche-liebe-mit-asa-mohr-20261002-2000-2200",
-      "sourceLabel": "Originalquelle",
-      "favorite": {
-        "id": "lagerfeuerabend-maerchenzelt-2026-10-02",
-        "title": "Lagerfeuerabend · Märchenzelt",
-        "dayLabel": "Freitag · 20:00",
-        "categoryLabel": "Kultur",
-        "description": "Charaktervoller Märchenabend über die unsterbliche Liebe in kleiner Runde am Lagerfeuer hinter dem abraxas.",
-        "url": "https://www.kulturhaus-abraxas.de/spielplan/lagerfeuerabend-mit-maerchen-ueber-die-unsterbliche-liebe-mit-asa-mohr-20261002-2000-2200"
-      },
-      "label": "Kultur · Literatur",
-      "meta": [
-        "Freitag · 20:00",
-        "Märchenzelt am abraxas · 21 €"
-      ]
-    },
-    {
       "day": "sa",
       "category": "markt",
       "date": "2026-10-03",
@@ -180,28 +159,6 @@
       "meta": [
         "Samstag & Sonntag",
         "Rehling"
-      ]
-    },
-    {
-      "day": "fr",
-      "category": "musik",
-      "date": "2026-10-02",
-      "title": "Soho Song Slam · Soho Stage",
-      "description": "Sechs Acts aus der Region und darüber hinaus bekommen jeweils zehn Minuten; das Publikum schickt zwei ins Finale und kürt am Ende den Sieger.",
-      "url": "https://www.musikkantine.de/home/2026-10-02-soho-song-slam/",
-      "sourceLabel": "Originalquelle",
-      "favorite": {
-        "id": "soho-song-slam-2026-10-02",
-        "title": "Soho Song Slam · Soho Stage",
-        "dayLabel": "Freitag · 19:30",
-        "categoryLabel": "Musik",
-        "description": "Song-Slam mit sechs Acts, kurzen Sets und Publikumsfinale in der kleinen Soho Stage.",
-        "url": "https://www.musikkantine.de/home/2026-10-02-soho-song-slam/"
-      },
-      "label": "Musik",
-      "meta": [
-        "Freitag · 19:30",
-        "Soho Stage · ab 13 €"
       ]
     },
     {
@@ -468,9 +425,71 @@
       },
       "time": "10.10.",
       "badge": "Gastronomie"
+    },
+    {
+      "day": "",
+      "category": "kultur",
+      "date": "2026-10-09",
+      "title": "Irische Märchen · Märchenzelt",
+      "description": "Erzählabend mit irischen Märchen, Cider und Irish Folk im kleinen Märchenzelt – charaktervoll und deutlich abseits vom Standardprogramm.",
+      "url": "https://www.kulturhaus-abraxas.de/spielplan",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "irische-maerchen-abraxas-2026-10-09",
+        "title": "Irische Märchen · Märchenzelt",
+        "dayLabel": "Freitag, 09.10. · 20:00",
+        "categoryLabel": "Kultur · Literatur",
+        "description": "Irische Märchen und Irish Folk im Märchenzelt.",
+        "url": "https://www.kulturhaus-abraxas.de/spielplan"
+      },
+      "time": "09.10.",
+      "badge": "Literatur · Augsburg"
+    },
+    {
+      "day": "",
+      "category": "kultur",
+      "date": "2026-10-17",
+      "title": "Lara Ermer · Leicht entflammbar",
+      "description": "Kabarett und gesellschaftliche Beobachtungen in der kleinen Kresslesmühle – textorientiertes Format mit guter Nähe zu deinem Kulturprofil.",
+      "url": "https://www.kresslesmuehle.de/programm/",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "lara-ermer-kresslesmuehle-2026-10-17",
+        "title": "Lara Ermer · Leicht entflammbar",
+        "dayLabel": "Samstag, 17.10.",
+        "categoryLabel": "Kultur · Kabarett",
+        "description": "Textorientierter Kabarettabend in der Kresslesmühle.",
+        "url": "https://www.kresslesmuehle.de/programm/"
+      },
+      "time": "17.10.",
+      "badge": "Kabarett · Augsburg"
     }
   ],
   "restaurants": [
+    {
+      "id": "elisabeth-streetfood-augsburg",
+      "title": "Elisabeth Streetfood",
+      "type": "Vietnamesisch · Neueröffnung",
+      "description": "Neuer vietnamesischer Streetfood-Stand in der Viktualienhalle mit Pho, belegten Sandwiches und Salaten. Passt gut zu eurer Vorliebe für individuelle asiatische Adressen.",
+      "meta": [
+        "Stadtmarkt Augsburg",
+        "Neu seit September 2026"
+      ],
+      "url": "https://www.augsburg-city.de/shoppen-geniessen/neu-in-der-city/",
+      "badge": "Neu"
+    },
+    {
+      "id": "somo-augsburg",
+      "title": "SOMO Augsburg",
+      "type": "Focaccia · Café · Neueröffnung",
+      "description": "Neue Adresse nahe Rathausplatz mit handgemachten Focaccia, darunter Varianten mit Grillgemüse und Trüffel, dazu Espresso. Individuell, zentral und kulinarisch deutlich näher an eurem Profil.",
+      "meta": [
+        "Hinter der Metzg 7",
+        "Neu seit September 2026"
+      ],
+      "url": "https://www.augsburg-city.de/shoppen-geniessen/neu-in-der-city/",
+      "badge": "Neu"
+    },
     {
       "id": "amore-vintage-augsburg",
       "title": "Amore Vintage",

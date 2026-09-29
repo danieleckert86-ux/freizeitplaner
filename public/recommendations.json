@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "dataUpdated": "29.09.2026",
   "weekendRange": "Freitag, 2. bis Sonntag, 4. Oktober 2026",
   "weatherDays": [
@@ -468,6 +468,114 @@
       },
       "time": "10.10.",
       "badge": "Gastronomie"
+    }
+  ],
+  "restaurants": [
+    {
+      "id": "amore-vintage-augsburg",
+      "title": "Amore Vintage",
+      "type": "Café · Neueröffnung",
+      "description": "Café und Vintage-Fashion in einem: Kaffee, Matcha und Second-Hand mitten in der Innenstadt. Eine ungewöhnliche, individuelle Café-Idee statt klassischer Kette.",
+      "meta": [
+        "Philippine-Welser-Straße 5",
+        "Neu seit August 2026"
+      ],
+      "url": "https://www.augsburg-city.de/shoppen-geniessen/neu-in-der-city/",
+      "badge": "Neu"
+    },
+    {
+      "id": "hummels-tagesbar-augsburg",
+      "title": "Hummels Tagesbar",
+      "type": "Café · Tagesbar",
+      "description": "Morgens Kaffee und Frühstück, später herzhafte und süße Kleinigkeiten. Zentral, klein und deutlich näher an eurem Café-Geschmack als ein Standard-Frühstückslokal.",
+      "meta": [
+        "Philippine-Welser-Straße 14",
+        "Neu seit Juli 2026"
+      ],
+      "url": "https://www.augsburg-city.de/shoppen-geniessen/neu-in-der-city/",
+      "badge": "Neu"
+    },
+    {
+      "id": "grandhotel-cosmopolis-augsburg",
+      "title": "Grandhotel Cosmopolis",
+      "type": "Café · Kultur · vegetarisch",
+      "description": "Unkonventioneller Ort mit internationalem, sozialem und kulturellem Charakter. Besonders interessant für vegetarische Angebote und Veranstaltungen wie den Le Grand Brunch.",
+      "meta": [
+        "Augsburg Innenstadt",
+        "Individuell & kulturell"
+      ],
+      "url": "https://grandhotel-cosmopolis.org/",
+      "badge": "Passt gut"
+    }
+  ],
+  "cinema": [
+    {
+      "id": "luegen-ueber-meine-mutter-2026",
+      "title": "Lügen über meine Mutter",
+      "type": "Film",
+      "description": "Deutsches Drama von Aron Lehmann mit Rosalie Thomass und Golo Euler. Charakter- und Beziehungsgeschichte – damit näher an deinem Geschmack für menschliche Stoffe als typische Blockbuster.",
+      "meta": [
+        "Thalia Augsburg",
+        "Deutschland · 2026"
+      ],
+      "url": "https://thalia-augsburg.critic.de/kinoprogramm/",
+      "badge": "Gute Passung"
+    },
+    {
+      "id": "vaterland-2026",
+      "title": "Vaterland",
+      "type": "Film",
+      "description": "Aktueller Film von Paweł Pawlikowski mit Sandra Hüller. Ein anspruchsvollerer Arthouse-Kandidat im aktuellen Augsburger Programm.",
+      "meta": [
+        "Thalia / Liliom",
+        "2026"
+      ],
+      "url": "https://thalia-augsburg.critic.de/kinoprogramm/",
+      "badge": "Arthouse"
+    }
+  ],
+  "stream": [
+    {
+      "id": "wochenendrebellen-netflix-2026-09-24",
+      "title": "Wochenendrebellen",
+      "type": "Film",
+      "description": "Warmherzige deutsche Tragikomödie über Vater und Sohn. Die Mischung aus Humor, Familie und menschlicher Geschichte passt sehr gut zu Titeln wie Ziemlich beste Freunde, Green Book oder Little Miss Sunshine.",
+      "meta": [
+        "Netflix",
+        "Neu seit 24.09.2026"
+      ],
+      "url": "https://www.netflix.com/",
+      "badge": "Sehr gute Passung",
+      "platform": "Netflix",
+      "releaseDate": "2026-09-24"
+    },
+    {
+      "id": "toy-story-5-disney-2026-09-23",
+      "title": "Toy Story 5",
+      "type": "Film",
+      "description": "Pixars neuer Animationsfilm. Wegen deiner Vorliebe für Alles steht Kopf ein naheliegender Kandidat, wenn du wieder eine emotionale Animationsgeschichte möchtest.",
+      "meta": [
+        "Disney+",
+        "Neu seit 23.09.2026"
+      ],
+      "url": "https://www.disneyplus.com/",
+      "badge": "Gute Passung",
+      "platform": "Disney+",
+      "releaseDate": "2026-09-23"
+    },
+    {
+      "id": "einfach-mal-was-schoenes-netflix-2026-09-18",
+      "title": "Einfach mal was Schönes",
+      "type": "Film",
+      "description": "Deutsche Tragikomödie über Beziehungen, Familie und Lebensentwürfe. Sehr nah an deinem hinterlegten Filmgeschmack; falls du ihn bereits kennst, kann er später als gesehen markiert werden.",
+      "meta": [
+        "Netflix",
+        "Neu seit 18.09.2026"
+      ],
+      "url": "https://www.netflix.com/",
+      "badge": "Sehr gute Passung",
+      "platform": "Netflix",
+      "releaseDate": "2026-09-18"
     }
   ]
 }

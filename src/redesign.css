@@ -280,3 +280,28 @@ section[id],h1[id]{scroll-margin-top:85px}
    padding:5px 7px;
  }
 }
+
+/* Final mobile action alignment: same geometry for every recommendation card */
+@media(max-width:760px){
+ .card .item-actions,.card .card-actions,
+ .idea-card .item-actions,.tour-card .item-actions,.discovery-item .item-actions{
+   display:grid!important;
+   grid-template-columns:88px minmax(0,1fr) 82px!important;
+   column-gap:8px!important;
+   align-items:center!important;
+   width:100%!important;
+ }
+ .idea-card .item-actions{
+   margin-left:-39px!important;
+   width:calc(100% + 39px)!important;
+ }
+ .card .details-btn,.idea-card .details-btn,.tour-card .details-btn,.discovery-item .details-btn{
+   grid-column:1!important;width:88px!important;justify-content:center!important;
+ }
+ .card .info-link,.idea-card .info-link,.tour-card .info-link,.discovery-item .info-link{
+   grid-column:2!important;justify-self:start!important;padding-left:0!important;padding-right:0!important;
+ }
+ .card .favorite-btn,.idea-card .favorite-btn,.tour-card .favorite-btn,.discovery-item .favorite-btn{
+   grid-column:3!important;width:82px!important;justify-content:center!important;justify-self:end!important;margin:0!important;
+ }
+}

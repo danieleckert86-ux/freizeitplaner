@@ -99,7 +99,7 @@
       "category": "kultur",
       "date": "2026-10-02",
       "title": "Kreons Antigone · Sensemble",
-      "description": "KulturKreons Antigone · SensembleDeutschsprachige Erstaufführung eines modernen Politthrillers – Premiere im kleinen Sensemble Theater.",
+      "description": "Deutschsprachige Erstaufführung eines modernen Politthrillers – Premiere im kleinen Sensemble Theater.",
       "url": "https://sensemble.de/",
       "sourceLabel": "Originalquelle",
       "favorite": {
@@ -121,7 +121,7 @@
       "category": "kultur",
       "date": "2026-10-02",
       "title": "Lange Nacht der Demokratie · Rathaus",
-      "description": "KulturLange Nacht der Demokratie · RathausKostenloser Abend im Augsburger Rathaus mit vielfältigem Programm rund um Austausch und Demokratie.",
+      "description": "Kostenloser Abend im Augsburger Rathaus mit vielfältigem Programm rund um Austausch und Demokratie.",
       "url": "https://www.augsburg.de/veranstaltungen",
       "sourceLabel": "Originalquelle",
       "favorite": {
@@ -143,7 +143,7 @@
       "category": "markt",
       "date": "2026-10-02",
       "title": "Shopping Night · Augsburger Innenstadt",
-      "description": "StadtlebenShopping Night · Augsburger InnenstadtInnenstadtbummel am Freitagabend mit verlängerten Öffnungszeiten bis 22 Uhr – gut kombinierbar mit Essen oder Konzert.",
+      "description": "Innenstadtbummel am Freitagabend mit verlängerten Öffnungszeiten bis 22 Uhr – gut kombinierbar mit Essen oder Konzert.",
       "url": "https://www.augsburg-marketing.de/sponsoring-events/shopping-night/",
       "sourceLabel": "Originalquelle",
       "favorite": {
@@ -165,7 +165,7 @@
       "category": "markt",
       "date": "2026-10-03",
       "title": "Herbstmarkt · Schloss Scherneck",
-      "description": "MarktHerbstmarkt · Schloss ScherneckÜber 80 Aussteller, Garten, Lifestyle und kulinarische Angebote vor der Schlosskulisse mit Blick über die Lechebene.",
+      "description": "Über 80 Aussteller, Garten, Lifestyle und kulinarische Angebote vor der Schlosskulisse mit Blick über die Lechebene.",
       "url": "https://www.augsburg-tourismus.de/de/veranstaltungen",
       "sourceLabel": "Originalquelle",
       "favorite": {
@@ -187,7 +187,7 @@
       "category": "kultur",
       "date": "2026-10-03",
       "title": "Daniel He · Kresslesmühle",
-      "description": "MusikDaniel He · KresslesmühleKonzertabend in einer kleinen, persönlichen Kultur-Location – eine ruhigere Alternative zum Post-Punk in der Soho Stage.",
+      "description": "Konzertabend in einer kleinen, persönlichen Kultur-Location – eine ruhigere Alternative zum Post-Punk in der Soho Stage.",
       "url": "https://www.kresslesmuehle.de/programm/",
       "sourceLabel": "Originalquelle",
       "favorite": {
@@ -209,7 +209,7 @@
       "category": "markt",
       "date": "2026-10-04",
       "title": "Augsburger Herbstdult",
-      "description": "MarktAugsburger HerbstdultMehr als ein Kilometer Freiluftmarkt zwischen Jakobertor und Vogeltor – klassischer Sonntagsbummel mitten in Augsburg.",
+      "description": "Mehr als ein Kilometer Freiluftmarkt zwischen Jakobertor und Vogeltor – klassischer Sonntagsbummel mitten in Augsburg.",
       "url": "https://www.augsburg.de/veranstaltungen",
       "sourceLabel": "Originalquelle",
       "favorite": {
@@ -231,7 +231,7 @@
       "category": "kultur",
       "date": "2026-10-04",
       "title": "SYMBIOSIS · Kunsthalle im Glaspalast",
-      "description": "KunstSYMBIOSIS · Kunsthalle im GlaspalastSonntagsführung durch die aktuelle Ausstellung – kompakter Kulturbaustein für einen ruhigeren Nachmittag.",
+      "description": "Sonntagsführung durch die aktuelle Ausstellung – kompakter Kulturbaustein für einen ruhigeren Nachmittag.",
       "url": "https://kunstsammlungen-museen.augsburg.de/termine",
       "sourceLabel": "Originalquelle",
       "favorite": {
@@ -253,7 +253,7 @@
       "category": "wellness",
       "date": "2026-10-04",
       "title": "THERME Bad Wörishofen · Vitalbad & Saunen",
-      "description": "WellnessTHERME Bad Wörishofen · Vitalbad & SaunenWetterunabhängige Alternative mit großer textilfreier Saunalandschaft und umfangreichem Aufgussprogramm.",
+      "description": "Wetterunabhängige Alternative mit großer textilfreier Saunalandschaft und umfangreichem Aufgussprogramm.",
       "url": "https://www.therme-badwoerishofen.de/vitalbad-saunen/aufgussprogramm/",
       "sourceLabel": "Originalquelle",
       "favorite": {
@@ -376,8 +376,8 @@
   "discoveries": [
     {
       "day": "",
-      "category": "",
-      "date": "",
+      "category": "musik",
+      "date": "2026-10-08",
       "title": "yara · Soho Stage",
       "description": "Indie-Rock mit Coming-of-Age-Texten und kleiner Bühne.",
       "url": "https://www.musikkantine.de/home/2026-10-08-yara/",
@@ -395,8 +395,8 @@
     },
     {
       "day": "",
-      "category": "",
-      "date": "",
+      "category": "markt",
+      "date": "2026-10-10",
       "title": "PunkRockMarkt · Provino Club",
       "description": "DIY-Kunst, Marktstände, Tattoo-Artists und tagsüber Akustik-Livemusik.",
       "url": "https://www.neue-szene.de/node/93994",
@@ -414,8 +414,8 @@
     },
     {
       "day": "",
-      "category": "",
-      "date": "",
+      "category": "musik",
+      "date": "2026-10-10",
       "title": "Mar Malade · Kantine",
       "description": "Indie-Pop und Folk mit verspieltem, warmem Live-Charakter.",
       "url": "https://www.musikkantine.de/home/2026-10-10-mar-malade/",
@@ -433,8 +433,8 @@
     },
     {
       "day": "",
-      "category": "",
-      "date": "",
+      "category": "kultur",
+      "date": "2026-10-17",
       "title": "Offene Ateliers · Gaswerk",
       "description": "Künstler öffnen ihre Arbeitsräume; dazu Führungen und Kulturprogramm. Eintritt frei.",
       "url": "https://gaswerk-augsburg.de/offene-ateliers_okt_2026/",
@@ -452,8 +452,8 @@
     },
     {
       "day": "",
-      "category": "",
-      "date": "",
+      "category": "musik",
+      "date": "2026-10-18",
       "title": "Kapa Tult · Kantine",
       "description": "Textorientierter Indie mit rohem, intimem Gitarrensound und leichtfüßigen Hooks.",
       "url": "https://www.musikkantine.de/home/2026-10-18-kapa-tult/",

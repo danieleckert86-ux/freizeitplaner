@@ -194,3 +194,48 @@ section[id],h1[id]{scroll-margin-top:85px}
  .card .item-actions,.card .card-actions{margin-top:8px}
  .card .info-link,.card .favorite-btn,.card .details-btn{min-height:34px;padding:6px 9px;font-size:12px}
 }
+
+/* Compact secondary recommendation cards */
+.idea-card{padding:15px;gap:11px}
+.idea-card h3{font-size:17px;line-height:1.2;margin:2px 0 6px}
+.idea-card p{font-size:13.5px;line-height:1.4;margin:0 0 7px}
+.idea-card .idea-meta{font-size:12px;line-height:1.35}
+.idea-card .item-actions{padding-top:9px;gap:5px}
+
+.discovery-item{padding:14px;gap:11px}
+.discovery-item time{font-size:12px;padding:8px 7px;border-radius:12px}
+.discovery-item h3{font-size:18px;line-height:1.2;margin:7px 0 6px}
+.discovery-item p{font-size:13.5px;line-height:1.4;margin:0 0 8px}
+.discovery-item .item-actions{display:flex;align-items:center;flex-wrap:nowrap;gap:5px;margin-top:8px}
+.discovery-item .favorite-btn{margin-left:auto}
+
+.tour-card{padding:14px}
+.tour-card h3{font-size:18px;line-height:1.2;margin:7px 0 6px}
+.tour-card p{font-size:13.5px;line-height:1.4;margin:0 0 8px}
+.tour-card .tour-meta{font-size:12px;line-height:1.35}
+.tour-card .item-actions{display:flex;align-items:center;flex-wrap:nowrap;gap:5px;margin-top:8px}
+.tour-card .favorite-btn{margin-left:auto}
+
+.favorite-row{padding:13px 14px}
+.favorite-row h3{font-size:17px;line-height:1.2;margin:3px 0 5px}
+.favorite-row p{font-size:13px;line-height:1.4;margin:0 0 7px}
+
+@media(max-width:760px){
+ .idea-card{padding:13px;grid-template-columns:30px minmax(0,1fr);gap:9px}
+ .idea-visual{width:30px;height:34px;min-height:34px;border-radius:9px}
+ .idea-visual svg{width:18px}
+ .idea-card h3{font-size:16px}
+ .idea-card p{font-size:13px;line-height:1.36}
+ .idea-card .item-actions{margin-left:-39px;width:calc(100% + 39px);flex-wrap:nowrap;padding-top:7px}
+ .discovery-item{grid-template-columns:54px minmax(0,1fr);gap:10px;padding:13px}
+ .discovery-item h3{font-size:17px}
+ .discovery-item p{font-size:13px;line-height:1.36}
+ .discovery-item .item-actions,.tour-card .item-actions{flex-wrap:nowrap}
+ .discovery-item .info-link,.discovery-item .details-btn,.discovery-item .favorite-btn,
+ .tour-card .info-link,.tour-card .details-btn,.tour-card .favorite-btn,
+ .idea-card .info-link,.idea-card .details-btn,.idea-card .favorite-btn{font-size:11.5px;min-height:32px;padding:5px 7px}
+ .tour-card{padding:13px}
+ .tour-card h3{font-size:17px}
+ .tour-card p{font-size:13px;line-height:1.36}
+ .favorite-row{padding:12px}
+}

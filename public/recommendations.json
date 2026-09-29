@@ -1,0 +1,473 @@
+{
+  "schemaVersion": 1,
+  "dataUpdated": "28.09.2026",
+  "weekendRange": "Freitag, 2. bis Sonntag, 4. Oktober 2026",
+  "weatherDays": [
+    {
+      "date": "2026-10-02",
+      "label": "Freitag",
+      "display": "02.10."
+    },
+    {
+      "date": "2026-10-03",
+      "label": "Samstag",
+      "display": "03.10."
+    },
+    {
+      "date": "2026-10-04",
+      "label": "Sonntag",
+      "display": "04.10."
+    }
+  ],
+  "top": [
+    {
+      "day": "fr",
+      "category": "musik",
+      "date": "2026-10-02",
+      "title": "Breath Attack × Augsburger Kneipenchor · Kantine",
+      "description": "Urban Brass, Balkan Beats und Funk treffen auf vierstimmigen Kneipenchor – ein ungewöhnlicher gemeinsamer Augsburger Konzertabend.",
+      "url": "https://www.musikkantine.de/home/2026-10-02-breath-attack-meets-augsburger-kneipenchor/",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "breath-attack-kneipenchor-2026-10-02",
+        "title": "Breath Attack × Augsburger Kneipenchor",
+        "dayLabel": "Freitag",
+        "categoryLabel": "Musik",
+        "description": "Urban Brass, Balkan Beats und Funk treffen auf den Augsburger Kneipenchor.",
+        "url": "https://www.musikkantine.de/home/2026-10-02-breath-attack-meets-augsburger-kneipenchor/"
+      },
+      "dayText": "Freitag · 19:30",
+      "badge": "Musik",
+      "facts": [
+        "Kantine Augsburg",
+        "ab 18 €"
+      ],
+      "why": "Lokal, eigenständig und deutlich besonderer als ein gewöhnlicher Konzertabend."
+    },
+    {
+      "day": "sa",
+      "category": "musik",
+      "date": "2026-10-03",
+      "title": "TWIN NOIR · Soho Stage",
+      "description": "Berliner Post-Punk, Wave und EBM in einer kleinen Augsburger Location.",
+      "url": "https://www.musikkantine.de/home/2026-10-03-twin-noir/",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "twin-noir-augsburg-2026-10-03",
+        "title": "TWIN NOIR · Soho Stage",
+        "dayLabel": "Samstag",
+        "categoryLabel": "Musik",
+        "description": "Post-Punk, Wave und EBM in der Soho Stage Augsburg.",
+        "url": "https://www.musikkantine.de/home/2026-10-03-twin-noir/"
+      },
+      "dayText": "Samstag · 19:30",
+      "badge": "Musik",
+      "facts": [
+        "Soho Stage Augsburg",
+        "ab 25 €"
+      ],
+      "why": "Kleine Bühne, eigenständiger Sound und eine gute Alternative zu großen Standardkonzerten."
+    },
+    {
+      "day": "so",
+      "category": "musik",
+      "date": "2026-10-04",
+      "title": "Adjiri Odametey Solo · Kresslesmühle",
+      "description": "Afrikanische Weltmusik als intimer Soloabend in der Kresslesmühle.",
+      "url": "https://www.kresslesmuehle.de/programm/",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "adjiri-odametey-2026-10-04",
+        "title": "Adjiri Odametey Solo · Kresslesmühle",
+        "dayLabel": "Sonntag",
+        "categoryLabel": "Musik",
+        "description": "Afrikanische Weltmusik als Soloabend in der Kresslesmühle.",
+        "url": "https://www.kresslesmuehle.de/programm/"
+      },
+      "dayText": "Sonntag",
+      "badge": "Musik",
+      "facts": [
+        "Kresslesmühle Augsburg",
+        "Sonntag"
+      ],
+      "why": "Kleine Kultur-Location und musikalisch etwas außerhalb des Gewöhnlichen."
+    }
+  ],
+  "ideas": [
+    {
+      "day": "fr",
+      "category": "kultur",
+      "date": "2026-10-02",
+      "title": "Kreons Antigone · Sensemble",
+      "description": "KulturKreons Antigone · SensembleDeutschsprachige Erstaufführung eines modernen Politthrillers – Premiere im kleinen Sensemble Theater.",
+      "url": "https://sensemble.de/",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "kreons-antigone-2026-10-02",
+        "title": "Kreons Antigone · Sensemble",
+        "dayLabel": "Freitag · 20:00",
+        "categoryLabel": "Kultur",
+        "description": "Deutschsprachige Erstaufführung eines modernen Politthrillers – Premiere im kleinen Sensemble Theater.",
+        "url": "https://sensemble.de/"
+      },
+      "label": "Kultur",
+      "meta": [
+        "Freitag · 20:00",
+        "Augsburg"
+      ]
+    },
+    {
+      "day": "fr",
+      "category": "kultur",
+      "date": "2026-10-02",
+      "title": "Lange Nacht der Demokratie · Rathaus",
+      "description": "KulturLange Nacht der Demokratie · RathausKostenloser Abend im Augsburger Rathaus mit vielfältigem Programm rund um Austausch und Demokratie.",
+      "url": "https://www.augsburg.de/veranstaltungen",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "lange-nacht-demokratie-2026-10-02",
+        "title": "Lange Nacht der Demokratie · Rathaus",
+        "dayLabel": "Freitag · 18–22 Uhr",
+        "categoryLabel": "Kultur",
+        "description": "Kostenloser Abend im Augsburger Rathaus mit vielfältigem Programm rund um Austausch und Demokratie.",
+        "url": "https://www.augsburg.de/veranstaltungen"
+      },
+      "label": "Kultur",
+      "meta": [
+        "Freitag · 18–22 Uhr",
+        "Rathaus Augsburg"
+      ]
+    },
+    {
+      "day": "fr",
+      "category": "markt",
+      "date": "2026-10-02",
+      "title": "Shopping Night · Augsburger Innenstadt",
+      "description": "StadtlebenShopping Night · Augsburger InnenstadtInnenstadtbummel am Freitagabend mit verlängerten Öffnungszeiten bis 22 Uhr – gut kombinierbar mit Essen oder Konzert.",
+      "url": "https://www.augsburg-marketing.de/sponsoring-events/shopping-night/",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "shopping-night-augsburg-2026-10-02",
+        "title": "Shopping Night · Augsburger Innenstadt",
+        "dayLabel": "Freitag · bis 22 Uhr",
+        "categoryLabel": "Stadtleben",
+        "description": "Innenstadtbummel am Freitagabend mit verlängerten Öffnungszeiten bis 22 Uhr – gut kombinierbar mit Essen oder Konzert.",
+        "url": "https://www.augsburg-marketing.de/sponsoring-events/shopping-night/"
+      },
+      "label": "Stadtleben",
+      "meta": [
+        "Freitag · bis 22 Uhr",
+        "Innenstadt Augsburg"
+      ]
+    },
+    {
+      "day": "sa",
+      "category": "markt",
+      "date": "2026-10-03",
+      "title": "Herbstmarkt · Schloss Scherneck",
+      "description": "MarktHerbstmarkt · Schloss ScherneckÜber 80 Aussteller, Garten, Lifestyle und kulinarische Angebote vor der Schlosskulisse mit Blick über die Lechebene.",
+      "url": "https://www.augsburg-tourismus.de/de/veranstaltungen",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "herbstmarkt-scherneck-2026-10-03",
+        "title": "Herbstmarkt · Schloss Scherneck",
+        "dayLabel": "Samstag & Sonntag",
+        "categoryLabel": "Markt",
+        "description": "Über 80 Aussteller, Garten, Lifestyle und kulinarische Angebote vor der Schlosskulisse mit Blick über die Lechebene.",
+        "url": "https://www.augsburg-tourismus.de/de/veranstaltungen"
+      },
+      "label": "Markt",
+      "meta": [
+        "Samstag & Sonntag",
+        "Rehling"
+      ]
+    },
+    {
+      "day": "sa",
+      "category": "kultur",
+      "date": "2026-10-03",
+      "title": "Daniel He · Kresslesmühle",
+      "description": "MusikDaniel He · KresslesmühleKonzertabend in einer kleinen, persönlichen Kultur-Location – eine ruhigere Alternative zum Post-Punk in der Soho Stage.",
+      "url": "https://www.kresslesmuehle.de/programm/",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "daniel-he-kresslesmuehle-2026-10-03",
+        "title": "Daniel He · Kresslesmühle",
+        "dayLabel": "Samstag",
+        "categoryLabel": "Musik",
+        "description": "Konzertabend in einer kleinen, persönlichen Kultur-Location – eine ruhigere Alternative zum Post-Punk in der Soho Stage.",
+        "url": "https://www.kresslesmuehle.de/programm/"
+      },
+      "label": "Musik",
+      "meta": [
+        "Samstag",
+        "Kresslesmühle Augsburg"
+      ]
+    },
+    {
+      "day": "so",
+      "category": "markt",
+      "date": "2026-10-04",
+      "title": "Augsburger Herbstdult",
+      "description": "MarktAugsburger HerbstdultMehr als ein Kilometer Freiluftmarkt zwischen Jakobertor und Vogeltor – klassischer Sonntagsbummel mitten in Augsburg.",
+      "url": "https://www.augsburg.de/veranstaltungen",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "herbstdult-augsburg-2026-10-04",
+        "title": "Augsburger Herbstdult",
+        "dayLabel": "Sonntag · 10–19 Uhr",
+        "categoryLabel": "Markt",
+        "description": "Mehr als ein Kilometer Freiluftmarkt zwischen Jakobertor und Vogeltor – klassischer Sonntagsbummel mitten in Augsburg.",
+        "url": "https://www.augsburg.de/veranstaltungen"
+      },
+      "label": "Markt",
+      "meta": [
+        "Sonntag · 10–19 Uhr",
+        "Jakobervorstadt"
+      ]
+    },
+    {
+      "day": "so",
+      "category": "kultur",
+      "date": "2026-10-04",
+      "title": "SYMBIOSIS · Kunsthalle im Glaspalast",
+      "description": "KunstSYMBIOSIS · Kunsthalle im GlaspalastSonntagsführung durch die aktuelle Ausstellung – kompakter Kulturbaustein für einen ruhigeren Nachmittag.",
+      "url": "https://kunstsammlungen-museen.augsburg.de/termine",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "symbiosis-glaspalast-2026-10-04",
+        "title": "SYMBIOSIS · Kunsthalle im Glaspalast",
+        "dayLabel": "Sonntag · 14:00",
+        "categoryLabel": "Kunst",
+        "description": "Sonntagsführung durch die aktuelle Ausstellung – kompakter Kulturbaustein für einen ruhigeren Nachmittag.",
+        "url": "https://kunstsammlungen-museen.augsburg.de/termine"
+      },
+      "label": "Kunst",
+      "meta": [
+        "Sonntag · 14:00",
+        "Glaspalast Augsburg"
+      ]
+    },
+    {
+      "day": "so",
+      "category": "wellness",
+      "date": "2026-10-04",
+      "title": "THERME Bad Wörishofen · Vitalbad & Saunen",
+      "description": "WellnessTHERME Bad Wörishofen · Vitalbad & SaunenWetterunabhängige Alternative mit großer textilfreier Saunalandschaft und umfangreichem Aufgussprogramm.",
+      "url": "https://www.therme-badwoerishofen.de/vitalbad-saunen/aufgussprogramm/",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "therme-bad-woerishofen-2026-10-04",
+        "title": "THERME Bad Wörishofen · Vitalbad & Saunen",
+        "dayLabel": "Sonntag",
+        "categoryLabel": "Wellness",
+        "description": "Wetterunabhängige Alternative mit großer textilfreier Saunalandschaft und umfangreichem Aufgussprogramm.",
+        "url": "https://www.therme-badwoerishofen.de/vitalbad-saunen/aufgussprogramm/"
+      },
+      "label": "Wellness",
+      "meta": [
+        "Sonntag",
+        "Bad Wörishofen"
+      ]
+    }
+  ],
+  "hikes": [
+    {
+      "day": "sa",
+      "category": "wandern",
+      "date": "2026-10-03",
+      "title": "Alpspitzrunde mit Wasserfall · Pfronten/Nesselwang",
+      "description": "Abwechslungsreiche Runde mit Wasserfall, Alpen und Aussichtspunkten. Samstag ist aktuell überwiegend trocken und wolkig prognostiziert.",
+      "url": "https://www.allgaeu.de/touren/alpspitzrunde-mit-wasserfall",
+      "sourceLabel": "Tour öffnen",
+      "favorite": {
+        "id": "alpspitzrunde-wasserfall-2026-10-03",
+        "title": "Alpspitzrunde mit Wasserfall",
+        "dayLabel": "Samstag",
+        "categoryLabel": "Wandern",
+        "description": "10,2 km, 762 hm, Wasserfall und Alpenpanorama.",
+        "url": "https://www.allgaeu.de/touren/alpspitzrunde-mit-wasserfall"
+      },
+      "label": "Wandern",
+      "metaLabel": "Rundtour",
+      "meta": [
+        "10,2 km",
+        "762 hm",
+        "ca. 4:15 h",
+        "Allgäu"
+      ]
+    },
+    {
+      "day": "sa",
+      "category": "wandern",
+      "date": "2026-10-03",
+      "title": "Bad Hindelang – Hinterstein · Zipfelsfall",
+      "description": "Wasserreiche, deutlich leichtere Alternative entlang der Ostrach zum Zipfelsfall; Samstag ist dort aktuell trocken prognostiziert.",
+      "url": "https://www.allgaeu.de/draussen/wandern/halbtages-tagestouren",
+      "sourceLabel": "Tour öffnen",
+      "favorite": {
+        "id": "hindelang-hinterstein-zipfelsfall-2026-10-03",
+        "title": "Bad Hindelang – Hinterstein · Zipfelsfall",
+        "dayLabel": "Samstag",
+        "categoryLabel": "Wandern",
+        "description": "13,7 km, 273 hm, leichte Tour zum Zipfelsfall.",
+        "url": "https://www.allgaeu.de/draussen/wandern/halbtages-tagestouren"
+      },
+      "label": "Wandern",
+      "metaLabel": "leichter",
+      "meta": [
+        "13,7 km",
+        "273 hm",
+        "ca. 4 h",
+        "Allgäu"
+      ]
+    }
+  ],
+  "bikes": [
+    {
+      "day": "so",
+      "category": "fahrrad",
+      "date": "2026-10-04",
+      "title": "Ein Fluss in neuem Gewand · Wertach",
+      "description": "Dreistündige geführte Radtour zur Revitalisierung der Wertach – lokal und informativer als eine gewöhnliche Trainingsrunde.",
+      "url": "https://www.umweltbildungszentrum-augsburg.de/willkommen/8/",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "wertach-radtour-2026-10-04",
+        "title": "Ein Fluss in neuem Gewand · Wertach",
+        "dayLabel": "Sonntag",
+        "categoryLabel": "Fahrrad",
+        "description": "Geführte Radtour zur Revitalisierung der Wertach.",
+        "url": "https://www.umweltbildungszentrum-augsburg.de/willkommen/8/"
+      },
+      "label": "Radtour",
+      "metaLabel": "geführt",
+      "meta": [
+        "10–13 Uhr",
+        "Augsburg",
+        "Wertach"
+      ]
+    },
+    {
+      "day": "so",
+      "category": "fahrrad",
+      "date": "2026-10-04",
+      "title": "Holzwinkel- & Weldenbahn-Runde",
+      "description": "Entspannte Runde auf der ehemaligen Weldenbahntrasse durch Wälder und Felder nach Welden und zurück.",
+      "url": "https://www.avv-augsburg.de/service/freizeit/outdoor-aktivitaeten/fahrradtouren/holzwinkel-und-weldenbahnstrecke",
+      "sourceLabel": "Tour öffnen",
+      "favorite": {
+        "id": "holzwinkel-weldenbahn-2026-10-04",
+        "title": "Holzwinkel- & Weldenbahn-Runde",
+        "dayLabel": "Sonntag",
+        "categoryLabel": "Fahrrad",
+        "description": "Rund 40 km und 120 hm ab Neusäß.",
+        "url": "https://www.avv-augsburg.de/service/freizeit/outdoor-aktivitaeten/fahrradtouren/holzwinkel-und-weldenbahnstrecke"
+      },
+      "label": "Radtour",
+      "metaLabel": "wenig Steigung",
+      "meta": [
+        "rund 40 km",
+        "120 hm",
+        "ab Neusäß"
+      ]
+    }
+  ],
+  "discoveries": [
+    {
+      "day": "",
+      "category": "",
+      "date": "",
+      "title": "yara · Soho Stage",
+      "description": "Indie-Rock mit Coming-of-Age-Texten und kleiner Bühne.",
+      "url": "https://www.musikkantine.de/home/2026-10-08-yara/",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "yara-augsburg-2026-10-08",
+        "title": "yara · Soho Stage",
+        "dayLabel": "Donnerstag, 08.10.",
+        "categoryLabel": "Musik",
+        "description": "Indie-Rock mit Coming-of-Age-Texten in der Soho Stage.",
+        "url": "https://www.musikkantine.de/home/2026-10-08-yara/"
+      },
+      "time": "08.10.",
+      "badge": "Musik · Augsburg"
+    },
+    {
+      "day": "",
+      "category": "",
+      "date": "",
+      "title": "PunkRockMarkt · Provino Club",
+      "description": "DIY-Kunst, Marktstände, Tattoo-Artists und tagsüber Akustik-Livemusik.",
+      "url": "https://www.neue-szene.de/node/93994",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "punkrockmarkt-augsburg-2026-10-10",
+        "title": "PunkRockMarkt · Provino Club",
+        "dayLabel": "Samstag, 10.10.",
+        "categoryLabel": "Markt/Kultur",
+        "description": "DIY-Kunst, Marktstände und Akustik-Livemusik im Provino Club.",
+        "url": "https://www.neue-szene.de/node/93994"
+      },
+      "time": "10.10.",
+      "badge": "Markt × Musik · Augsburg"
+    },
+    {
+      "day": "",
+      "category": "",
+      "date": "",
+      "title": "Mar Malade · Kantine",
+      "description": "Indie-Pop und Folk mit verspieltem, warmem Live-Charakter.",
+      "url": "https://www.musikkantine.de/home/2026-10-10-mar-malade/",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "mar-malade-augsburg-2026-10-10",
+        "title": "Mar Malade · Kantine",
+        "dayLabel": "Samstag, 10.10.",
+        "categoryLabel": "Musik",
+        "description": "Indie-Pop und Folk in der Kantine Augsburg.",
+        "url": "https://www.musikkantine.de/home/2026-10-10-mar-malade/"
+      },
+      "time": "10.10.",
+      "badge": "Musik · Augsburg"
+    },
+    {
+      "day": "",
+      "category": "",
+      "date": "",
+      "title": "Offene Ateliers · Gaswerk",
+      "description": "Künstler öffnen ihre Arbeitsräume; dazu Führungen und Kulturprogramm. Eintritt frei.",
+      "url": "https://gaswerk-augsburg.de/offene-ateliers_okt_2026/",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "offene-ateliers-gaswerk-2026-10-17",
+        "title": "Offene Ateliers · Gaswerk",
+        "dayLabel": "17.–18.10.",
+        "categoryLabel": "Kultur",
+        "description": "Offene Künstlerateliers, Führungen und Kulturprogramm im Gaswerk.",
+        "url": "https://gaswerk-augsburg.de/offene-ateliers_okt_2026/"
+      },
+      "time": "17.–18.10.",
+      "badge": "Kunst · Augsburg"
+    },
+    {
+      "day": "",
+      "category": "",
+      "date": "",
+      "title": "Kapa Tult · Kantine",
+      "description": "Textorientierter Indie mit rohem, intimem Gitarrensound und leichtfüßigen Hooks.",
+      "url": "https://www.musikkantine.de/home/2026-10-18-kapa-tult/",
+      "sourceLabel": "Originalquelle",
+      "favorite": {
+        "id": "kapa-tult-augsburg-2026-10-18",
+        "title": "Kapa Tult · Kantine",
+        "dayLabel": "Sonntag, 18.10.",
+        "categoryLabel": "Musik",
+        "description": "Textorientierter Indie in der Kantine Augsburg.",
+        "url": "https://www.musikkantine.de/home/2026-10-18-kapa-tult/"
+      },
+      "time": "18.10.",
+      "badge": "Musik · Augsburg"
+    }
+  ]
+}

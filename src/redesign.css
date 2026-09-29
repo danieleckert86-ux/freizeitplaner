@@ -132,3 +132,30 @@ section[id],h1[id]{scroll-margin-top:85px}
 @media(max-width:760px){.idea-card .item-actions{margin-left:0}.idea-card .item-actions .favorite-btn{margin-left:0}}
 
 @media(max-width:760px){.weather-day{padding:14px 11px}.weather-icon{width:27px;height:27px;flex-basis:27px}.weather-icon svg{width:27px;height:27px}.weather-temp{font-size:20px}.weather-low{font-size:10px}.weather-summary{margin-top:8px;gap:2px 6px}.weather-rain{font-size:10.5px}.weather-hint{align-items:flex-start;flex-direction:column;gap:3px}.weather-hint small{white-space:normal}}
+
+.independent-section{margin-top:46px;scroll-margin-top:24px}
+.lifestyle-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.lifestyle-card{display:flex;flex-direction:column;min-width:0;padding:20px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
+.lifestyle-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.lifestyle-type{font-size:12px;font-weight:800;color:#52637d;text-transform:uppercase;letter-spacing:.04em}
+.lifestyle-badge{font-size:11px;font-weight:800;color:#3157c8;background:#edf2ff;border-radius:999px;padding:6px 9px;white-space:nowrap}
+.lifestyle-card h3{margin:0;font-size:20px;line-height:1.18}
+.lifestyle-card p{margin:10px 0 14px;color:var(--muted);line-height:1.55}
+.lifestyle-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:auto;margin-bottom:15px}
+.lifestyle-meta span{font-size:12px;font-weight:650;background:#f3f6fb;color:#596a83;border-radius:999px;padding:6px 9px}
+.lifestyle-card>.info-link{align-self:flex-start}
+.media-switch{display:inline-flex;gap:5px;padding:5px;margin:0 0 18px;background:#eef2f8;border-radius:14px}
+.media-tab{border:0;background:transparent;color:#64738b;font:inherit;font-weight:800;padding:10px 20px;border-radius:10px;cursor:pointer}
+.media-tab.active{background:#17233d;color:#fff;box-shadow:0 4px 12px #17233d1f}
+.media-panel[hidden]{display:none}
+.media-note{margin:-4px 0 15px;color:var(--muted);font-size:13px}
+@media(max-width:760px){
+  .lifestyle-grid{grid-template-columns:1fr}
+  .independent-section{margin-top:38px}
+  .lifestyle-card{padding:17px}
+  .section-nav{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .section-nav::-webkit-scrollbar{display:none}
+  .section-nav a{flex:0 0 auto;white-space:nowrap}
+  .media-switch{display:flex;width:100%}
+  .media-tab{flex:1}
+}

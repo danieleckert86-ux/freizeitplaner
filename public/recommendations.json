@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "dataUpdated": "29.09.2026",
+  "dataUpdated": "30.09.2026",
   "weekendRange": "Freitag, 2. bis Sonntag, 4. Oktober 2026",
   "weatherDays": [
     {
@@ -491,30 +491,6 @@
       "badge": "Neu"
     },
     {
-      "id": "amore-vintage-augsburg",
-      "title": "Amore Vintage",
-      "type": "Café · Neueröffnung",
-      "description": "Café und Vintage-Fashion in einem: Kaffee, Matcha und Second-Hand mitten in der Innenstadt. Eine ungewöhnliche, individuelle Café-Idee statt klassischer Kette.",
-      "meta": [
-        "Philippine-Welser-Straße 5",
-        "Neu seit August 2026"
-      ],
-      "url": "https://www.augsburg-city.de/shoppen-geniessen/neu-in-der-city/",
-      "badge": "Neu"
-    },
-    {
-      "id": "hummels-tagesbar-augsburg",
-      "title": "Hummels Tagesbar",
-      "type": "Café · Tagesbar",
-      "description": "Morgens Kaffee und Frühstück, später herzhafte und süße Kleinigkeiten. Zentral, klein und deutlich näher an eurem Café-Geschmack als ein Standard-Frühstückslokal.",
-      "meta": [
-        "Philippine-Welser-Straße 14",
-        "Neu seit Juli 2026"
-      ],
-      "url": "https://www.augsburg-city.de/shoppen-geniessen/neu-in-der-city/",
-      "badge": "Neu"
-    },
-    {
       "id": "grandhotel-cosmopolis-augsburg",
       "title": "Grandhotel Cosmopolis",
       "type": "Café · Kultur · vegetarisch",
@@ -565,19 +541,19 @@
       "badge": "Gute Passung"
     },
     {
-      "id": "vaterland-2026",
-      "title": "Vaterland",
+      "id": "das-gewisse-etwas-2026",
+      "title": "Das gewisse Etwas",
       "type": "Film",
-      "description": "Aktueller Film von Paweł Pawlikowski mit Sandra Hüller. Ein anspruchsvollerer Arthouse-Kandidat im aktuellen Augsburger Programm.",
+      "description": "Warmherzige deutsche Komödie über einen Vater und seinen Sohn, die nach einem Juwelenraub mit einer Reisegruppe junger Menschen mit Beeinträchtigung unterwegs sind. Humor, große Gefühle und ungewöhnliche Begegnungen passen gut zu deinem charakterorientierten Filmgeschmack.",
       "meta": [
-        "Thalia / Liliom",
-        "2026"
+        "CinemaxX Augsburg",
+        "Deutschland · 2026"
       ],
-      "url": "https://thalia-augsburg.critic.de/kinoprogramm/",
-      "badge": "Arthouse",
-      "imdbRating": 7.2,
-      "imdbUrl": "https://www.imdb.com/de/title/tt37304295/",
-      "trailerUrl": "https://trailer.de/trailer/vaterland-trailer"
+      "url": "https://www.cinemaxx.de/kinoprogramm/augsburg/jetzt-im-kino",
+      "badge": "Gute Passung",
+      "imdbRating": 6.7,
+      "imdbUrl": "https://www.imdb.com/de/title/tt37800509/",
+      "trailerUrl": "https://www.youtube.com/watch?v=EmU-mGLAW4k"
     }
   ],
   "stream": [
@@ -599,40 +575,6 @@
       "trailerUrl": "https://www.youtube.com/watch?v=Bg7etDgdhe4"
     },
     {
-      "id": "toy-story-5-disney-2026-09-23",
-      "title": "Toy Story 5",
-      "type": "Film",
-      "description": "Pixars neuer Animationsfilm. Wegen deiner Vorliebe für Alles steht Kopf ein naheliegender Kandidat, wenn du wieder eine emotionale Animationsgeschichte möchtest.",
-      "meta": [
-        "Disney+",
-        "Neu seit 23.09.2026"
-      ],
-      "url": "https://www.disneyplus.com/",
-      "badge": "Gute Passung",
-      "platform": "Disney+",
-      "releaseDate": "2026-09-23",
-      "imdbRating": 7.4,
-      "imdbUrl": "https://www.imdb.com/de/title/tt29355505/",
-      "trailerUrl": "https://www.youtube.com/watch?v=GlHL_3smXSE"
-    },
-    {
-      "id": "einfach-mal-was-schoenes-netflix-2026-09-18",
-      "title": "Einfach mal was Schönes",
-      "type": "Film",
-      "description": "Deutsche Tragikomödie über Beziehungen, Familie und Lebensentwürfe. Sehr nah an deinem hinterlegten Filmgeschmack; falls du ihn bereits kennst, kann er später als gesehen markiert werden.",
-      "meta": [
-        "Netflix",
-        "Neu seit 18.09.2026"
-      ],
-      "url": "https://www.netflix.com/",
-      "badge": "Sehr gute Passung",
-      "platform": "Netflix",
-      "releaseDate": "2026-09-18",
-      "imdbRating": 6.3,
-      "imdbUrl": "https://www.imdb.com/de/title/tt21335690/",
-      "trailerUrl": "https://www.youtube.com/watch?v=cTehT-9Sqqw"
-    },
-    {
       "id": "blackbird-ard-2026-09-30",
       "title": "Blackbird",
       "type": "Film",
@@ -649,37 +591,37 @@
       "trailerUrl": "https://www.ardmediathek.de/video/blackbird/trailer-blackbird/ard/Y3JpZDovL2FyZC5kZS92aWRlby0xNzExOQ"
     },
     {
-      "id": "eine-million-minuten-rtlplus-2026-09-02",
-      "title": "Eine Million Minuten",
-      "type": "Film",
-      "description": "Deutsches Familiendrama mit Karoline Herfurth und Tom Schilling über die Frage, was im Leben wirklich wichtig ist. Inhaltlich sehr nah an deinen warmen, menschlichen Filmfavoriten.",
+      "id": "babylon-berlin-s5-ard-2026-09-10",
+      "title": "Babylon Berlin · Staffel 5",
+      "type": "Serie",
+      "description": "Finale Staffel der vielfach ausgezeichneten deutschen Serie um Gereon Rath und Charlotte Ritter im Berlin des Jahres 1933. Starke Figuren, aufwendige Inszenierung und gesellschaftliche Konflikte – ein hochwertiger Serientipp mit deutlich mehr Charaktertiefe als klassische Krimikost.",
       "meta": [
-        "RTL+",
-        "Neu seit 02.09.2026"
+        "ARD Mediathek",
+        "Neu seit 10.09.2026"
       ],
-      "url": "https://www.rtlplus.com/",
-      "badge": "Gute Passung",
-      "platform": "RTL+",
-      "releaseDate": "2026-09-02",
-      "imdbRating": 6.5,
-      "imdbUrl": "https://www.imdb.com/de/title/tt28618089/"
+      "url": "https://www.ardmediathek.de/serie/babylon-berlin/staffel-5/Y3JpZDovL2Rhc2Vyc3RlLmRlL2JhYnlsb24tYmVybGlu/5",
+      "badge": "Sehr gute Passung",
+      "platform": "ARD Mediathek",
+      "releaseDate": "2026-09-10",
+      "imdbRating": 8.4,
+      "imdbUrl": "https://www.imdb.com/de/title/tt4378376/",
+      "trailerUrl": "https://www.youtube.com/watch?v=ZrMnQizCoOY"
     },
     {
-      "id": "top-gun-maverick-rtlplus-2026-09-27",
-      "title": "Top Gun: Maverick",
-      "type": "Film",
-      "description": "Hoch bewerteter moderner Blockbuster mit viel Tempo, aber auch einer ausgeprägten Figuren- und Mentorengeschichte. Eine gute Ergänzung zu deinen sonst stärker charakterorientierten Favoriten.",
+      "id": "brilliant-minds-s2-rtlplus-2026-09-10",
+      "title": "Brilliant Minds · Staffel 2",
+      "type": "Serie",
+      "description": "Medizinisches Drama um den unkonventionellen Neurologen Dr. Oliver Wolf und sein Team. Die Verbindung aus ungewöhnlichen Fällen, starken Figuren und persönlichen Konflikten passt besonders gut zu deiner Vorliebe für Dr. House.",
       "meta": [
         "RTL+",
-        "Neu seit 27.09.2026"
+        "Neu seit 10.09.2026"
       ],
       "url": "https://www.rtlplus.com/",
-      "badge": "Blockbuster-Tipp",
+      "badge": "Sehr gute Passung",
       "platform": "RTL+",
-      "releaseDate": "2026-09-27",
-      "imdbRating": 8.2,
-      "imdbUrl": "https://www.imdb.com/de/title/tt1745960/",
-      "trailerUrl": "https://www.youtube.com/watch?v=3hO--XhlsfU"
+      "releaseDate": "2026-09-10",
+      "imdbRating": 7.2,
+      "imdbUrl": "https://www.imdb.com/de/title/tt26448526/"
     }
   ]
 }

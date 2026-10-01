@@ -195,10 +195,24 @@ async function loadHiddenRecommendationIds() {
 }
 
 async function loadRecommendationData() {
-  const response = await fetch('/recommendations.json', { cache: 'no-store' });
-  if (!response.ok) throw new Error('Recommendation data could not be loaded');
-  const data = await response.json() as RecommendationData;
-  if (![1, 2].includes(data.schemaVersion)) throw new Error('Unsupported recommendation schema');
+  let data: RecommendationData;
+
+  const { data: recommendationRow, error: recommendationError } = await supabase
+    .from('recommendation_data')
+    .select('payload')
+    .eq('id', 'current')
+    .maybeSingle();
+
+  if (!recommendationError && recommendationRow?.payload) {
+    data = recommendationRow.payload as RecommendationData;
+  } else {
+    console.warn('Supabase recommendation data unavailable; using JSON fallback', recommendationError);
+    const response = await fetch('/recommendations.json', { cache: 'no-store' });
+    if (!response.ok) throw new Error('Recommendation data could not be loaded');
+    data = await response.json() as RecommendationData;
+  }
+
+  if (data.schemaVersion !== 2) throw new Error('Unsupported recommendation schema');
   const [hiddenIds, ratings] = await Promise.all([loadHiddenRecommendationIds(), loadRecommendationRatings()]);
   renderRecommendationData(data, hiddenIds);
   wireRatingButtons(ratings);

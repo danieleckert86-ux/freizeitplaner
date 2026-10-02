@@ -78,3 +78,37 @@
 #personalPlanner .planner-tools>.planner-box>details>summary{font-size:1rem;padding:6px 0}
 .weekly-check li{line-height:1.7;padding:8px 0}
 @media(max-width:700px){.unified-idea-grid{grid-template-columns:1fr}#personalPlanner .composer-preferences .planner-form{grid-template-columns:1fr}.planner-tools>.planner-box{padding:14px 16px}.day-composer>.routine-heading{align-items:start}}
+
+/* Give each secondary tool a purpose, a consistent disclosure and a clear home. */
+#personalPlanner .planner-next{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:24px;padding:24px}
+#personalPlanner .planner-next h2{font-size:1.35rem;margin:6px 0 16px;color:#fff}
+.next-kicker{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:#b6c8e6;font-weight:700}
+#personalPlanner .next-activity{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline;margin:0 0 8px}
+#personalPlanner .next-activity strong{font-size:1.1rem}
+.next-activity span{font-size:.9rem;color:#d6e2f4}
+#personalPlanner .planner-next .next-help{font-size:.85rem;color:#c6d4e9;max-width:650px;margin-bottom:0}
+.weekly-check-start{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 20px;margin-bottom:30px;border:1px solid #dce3ee;border-radius:14px;background:#edf3fb}
+.weekly-check-start p{font-size:.9rem;line-height:1.5;color:#53647d;margin:5px 0 0}
+#personalPlanner .weekly-check-start button{flex-shrink:0;background:#fff;font-weight:600}
+.tool-group{margin:0 0 26px;min-width:0}
+#personalPlanner .tool-group>header{margin:0 0 12px;padding:0 2px}
+#personalPlanner .tool-group>header h2{font-size:1.1rem;margin:0 0 5px}
+#personalPlanner .tool-group>header p{font-size:.875rem;line-height:1.5;color:#63728a;margin:0}
+.tool-group-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:12px}
+#personalPlanner .tool-group .planner-box{padding:0;margin:0;overflow:hidden;border-radius:14px}
+#personalPlanner .tool-group .planner-box>details{padding:0 20px;margin:0}
+#personalPlanner .tool-group .planner-box>details>summary{display:flex;gap:14px;align-items:center;padding:20px 0!important;font-size:1rem;list-style:none;min-height:88px;box-sizing:border-box}
+#personalPlanner .tool-group summary::-webkit-details-marker{display:none}
+.tool-summary-copy{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+#personalPlanner .tool-summary-copy strong{font-size:.975rem;line-height:1.4}
+.tool-summary-copy small{font-size:.825rem;font-weight:400;line-height:1.5;color:#63728a}
+.tool-summary-badge{font-size:.75rem;font-weight:600;padding:5px 8px;border-radius:7px;background:#edf3fb;color:#3260a0;white-space:nowrap}
+.tool-summary-toggle{display:flex;align-items:center;justify-content:center;width:28px;height:28px;flex:0 0 28px;border-radius:50%;background:#f0f4fa;color:#49668b;font-size:1.25rem;font-weight:400;transition:transform .15s}
+#personalPlanner .tool-group details[open]>.tool-summary-toggle{transform:rotate(45deg)}
+#personalPlanner .tool-group details[open]>summary .tool-summary-toggle{transform:rotate(45deg)}
+#personalPlanner .tool-group .planner-box>details[open]{padding-bottom:20px}
+#personalPlanner .tool-group .planner-box>details[open]>summary{border-bottom:1px solid #e3e9f2;margin-bottom:18px}
+#personalPlanner .tool-group .planner-box>details>summary:focus-visible{outline:3px solid #2366d1;outline-offset:-3px;border-radius:10px}
+#personalPlanner .planner-settings{padding-top:20px;border-top:1px solid #dce3ee}
+@media(max-width:850px){.tool-group-grid{grid-template-columns:1fr}#personalPlanner .planner-next{grid-template-columns:1fr;gap:18px}#personalPlanner .planner-next .planner-actions{display:flex}#personalPlanner .planner-next .planner-actions button{width:100%}.weekly-check-start{align-items:start;flex-direction:column;gap:12px}#personalPlanner .weekly-check-start button{width:100%}}
+@media(max-width:480px){#personalPlanner .tool-group .planner-box>details{padding:0 16px}#personalPlanner .tool-group .planner-box>details>summary{flex-wrap:nowrap;gap:10px}.tool-summary-badge{display:none}#personalPlanner .planner-next{padding:20px}.tool-summary-copy small{font-size:.8rem}}

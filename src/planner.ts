@@ -4,7 +4,7 @@ type Appointment = { id: string; title: string; date: string; start: string; end
 type Slot = { id: string; date: string; start: string; end: string; energy: string; mood: string; effort: string };
 type Entry = { id: string; title: string; url: string; date: string; start: string; end: string; slotId: string; status: string; createdAt: string; proposedAt: string; organizedAt: string; doneAt: string; note: string; next: string };
 type State = { version: 1; appointments: Appointment[]; slots: Slot[]; entries: Entry[]; checks: string[] };
-type Idea = { title: string; url: string; next: string; outdoor: boolean };
+type Idea = { title: string; url: string; next: string; outdoor: boolean; minutes?: number };
 const KEY = 'freizeitplaner.personal.v1';
 const statuses = ['Idee gespeichert', 'Vorgeschlagen', 'Offen', 'Zugesagt', 'Abgelehnt', 'Organisiert', 'Gemacht'];
 const e = (s: string) => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
@@ -59,7 +59,7 @@ export function initPlanner() {
   function ideas(s: Slot): Idea[] {
     const wet = (rain[s.date] ?? 0) >= 50;
     const pool: Idea[] = [];
-    const routine = (title: string, next: string, outdoor = false) => pool.push({title, next, outdoor, url:''});
+    const routine = (title: string, next: string, outdoor = false) => pool.push({title, next, outdoor, url:'', minutes: title.includes('Filmabend') ? 120 : title.includes('schwimmen') ? 90 : title.includes('essen') ? 90 : title.includes('Spaziergang') ? 45 : 60});
     if (s.mood === 'culture') routine('Ein gemeinsamer Filmabend', 'Einen Titel aus „Filme & Serien“ auswählen und den Zeitpunkt abstimmen.');
     if (s.mood === 'food') routine('Gemeinsam essen gehen', 'Ein Restaurant aus der App auswählen, vegetarische Optionen und Öffnungszeiten prüfen.');
     if (s.mood === 'movement' && s.energy !== 'low') routine('Gemeinsam schwimmen gehen', 'Öffnungszeiten und freien Badebetrieb prüfen, dann Eva den Zeitpunkt vorschlagen.');
@@ -80,9 +80,13 @@ export function initPlanner() {
         pool.unshift({title, url: card.querySelector<HTMLAnchorElement>('a.info-link')?.href || '', outdoor, next:'Uhrzeit, Dauer, Anfahrt und Verfügbarkeit in der Originalquelle prüfen; anschließend Eva konkret vorschlagen.'});
       });
     }
+    routine('Kurz gemeinsam an die frische Luft', 'Eva eine kleine Runde von 15 Minuten vorschlagen.', true);
+    pool[pool.length - 1].minutes = 15;
+    routine('Gemeinsam eine Tasse Tee trinken', 'Eva eine Viertelstunde gemeinsame Pause vorschlagen.');
+    pool[pool.length - 1].minutes = 15;
     routine('In Ruhe einen Kaffee trinken gehen', 'Ein Café auswählen, Öffnungszeiten prüfen und Eva den Zeitpunkt vorschlagen.');
     routine('Eine Runde zum Garten', 'Wetter prüfen und Eva den Zeitpunkt vorschlagen.', true);
-    return pool.filter((a, i) => pool.findIndex(b => b.title === a.title) === i && !(wet && a.outdoor)).slice(0,3);
+    return pool.filter((a, i) => pool.findIndex(b => b.title === a.title) === i && !(wet && a.outdoor) && (a.minutes ?? 0) <= minutes).slice(0,3);
   }
   function addEntry(title: string, url = '', status = 'Idee gespeichert', slot?: Slot, next = 'Eva einen konkreten Zeitpunkt vorschlagen.') {
     const now = new Date().toISOString();
@@ -112,7 +116,7 @@ export function initPlanner() {
       ${chosen ? `<div class="planner-slot"><p>${label(chosen.date)} · ${chosen.start}–${chosen.end} ${button('deleteSlot','Zeitfenster entfernen',chosen.id)}</p>${clash(chosen) ? '<p class="planner-warning">Dieses Zeitfenster überschneidet sich mit einem Termin oder Vorhaben. Bitte erst klären oder ein anderes wählen.</p>' : ''}${rain[chosen.date] !== undefined ? `<p>Regenwahrscheinlichkeit: ${rain[chosen.date]} % · Tagesprognose Open-Meteo</p>` : '<p class="planner-small">Keine Wetterprognose verfügbar. Vor einer Aktivität draußen bitte Wetter prüfen.</p>'}
       <div class="planner-form"><label>Energie<select data-slot-field="energy">${options([['low','Wenig'],['medium','Mittel'],['high','Viel']],chosen.energy)}</select></label><label>Was wäre angenehm?<select data-slot-field="mood">${options([['unknown','Weiß nicht'],['outdoor','Draußen'],['movement','Bewegung'],['food','Genuss'],['culture','Kultur']],chosen.mood)}</select></label><label>Aufwand<select data-slot-field="effort">${options([['spontaneous','Spontan'],['prepare','Etwas vorbereiten'],['trip','Kleiner Ausflug']],chosen.effort)}</select></label></div>
       <p class="planner-small">${state.entries.some(a => a.slotId === chosen.id && a.status !== 'Abgelehnt') ? 'Für dieses Zeitfenster hast du bereits ein Vorhaben. Bearbeite es unten oder entferne es, bevor du ein anderes auswählst.' : ''}</p><p class="planner-small">Wenn nichts Konkretes dagegenspricht, nimm den ersten passenden Vorschlag. Neue Ideen sind nicht jede Woche nötig.</p>
-      ${clash(chosen) || chosen.date < today() ? (chosen.date < today() ? '<p>Dieses Zeitfenster liegt in der Vergangenheit. Wähle eines ab heute.</p>' : '') : ideas(chosen).map((a,i) => `<article class="planner-idea"><span class="section-kicker">${i === 0 ? 'Mein Vorschlag für dich' : 'Alternative'}</span><h3>${e(a.title)}</h3><p>${e(a.next)}</p>${safeUrl(a.url) ? `<a href="${e(a.url)}" target="_blank" rel="noopener noreferrer">Originalquelle prüfen</a>` : ''}${button('chooseIdea',state.entries.some(x => x.slotId === chosen.id && x.status !== 'Abgelehnt') ? 'Zeitfenster bereits geplant' : 'Das bereite ich vor',String(i))}</article>`).join('')}</div>` : ''}</section></div>
+      ${clash(chosen) || chosen.date < today() ? (chosen.date < today() ? '<p>Dieses Zeitfenster liegt in der Vergangenheit. Wähle eines ab heute.</p>' : '') : ideas(chosen).map((a,i) => `<article class="planner-idea"><span class="section-kicker">${i === 0 ? 'Mein Vorschlag für dich' : 'Alternative'}</span><h3>${e(a.title)}</h3><p>${e(a.next)}</p>${safeUrl(a.url) ? `<a href="${e(a.url)}" target="_blank" rel="noopener noreferrer">Originalquelle prüfen</a>` : ''}${a.minutes ? `<p class="planner-small">Zeit einplanen: etwa ${a.minutes} Minuten.</p>` : ''}${button('chooseIdea',state.entries.some(x => x.slotId === chosen.id && x.status !== 'Abgelehnt') ? 'Zeitfenster bereits geplant' : 'Das bereite ich vor',String(i))}</article>`).join('')}</div>` : ''}</section></div>
       <section class="planner-box"><h2>3. Vorschlagen und umsetzen</h2><p>Eine gespeicherte Idee zählt erst dann als vorgeschlagen, wenn du sie tatsächlich angesprochen oder geschrieben hast.</p><div class="planner-stats"><span><strong>${proposals}</strong> vorgeschlagen</span><span><strong>${organized}</strong> organisiert</span><span><strong>${done}</strong> gemacht</span></div><p class="planner-small">Gezählt nach dem Datum der jeweiligen Handlung in dieser Woche.</p>
       <form id="entryForm" class="planner-form"><label>Eigener Vorschlag<input name="title" required maxlength="200" placeholder="Zum Beispiel: Samstag schwimmen"></label><label>Datum der Aktivität<input name="date" type="date"></label><label>Eintragen als<select name="status">${options([['Idee gespeichert','Idee gespeichert'],['Vorgeschlagen','Gerade tatsächlich vorgeschlagen']])}</select></label><button>Eintragen</button></form>
       <h3>Vorhaben dieser Woche</h3>${state.entries.filter(a => inWeek(a.date) || !a.date && inWeek(actionDate(a.createdAt))).map(entryMarkup).join('') || '<p>Noch kein Vorhaben eingetragen.</p>'}
@@ -122,7 +126,7 @@ export function initPlanner() {
   }
   function entryMarkup(a: Entry) {
     const stamp = (s: string) => s ? new Intl.DateTimeFormat('de-DE',{timeZone:'Europe/Berlin',dateStyle:'short',timeStyle:'short'}).format(new Date(s)) : 'Noch nicht';
-    return `<article class="planner-entry" data-entry="${e(a.id)}"><div><h3>${e(a.title)}</h3><p>${label(a.date)}${a.start ? ` · ${a.start}–${a.end}` : ''}</p></div><div class="planner-form"><label>Status<select data-entry-field="status">${options(statuses.map(s=>[s,s]),a.status)}</select></label><label>Aktivitätsdatum<input type="date" data-entry-field="date" value="${a.date}"></label><label>Nächster Schritt<input data-entry-field="next" value="${e(a.next)}" maxlength="500"></label><label>Notiz / Rückmeldung<textarea data-entry-field="note" maxlength="2000" placeholder="Was wurde besprochen?">${e(a.note)}</textarea></label></div><p class="planner-small">Vorgeschlagen: ${stamp(a.proposedAt)} · Organisiert: ${stamp(a.organizedAt)} · Gemacht: ${stamp(a.doneAt)}</p><details><summary>Vorschlagsdatum nachtragen oder korrigieren</summary><label>Datum<input type="date" data-entry-field="proposedDate" max="${today()}" value="${actionDate(a.proposedAt)}"></label><p class="planner-small">Eine Erinnerung an einen früheren Vorschlag nachtragen. Leeres Datum entfernt die Markierung „vorgeschlagen“.</p></details><div class="planner-actions">${!a.proposedAt ? button('proposed','Gerade vorgeschlagen',a.id) : ''}${safeUrl(a.url) ? `<a href="${e(a.url)}" target="_blank" rel="noopener noreferrer">Quelle</a>` : ''}${a.date && a.start ? button('activityCalendar','In Kalender übernehmen',a.id) : ''}${button('deleteEntry','Eintrag entfernen',a.id)}</div></article>`;
+    return `<article class="planner-entry" data-entry="${e(a.id)}"><div><h3>${e(a.title)}</h3><p>${label(a.date)}${a.start ? ` · ${a.start}–${a.end}` : ''}</p></div><div class="planner-form"><label>Status<select data-entry-field="status">${options(statuses.map(s=>[s,s]),a.status)}</select></label><label>Aktivitätsdatum<input type="date" data-entry-field="date" value="${a.date}"></label><label>Von<input type="time" data-entry-field="start" value="${a.start}"></label><label>Bis<input type="time" data-entry-field="end" value="${a.end}"></label><label>Nächster Schritt<input data-entry-field="next" value="${e(a.next)}" maxlength="500"></label><label>Notiz / Rückmeldung<textarea data-entry-field="note" maxlength="2000" placeholder="Was wurde besprochen?">${e(a.note)}</textarea></label></div><p class="planner-small">Vorgeschlagen: ${stamp(a.proposedAt)} · Organisiert: ${stamp(a.organizedAt)} · Gemacht: ${stamp(a.doneAt)}</p><details><summary>Vorschlagsdatum nachtragen oder korrigieren</summary><label>Datum<input type="date" data-entry-field="proposedDate" max="${today()}" value="${actionDate(a.proposedAt)}"></label><p class="planner-small">Eine Erinnerung an einen früheren Vorschlag nachtragen. Leeres Datum entfernt die Markierung „vorgeschlagen“.</p></details><div class="planner-actions">${!a.proposedAt ? button('proposed','Gerade vorgeschlagen',a.id) : ''}${safeUrl(a.url) ? `<a href="${e(a.url)}" target="_blank" rel="noopener noreferrer">Quelle</a>` : ''}${a.date && a.start ? button('activityCalendar','In Kalender übernehmen',a.id) : ''}${button('deleteEntry','Eintrag entfernen',a.id)}</div></article>`;
   }
   function wire() {
     if (!host) return;
@@ -145,6 +149,7 @@ export function initPlanner() {
     host.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement>('[data-entry-field]').forEach(el=>el.addEventListener('change',()=>mutate(()=>{
       const a=state.entries.find(x=>x.id===el.closest<HTMLElement>('[data-entry]')?.dataset.entry);if(!a)return;
       const k=el.dataset.entryField!; const now=new Date().toISOString();
+      if((k==='start'&&el.value&&a.end&&el.value>=a.end)||(k==='end'&&el.value&&a.start&&el.value<=a.start))throw Error();
       if(k==='proposedDate'){a.proposedAt=el.value?new Date(el.value+'T12:00:00Z').toISOString():'';return;}
       (a as unknown as Record<string,string>)[k]=el.value;
       if(k==='status'){

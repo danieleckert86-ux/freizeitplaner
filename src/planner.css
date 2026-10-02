@@ -23,3 +23,11 @@
 @media(min-width:900px){#personalPlanner #routineForm{grid-template-columns:repeat(3,minmax(0,1fr))}#personalPlanner #routineForm>label{grid-column:auto}#personalPlanner #routineForm>label:first-child,#personalPlanner #routineForm>.routine-next,#personalPlanner #routineForm>.planner-submit{grid-column:1 / -1}}
 @media(max-width:480px){#personalPlanner .planner-box{padding:18px 16px}#personalPlanner .planner-form{gap:14px 12px}#personalPlanner .planner-options{gap:12px 8px;padding:12px}#personalPlanner .planner-options .planner-check{font-size:.875rem}#personalPlanner .planner-entry-editor>summary{flex-direction:column;align-items:flex-start}#personalPlanner .planner-actions{display:grid;grid-template-columns:1fr 1fr}#personalPlanner .planner-actions>*{justify-content:center;text-align:center;min-width:0}.section-nav-btn{font-size:.9rem;padding:10px 12px}.back-to-top{bottom:calc(22px + env(safe-area-inset-bottom,0px))!important;right:16px!important;width:42px!important;height:42px!important}}
 @media(max-width:340px){#personalPlanner .planner-options{grid-template-columns:1fr}#personalPlanner .planner-form>label.planner-time{grid-column:1 / -1}}
+
+/* Appointment actions stay inside the calendar instead of a separate growing list. */
+.event-delete-menu{margin-top:5px;border-top:1px solid #cbd4e1;padding-top:4px}
+#personalPlanner .event-delete-menu>summary{padding:8px 0;font-size:.8rem;font-weight:500;color:#53647d;cursor:pointer}
+.event-delete-menu>div{display:grid;gap:6px;padding:2px 0 4px}
+#personalPlanner .event-delete-menu button{width:100%;min-height:40px;padding:8px;font-size:.8rem;line-height:1.4;text-align:left;white-space:normal;overflow-wrap:normal;background:#fff;color:#a33138;border:1px solid #dfcbd0;border-radius:7px}
+#personalPlanner .event-delete-menu button:hover{background:#fff1f2;border-color:#ba7c84}
+#personalPlanner .event-delete-menu>summary:focus-visible{outline:2px solid #306dcc;outline-offset:2px;border-radius:4px}

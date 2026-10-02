@@ -1,7 +1,7 @@
 import './planner.css';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-type Appointment = { id: string; title: string; date: string; start: string; end: string; owner: string; uncertain: boolean; repeat: boolean };
+type Appointment = { id: string; title: string; date: string; start: string; end: string; owner: string; uncertain: boolean; repeat: boolean; excludedDates?: string[] };
 type Slot = { id: string; date: string; start: string; end: string; energy: string; mood: string; effort: string };
 type Entry = { id: string; title: string; url: string; date: string; start: string; end: string; slotId: string; status: string; createdAt: string; proposedAt: string; organizedAt: string; doneAt: string; note: string; next: string };
 type Routine = { id: string; title: string; minutes: number; energy: string; mood: string; effort: string; outdoor: boolean; next: string };
@@ -39,7 +39,7 @@ function validState(v: unknown): v is State {
   return s.version === 1 && Array.isArray(s.appointments) && Array.isArray(s.slots) && Array.isArray(s.entries) && Array.isArray(s.checks)
     && (s.routines === undefined || Array.isArray(s.routines) && s.routines.every(r => strings(r,['id','title','energy','mood','effort','next']) && Number.isInteger(r.minutes) && r.minutes >= 5 && r.minutes <= 1440 && typeof r.outdoor === 'boolean' && ['low','medium','high'].includes(r.energy) && ['outdoor','movement','food','culture'].includes(r.mood) && ['spontaneous','prepare','trip'].includes(r.effort)))
     && s.checks.every(validDate)
-    && s.appointments.every(a => strings(a, ['id','title','date','start','end','owner']) && validDate(a.date) && validTime(a.start) && validTime(a.end) && a.end > a.start && typeof a.uncertain === 'boolean' && typeof a.repeat === 'boolean')
+    && s.appointments.every(a => strings(a, ['id','title','date','start','end','owner']) && validDate(a.date) && validTime(a.start) && validTime(a.end) && a.end > a.start && typeof a.uncertain === 'boolean' && typeof a.repeat === 'boolean' && (a.excludedDates === undefined || Array.isArray(a.excludedDates) && a.excludedDates.every(validDate)))
     && s.slots.every(a => strings(a, ['id','date','start','end','energy','mood','effort']) && validDate(a.date) && validTime(a.start) && validTime(a.end) && a.end > a.start && ['low','medium','high'].includes(a.energy) && ['unknown','outdoor','movement','food','culture'].includes(a.mood) && ['spontaneous','prepare','trip'].includes(a.effort))
     && s.entries.every(a => strings(a, ['id','title','url','date','start','end','slotId','status','createdAt','proposedAt','organizedAt','doneAt','note','next']) && statuses.includes(a.status) && (!a.date || validDate(a.date)) && (!a.start || validTime(a.start)) && (!a.end || validTime(a.end)) && ['createdAt','proposedAt','organizedAt','doneAt'].every(k => !(a as unknown as Record<string,string>)[k] || !isNaN(Date.parse((a as unknown as Record<string,string>)[k]))));
 }
@@ -139,7 +139,7 @@ export function initPlanner(database: SupabaseClient) {
     finally { refreshing = false; }
   }
   const inWeek = (date: string) => date >= week && date < addDays(week, 7);
-  const appointmentsFor = (date: string) => state.appointments.filter(a => a.date === date || (a.repeat && a.date <= date && day(a.date).getUTCDay() === day(date).getUTCDay()));
+  const appointmentsFor = (date: string) => state.appointments.filter(a => !a.excludedDates?.includes(date) && (a.date === date || (a.repeat && a.date <= date && day(a.date).getUTCDay() === day(date).getUTCDay())));
   const overlaps = (a: {start: string; end: string}, b: {start: string; end: string}) => a.start < b.end && b.start < a.end;
   const conflicts = (s: Slot) => appointmentsFor(s.date).filter(a => overlaps(a, s));
   const clash = (s: Slot) => conflicts(s).length > 0 || state.entries.some(a => a.slotId !== s.id && a.date === s.date && a.status !== 'Abgelehnt' && a.start && overlaps(a, s));
@@ -177,7 +177,7 @@ export function initPlanner(database: SupabaseClient) {
     const names=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
     return `<section class="week-board" aria-label="Wochenplan Montag bis Sonntag"><div class="week-board-heading"><h2>Deine Woche auf einen Blick</h2><div class="week-legend"><span class="legend-fixed">Fester Termin</span><span class="legend-free">Freies Zeitfenster</span><span class="legend-plan">Vorhaben</span></div></div><div class="week-days">${names.map((name,i)=>{
       const date=addDays(week,i);const entries=state.entries.filter(x=>x.date===date&&x.status!=='Abgelehnt').sort((a,b)=>a.start.localeCompare(b.start));const slots=state.slots.filter(x=>x.date===date);const events=appointmentsFor(date);
-      return `<article class="week-day ${date===today()?'is-today':''} ${date===activeDate?'is-selected':''}"><header><span>${name}</span><strong>${new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(day(date))}</strong>${date===today()?'<small>Heute</small>':''}</header><div class="week-day-items">${events.map(a=>`<div class="week-event ${a.uncertain?'is-uncertain':''}"><time>${a.start}–${a.end}</time><strong>${e(a.title)}</strong><span>${e(a.owner)}${a.uncertain?' · unklar':''}</span></div>`).join('')}${entries.map(a=>`<button type="button" class="week-plan" data-action="openEntry" data-id="${e(a.id)}"><time>${a.start?`${a.start}${a.end?'–'+a.end:''}`:'Zeit noch offen'}</time><strong>${e(a.title)}</strong><span>${e(a.status)}</span></button>`).join('')}${slots.filter(a=>!entries.some(x=>x.slotId===a.id)).map(a=>`<button type="button" class="week-free ${clash(a)?'has-conflict':''}" data-action="selectSlot" data-id="${a.id}"><time>${a.start}–${a.end}</time><strong>${clash(a)?'Bitte erst klären':'Zeit für eine Idee'}</strong></button>`).join('')}${!events.length&&!entries.length&&!slots.length?'<p class="week-day-empty">Noch nichts eingetragen</p>':''}</div><button type="button" class="week-add" data-action="selectDay" data-id="${date}">Zeitfenster planen</button></article>`;
+      return `<article class="week-day ${date===today()?'is-today':''} ${date===activeDate?'is-selected':''}"><header><span>${name}</span><strong>${new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(day(date))}</strong>${date===today()?'<small>Heute</small>':''}</header><div class="week-day-items">${events.map(a=>`<div class="week-event ${a.uncertain?'is-uncertain':''}"><time>${a.start}–${a.end}</time><strong>${e(a.title)}</strong><span>${e(a.owner)}${a.repeat?' · wöchentlich':''}${a.uncertain?' · unklar':''}</span><details class="event-delete-menu"><summary aria-label="${e(a.title)} am ${label(date)} löschen">Löschen</summary><div><button type="button" data-action="deleteOccurrence" data-id="${e(a.id)}" data-date="${date}">${a.repeat?'Nur diesen Termin löschen':'Termin löschen'}</button>${a.repeat?`<button type="button" data-action="deleteSeries" data-id="${e(a.id)}">Gesamte Serie löschen</button>`:''}</div></details></div>`).join('')}${entries.map(a=>`<button type="button" class="week-plan" data-action="openEntry" data-id="${e(a.id)}"><time>${a.start?`${a.start}${a.end?'–'+a.end:''}`:'Zeit noch offen'}</time><strong>${e(a.title)}</strong><span>${e(a.status)}</span></button>`).join('')}${slots.filter(a=>!entries.some(x=>x.slotId===a.id)).map(a=>`<button type="button" class="week-free ${clash(a)?'has-conflict':''}" data-action="selectSlot" data-id="${a.id}"><time>${a.start}–${a.end}</time><strong>${clash(a)?'Bitte erst klären':'Zeit für eine Idee'}</strong></button>`).join('')}${!events.length&&!entries.length&&!slots.length?'<p class="week-day-empty">Noch nichts eingetragen</p>':''}</div><button type="button" class="week-add" data-action="selectDay" data-id="${date}">Zeitfenster planen</button></article>`;
     }).join('')}</div></section>`;
   }
   function routinesMarkup() {
@@ -194,7 +194,6 @@ export function initPlanner(database: SupabaseClient) {
     const organized = state.entries.filter(a => a.organizedAt && inWeek(actionDate(a.organizedAt))).length;
     const done = state.entries.filter(a => a.doneAt && inWeek(actionDate(a.doneAt))).length;
     const pending = state.entries.filter(a => inWeek(a.date) && !['Abgelehnt','Gemacht'].includes(a.status));
-    const appointments = state.appointments.filter(a => a.repeat ? a.date < addDays(week,7) : inWeek(a.date));
     host.innerHTML = `<div class="planner-heading"><div><p class="section-kicker">Deine persönliche Planung</p><h1>Meine Woche</h1><p>Kleine Ideen für den Alltag, schöne Pläne für freie Tage.</p></div><div class="planner-week-nav">${button('prev','Vorige Woche')}${button('current','Diese Woche')}${button('next','Nächste Woche')}</div></div>
       <h2>${label(week)} – ${label(addDays(week,6))}</h2>
       <p class="planner-message" role="status">${e(message)}</p><p class="planner-small">Gemeinsamer Stand für alle Geräte · ohne Login. ${button('refresh','Jetzt aktualisieren')}</p>
@@ -203,7 +202,7 @@ export function initPlanner(database: SupabaseClient) {
       ${routinesMarkup()}
       <div class="planner-steps"><section class="planner-box"><details class="planner-setup" ${openSection === 'setup' || !state.appointments.length && !slots.length ? 'open' : ''}><summary>Termine &amp; freie Zeitfenster</summary><p>Yoga, Töpfern und Verabredungen eintragen. „Unklar“ heißt: erst nachfragen.</p>
       <form id="appointmentForm" class="planner-form"><label>Termin<input name="title" required maxlength="120" placeholder="Zum Beispiel: Yoga"></label><label>Person<select name="owner">${options([['Daniel','Ich'],['Eva','Eva'],['Beide','Beide']])}</select></label><label>Datum<input name="date" type="date" required value="${activeDate}"></label><label class="planner-time">Von<input name="start" type="time" required value="18:00"></label><label class="planner-time">Bis<input name="end" type="time" required value="19:30"></label><div class="planner-options" role="group" aria-label="Terminoptionen"><label class="planner-check"><input name="repeat" type="checkbox">Wöchentlich</label><label class="planner-check"><input name="uncertain" type="checkbox">Noch unklar</label></div><button class="planner-submit">Termin hinzufügen</button></form>
-      <ul class="planner-list">${appointments.map(a => `<li><span><strong>${e(a.title)}</strong> · ${e(a.owner)}<br>${label(a.date)} · ${a.start}–${a.end}${a.repeat ? ' · wöchentlich ab diesem Datum' : ''}${a.uncertain ? ' · noch unklar' : ''}</span>${button('deleteAppointment','Entfernen',a.id)}</li>`).join('') || '<li>Keine Termine eingetragen. Bitte gemeinsam klären, wann Zeit ist.</li>'}</ul>
+      <p class="planner-small">Eingetragene Termine löschst du direkt im Wochenplan. Bei wöchentlichen Terminen wählst du einen einzelnen Termin oder die gesamte Serie.</p>
       <h3 class="planner-subheading">Ein freies Zeitfenster</h3><form id="slotForm" class="planner-form"><label>Freies Zeitfenster<input name="date" type="date" required value="${activeDate}"></label><label class="planner-time">Von<input name="start" type="time" required value="18:30"></label><label class="planner-time">Bis<input name="end" type="time" required value="20:00"></label><button class="planner-submit">Zeitfenster hinzufügen</button></form>
       <p class="planner-small">Zeitfenster markierst du selbst nach der Abstimmung. Leere Kalendertage werden nicht als freie Zeit angenommen.</p>
       ${button('checked', state.checks.includes(week) ? 'Wochencheck erledigt ✓' : 'Wochencheck abschließen')}
@@ -280,10 +279,19 @@ export function initPlanner(database: SupabaseClient) {
       if(action==='cancelImport'){backup=null;render();return;}
       if(action==='confirmImport'&&backup){const imported=backup;if(await mutate(()=>{state={...imported,routines:imported.routines ?? defaultRoutines()};},'Sicherung gemeinsam übernommen.'))backup=null;render();return;}
       if(action==='chooseIdea'){const s=state.slots.find(x=>x.id===selectedSlot);if(!s||clash(s)||s.date<today())return;const a=ideas(s)[Number(id)];if(!a||state.entries.some(x=>x.slotId===s.id&&x.status!=='Abgelehnt'))return;addEntry(a.title,a.url,'Idee gespeichert',s,a.next);return;}
+      if(action==='deleteOccurrence'||action==='deleteSeries'){
+        const appointment=state.appointments.find(a=>a.id===id);const date=b.dataset.date;
+        if(!appointment || action==='deleteOccurrence' && (!validDate(date)||!appointmentsFor(date!).some(a=>a.id===id)))return;
+        if(action==='deleteSeries' && !confirm(`Die gesamte Serie „${appointment.title}“ löschen? Damit werden alle vergangenen und zukünftigen Termine dieser Serie entfernt.`))return;
+        await mutate(()=>{
+          if(action==='deleteOccurrence' && appointment.repeat)appointment.excludedDates=[...new Set([...(appointment.excludedDates??[]),date!])];
+          else state.appointments=state.appointments.filter(a=>a.id!==id);
+        },action==='deleteOccurrence' && appointment.repeat?'Dieser Termin wurde gelöscht. Die übrige Serie bleibt erhalten.':action==='deleteSeries'?'Die gesamte Terminserie wurde gelöscht.':'Der Termin wurde gelöscht.');
+        return;
+      }
       if(action==='deleteEntry'){const entry=state.entries.find(x=>x.id===id);if(!entry||!confirm(`„${entry.title}“ aus deinem persönlichen Protokoll entfernen?`))return;}
       mutate(()=>{
         if(action==='checked'&&!state.checks.includes(week))state.checks.push(week);
-        if(action==='deleteAppointment')state.appointments=state.appointments.filter(a=>a.id!==id);
         if(action==='deleteSlot')state.slots=state.slots.filter(a=>a.id!==id);
         if(action==='deleteEntry')state.entries=state.entries.filter(a=>a.id!==id);
         if(action==='proposed'){const a=state.entries.find(x=>x.id===id);if(a){a.proposedAt=new Date().toISOString();a.status='Vorgeschlagen';a.next='Rückmeldung und Zeitpunkt mit Eva klären.';}}

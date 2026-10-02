@@ -1,3 +1,4 @@
+import { initPlanner } from './planner';
 import './styles.css';
 import { createClient } from '@supabase/supabase-js';
 
@@ -230,7 +231,25 @@ type Favorite = {
 };
 
 async function bootstrap() {
-  await loadRecommendationData();
+  initPlanner();
+
+  const viewButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-view]'));
+  const viewSections = Array.from(document.querySelectorAll<HTMLElement>('[data-app-view]'));
+  const setAppView = (view: string) => {
+    viewButtons.forEach(button => button.classList.toggle('active', button.dataset.view === view));
+    viewSections.forEach(section => {
+      const active = section.dataset.appView === view;
+      section.hidden = !active;
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  viewButtons.forEach(button => button.addEventListener('click', () => setAppView(button.dataset.view ?? 'weekend')));
+  setAppView('planning');
+
+  try { await loadRecommendationData(); } catch {
+    const state = document.querySelector<HTMLElement>('.data-state');
+    if (state) state.textContent = 'Freizeit-Tipps gerade nicht verfügbar. Deine Wochenplanung funktioniert weiterhin.';
+  }
 
   document.querySelectorAll<HTMLButtonElement>('[data-hide-card]').forEach(button => {
     button.addEventListener('click', async () => {
@@ -252,19 +271,6 @@ async function bootstrap() {
       button.closest<HTMLElement>('.lifestyle-card')?.remove();
     });
   });
-
-  const viewButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-view]'));
-  const viewSections = Array.from(document.querySelectorAll<HTMLElement>('[data-app-view]'));
-  const setAppView = (view: string) => {
-    viewButtons.forEach(button => button.classList.toggle('active', button.dataset.view === view));
-    viewSections.forEach(section => {
-      const active = section.dataset.appView === view;
-      section.hidden = !active;
-    });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-  viewButtons.forEach(button => button.addEventListener('click', () => setAppView(button.dataset.view ?? 'weekend')));
-  setAppView('weekend');
 
   const mediaTabs = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-media-tab]'));
   const mediaPanels = Array.from(document.querySelectorAll<HTMLElement>('[data-media-panel]'));

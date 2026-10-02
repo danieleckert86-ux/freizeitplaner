@@ -50,6 +50,7 @@ function favoriteMarkup(item: Recommendation, compact = false) {
   const f = item.favorite;
   return '<button class="favorite-btn' + (compact ? ' compact' : '') + '" type="button" data-favorite ' +
     'data-id="' + dataEscape(f.id) + '" data-title="' + dataEscape(f.title) + '" ' +
+    'data-event-start="' + dataEscape(/^([01]\d|2[0-3]):[0-5]\d(?: Uhr)?$/.test(item.time || '') ? (item.time || '').slice(0,5) : '') + '" ' +
     'data-day-label="' + dataEscape(f.dayLabel) + '" data-category-label="' + dataEscape(f.categoryLabel) + '" ' +
     'data-description="' + dataEscape(f.description) + '" data-url="' + dataEscape(f.url) + '">Merken</button>';
 }

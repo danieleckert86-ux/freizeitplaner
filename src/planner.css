@@ -52,3 +52,29 @@
 #personalPlanner .suggestion-source:first-child .planner-idea:first-of-type{border-color:#2c62bc;background:#f4f8ff}
 @media(max-width:700px){#personalPlanner .routines-box .routine-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.routine-heading{align-items:start}.routine-edit-list>div{align-items:start;flex-direction:column}#personalPlanner .routine-card{padding:12px}#personalPlanner .routine-card h3{font-size:.9rem}}
 @media(max-width:340px){#personalPlanner .routines-box .routine-grid{grid-template-columns:1fr}}
+
+/* Calendar first: only the currently needed planning step is expanded. */
+#personalPlanner .week-plan{padding:0!important;gap:0}
+#personalPlanner .week-plan-open{display:flex;flex-direction:column;gap:5px;width:100%;padding:10px;text-align:left;background:transparent;border:0;color:inherit;border-radius:9px}
+#personalPlanner .week-plan-open:hover{background:#ffffff12}
+.week-quick-actions{display:flex;flex-direction:column;gap:5px;padding:0 8px 8px}
+#personalPlanner .week-quick-actions button{background:#ffffff18;color:#fff;border:1px solid #ffffff50;padding:7px 5px;font-size:.75rem;line-height:1.35;min-height:34px;border-radius:6px}
+#personalPlanner .week-fixed-add{background:transparent;border:0;color:#64738a;font-size:.75rem;padding:7px 4px;margin:0 8px 8px;min-height:32px}
+#personalPlanner .week-add{background:#245bbb!important;color:white;font-weight:600;border-color:#245bbb}
+.day-composer,.selected-entry{scroll-margin-top:90px;border:2px solid #779bd2;background:#f8fbff}
+#personalPlanner .day-composer h2{margin:6px 0 0}
+.composer-preferences{grid-column:1 / -1;border:1px solid #dce3ee;border-radius:10px;padding:0 12px;background:white}
+#personalPlanner .composer-preferences .planner-form{margin:8px 0 14px;grid-template-columns:repeat(3,minmax(0,1fr))}
+#personalPlanner .composer-preferences .planner-form>label{grid-column:auto}
+.unified-idea-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#personalPlanner .unified-idea-grid .planner-idea{display:flex;flex-direction:column;background:#fff;margin:0;min-width:0;padding:16px}
+#personalPlanner .unified-idea-grid .planner-idea:first-child{background:#f0f6ff}
+#personalPlanner .unified-idea-grid .planner-idea h3{margin:8px 0;font-size:1rem}
+#personalPlanner .unified-idea-grid .planner-idea p{font-size:.85rem;flex:1}
+#personalPlanner .unified-idea-grid .planner-idea button{width:100%;min-height:44px;background:#245bbb;border-color:#245bbb;color:#fff;font-weight:600}
+.unified-ideas>button{margin-top:14px}
+.custom-plan{margin-top:14px}
+.planner-tools>.planner-box{padding:16px 22px;margin-bottom:12px}
+#personalPlanner .planner-tools>.planner-box>details>summary{font-size:1rem;padding:6px 0}
+.weekly-check li{line-height:1.7;padding:8px 0}
+@media(max-width:700px){.unified-idea-grid{grid-template-columns:1fr}#personalPlanner .composer-preferences .planner-form{grid-template-columns:1fr}.planner-tools>.planner-box{padding:14px 16px}.day-composer>.routine-heading{align-items:start}}

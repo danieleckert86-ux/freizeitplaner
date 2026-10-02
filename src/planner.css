@@ -115,3 +115,8 @@
 #personalPlanner #plannerSettings>summary{display:flex;align-items:center;gap:14px;list-style:none;padding:12px 2px;margin:0;font-size:1rem}
 #personalPlanner #plannerSettings>summary:focus-visible{outline:3px solid #2366d1;outline-offset:3px;border-radius:8px}
 #personalPlanner #plannerSettings[open]>summary{margin-bottom:16px}
+/* Manage each activity where it is shown, without a second list. */
+.routine-manage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#personalPlanner .routine-manage button{background:#fff!important;color:#53647d!important;border:1px solid #ccd6e6!important;font-weight:500;font-size:.825rem!important;padding:9px 5px!important}
+#personalPlanner .routine-manage [data-action="deleteRoutine"]{color:#a33138!important}
+#personalPlanner #routineSection{border-top:1px solid #e3e9f2;margin-top:18px;padding-top:8px;scroll-margin-top:90px}

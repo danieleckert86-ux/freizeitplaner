@@ -71,6 +71,7 @@ export function initPlanner(database: SupabaseClient) {
   let openEditor = '';
   let openSection = '';
   let editingRoutine = '';
+  let routineFormOpen = false;
   let pendingIdea: Idea | null = null;
   let scheduleSlot = '';
   let draft: Slot | null = null;
@@ -237,10 +238,10 @@ export function initPlanner(database: SupabaseClient) {
   const toolSummary = (title: string, help: string, badge = '') => `<span class="tool-summary-copy"><strong>${e(title)}</strong><small>${e(help)}</small></span>${badge?`<span class="tool-summary-badge">${e(badge)}</span>`:''}<span class="tool-summary-toggle" aria-hidden="true">+</span>`;
   function routinesMarkup() {
     const routines=state.routines??[];const r=routines.find(x=>x.id===editingRoutine);
-    return `<section class="planner-box routines-box"><details id="routineLibrary" ${openSection==='routines'?'open':''}><summary>${toolSummary('Meine regelmäßigen Aktivitäten','Schwimmen, Spazieren, Kajak … auswählen, einplanen oder ergänzen.',`${routines.length} Ideen`)}</summary><div class="routine-heading"><div><span class="section-kicker">Deine vertrauten Ideen</span><h2>Meine Standardaktivitäten</h2></div><span class="planner-entry-meta">${routines.length} Aktivitäten</span></div><p>Schwimmen, Spazieren, Kajak … Wähle eine Aktivität und danach einen Zeitpunkt. Beim Planen im Kalender werden dir passende Aktivitäten aus dieser Liste angeboten.</p><div class="routine-grid">${routines.map(x=>{
+    return `<section class="planner-box routines-box"><details id="routineLibrary" ${openSection==='routines'?'open':''}><summary>${toolSummary('Meine regelmäßigen Aktivitäten','Schwimmen, Spazieren, Kajak … auswählen, einplanen oder ergänzen.',`${routines.length} Ideen`)}</summary><p>Direkt einplanen, bearbeiten oder löschen. Diese Aktivitäten werden dir auch beim Planen im Kalender vorgeschlagen.</p><div class="routine-grid">${routines.map(x=>{
       const count=state.entries.filter(a=>inWeek(a.date)&&a.status!=='Abgelehnt'&&(a.routineId===x.id||!a.routineId&&a.title===x.title)).length;
-      return `<article class="routine-card"><div><span class="routine-category">${e(moodOptions.find(o=>o[0]===x.mood)?.[1]||'Aktivität')}</span><h3>${e(x.title)}</h3><p>${x.minutes} Min.</p>${count?`<span class="routine-planned">${count}× diese Woche eingeplant</span>`:''}</div><div class="routine-actions">${button('routinePlan','Einplanen',x.id)}</div></article>`;
-    }).join('')||'<p>Ergänze deine erste Standardaktivität.</p>'}</div><details id="routineSection" ${openSection==='routines'?'open':''}><summary>Liste ergänzen &amp; bearbeiten</summary><div class="routine-edit-list">${routines.map(x=>`<div><strong>${e(x.title)}</strong><div class="planner-actions">${button('editRoutine','Bearbeiten',x.id)}${button('deleteRoutine','Entfernen',x.id)}</div></div>`).join('')}</div><h3>${r?'Standardaktivität bearbeiten':'Eine Standardaktivität ergänzen'}</h3><form id="routineForm" class="planner-form"><label>Aktivität<input name="title" required maxlength="200" value="${e(r?.title||'')}" placeholder="Zum Beispiel: Am Lech spazieren"></label><label>Dauer in Minuten<input name="minutes" type="number" min="5" max="1440" required value="${r?.minutes||45}"></label><label>Kategorie<select name="mood">${options(moodOptions,r?.mood||'outdoor')}</select></label><label class="planner-check"><input name="outdoor" type="checkbox" ${r?.outdoor?'checked':''}>Draußen</label><label class="routine-next">Vorbereitung / nächster Schritt<input name="next" maxlength="500" value="${e(r?.next||'')}" placeholder="Was musst du vorher klären?"></label><button class="planner-submit">${r?'Änderungen speichern':'Aktivität ergänzen'}</button>${r?button('cancelRoutine','Abbrechen'):''}</form></details></details></section>`;
+      return `<article class="routine-card"><div><span class="routine-category">${e(moodOptions.find(o=>o[0]===x.mood)?.[1]||'Aktivität')}</span><h3>${e(x.title)}</h3><p>${x.minutes} Min.</p>${count?`<span class="routine-planned">${count}× diese Woche eingeplant</span>`:''}</div><div class="routine-actions">${button('routinePlan','Einplanen',x.id)}<div class="routine-manage">${button('editRoutine','Bearbeiten',x.id)}${button('deleteRoutine','Löschen',x.id)}</div></div></article>`;
+    }).join('')||'<p>Ergänze deine erste Standardaktivität.</p>'}</div><details id="routineSection" ${r || routineFormOpen?'open':''}><summary>${r?`„${e(r.title)}“ bearbeiten`:'+ Neue Aktivität ergänzen'}</summary><h3>${r?'Standardaktivität bearbeiten':'Eine Standardaktivität ergänzen'}</h3><form id="routineForm" class="planner-form"><label>Aktivität<input name="title" required maxlength="200" value="${e(r?.title||'')}" placeholder="Zum Beispiel: Am Lech spazieren"></label><label>Dauer in Minuten<input name="minutes" type="number" min="5" max="1440" required value="${r?.minutes||45}"></label><label>Kategorie<select name="mood">${options(moodOptions,r?.mood||'outdoor')}</select></label><label class="planner-check"><input name="outdoor" type="checkbox" ${r?.outdoor?'checked':''}>Draußen</label><label class="routine-next">Vorbereitung / nächster Schritt<input name="next" maxlength="500" value="${e(r?.next||'')}" placeholder="Was musst du vorher klären?"></label><button class="planner-submit">${r?'Änderungen speichern':'Aktivität ergänzen'}</button>${button('cancelRoutine','Abbrechen')}</form></details></details></section>`;
   }
   function render() {
     if(!host)return;
@@ -271,7 +272,7 @@ export function initPlanner(database: SupabaseClient) {
     if (!host) return;
     host.querySelectorAll<HTMLDetailsElement>('.planner-entry-editor').forEach(el=>el.addEventListener('toggle',()=>{if(el.open)openEditor=el.closest<HTMLElement>('[data-entry]')?.dataset.entry||'';}));
     host.querySelector<HTMLDetailsElement>('.planner-setup')?.addEventListener('toggle',ev=>{if((ev.target as HTMLDetailsElement).open)openSection='setup';});
-    host.querySelector<HTMLDetailsElement>('#routineSection')?.addEventListener('toggle',ev=>{if((ev.target as HTMLDetailsElement).open)openSection='routines';});
+    host.querySelector<HTMLDetailsElement>('#routineSection')?.addEventListener('toggle',ev=>{routineFormOpen=(ev.currentTarget as HTMLDetailsElement).open;});
     host.querySelector<HTMLDetailsElement>('#routineLibrary')?.addEventListener('toggle',ev=>{openSection=(ev.target as HTMLDetailsElement).open?'routines':openSection==='routines'?'':openSection;});
     host.querySelector<HTMLFormElement>('#dayPlanForm')?.addEventListener('submit',ev=>{
       ev.preventDefault();if(!draft)return;const d=new FormData(ev.currentTarget as HTMLFormElement);
@@ -308,7 +309,7 @@ export function initPlanner(database: SupabaseClient) {
       ev.preventDefault();const d=new FormData(ev.currentTarget as HTMLFormElement);
       const r:Routine={id:editingRoutine||crypto.randomUUID(),title:String(d.get('title')).trim(),minutes:Number(d.get('minutes')),energy:state.routines?.find(x=>x.id===editingRoutine)?.energy||'medium',mood:String(d.get('mood')),effort:state.routines?.find(x=>x.id===editingRoutine)?.effort||'prepare',outdoor:d.has('outdoor'),next:String(d.get('next')).trim()||'Eva einen konkreten Zeitpunkt vorschlagen.'};
       if(!r.title)return;openSection='routines';
-      if(await mutate(()=>{const routines=state.routines??[];const i=routines.findIndex(x=>x.id===r.id);if(i<0)routines.push(r);else routines[i]=r;state.routines=routines;},'Standardaktivität gespeichert. Auf allen Geräten verfügbar.'))editingRoutine='';render();
+      if(await mutate(()=>{const routines=state.routines??[];const i=routines.findIndex(x=>x.id===r.id);if(i<0)routines.push(r);else routines[i]=r;state.routines=routines;},'Standardaktivität gespeichert. Auf allen Geräten verfügbar.')){editingRoutine='';routineFormOpen=false;}render();
     });
     host.querySelector<HTMLFormElement>('#appointmentForm')?.addEventListener('submit',ev=>{
       ev.preventDefault(); const f = ev.currentTarget as HTMLFormElement; const d = new FormData(f); const start = String(d.get('start')), end = String(d.get('end'));
@@ -351,12 +352,12 @@ export function initPlanner(database: SupabaseClient) {
       if(action==='checkAppointments'){openSection='setup';render();host.querySelector('.planner-setup')?.scrollIntoView({behavior:'smooth',block:'center'});return;}
       if(action==='openEntry'){openEditor=id!;draft=null;pendingIdea=null;render();host.querySelector('.selected-entry')?.scrollIntoView({behavior:'smooth',block:'center'});return;}
       if(action==='closeEntry'){openEditor='';render();return;}
-      if(action==='editRoutine'){editingRoutine=id!;openSection='routines';render();return;}
+      if(action==='editRoutine'){editingRoutine=id!;routineFormOpen=true;openSection='routines';render();host.querySelector('#routineSection')?.scrollIntoView({behavior:'smooth',block:'center'});return;}
       if(action==='routinePlan'){const r=state.routines?.find(x=>x.id===id);if(r)beginPlanning({title:r.title,url:'',next:r.next,outdoor:r.outdoor,minutes:r.minutes,source:'routine',routineId:r.id});return;}
       if(action==='cancelSchedule'){pendingIdea=null;render();return;}
       if(action==='saveUnscheduled'){const idea=pendingIdea;if(idea){pendingIdea=null;addEntry(idea.title,idea.url,'Idee gespeichert',undefined,idea.next,idea);}return;}
-      if(action==='deleteRoutine'){if(!confirm('Diese Standardaktivität entfernen? Bereits geplante Vorhaben bleiben erhalten.'))return;await mutate(()=>{state.routines=state.routines?.filter(x=>x.id!==id);});return;}
-      if(action==='cancelRoutine'){editingRoutine='';render();return;}
+      if(action==='deleteRoutine'){if(!confirm('Diese Standardaktivität entfernen? Bereits geplante Vorhaben bleiben erhalten.'))return;if(await mutate(()=>{state.routines=state.routines?.filter(x=>x.id!==id);}) && editingRoutine===id){editingRoutine='';routineFormOpen=false;render();}return;}
+      if(action==='cancelRoutine'){editingRoutine='';routineFormOpen=false;render();return;}
       if(action==='prev'||action==='next'||action==='current'){week=action==='current'?monday(today()):addDays(week,action==='prev'?-7:7);draft=null;pendingIdea=null;openEditor='';render();return;}
       if(action==='refresh'){await refreshCloud(true);return;}
       if(action==='export'){download(JSON.stringify(state,null,2),'freizeitplaner-sicherung-'+today()+'.json','application/json');return;}

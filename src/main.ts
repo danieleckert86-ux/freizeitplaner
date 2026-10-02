@@ -74,6 +74,15 @@ function lifestyleFavoriteMarkup(item: LifestyleRecommendation, section: 'restau
     'data-url="' + dataEscape(item.url) + '">Merken</button>';
 }
 
+function tourAttributes(item: Recommendation) {
+  const text=[item.metaLabel,item.description,...(item.meta??[])].join(' ');
+  const fixed=/geführt|geführte|anmeldung|reservierung|tickets|veranstaltung/i.test(text);
+  const durationText=(item.meta??[]).find(value=>/(\d+(?::\d{2}|[.,]\d+)?)\s*h(?:\b|$)/i.test(value))||'';
+  const match=durationText.match(/(\d+)(?::(\d{2})|[.,](\d+))?\s*h(?:\b|$)/i);
+  const minutes=match?Number(match[1])*60+(match[2]?Number(match[2]):match[3]?Number('0.'+match[3])*60:0):0;
+  return ' data-flexible-tour="'+String(!fixed)+'" data-tour-minutes="'+String(Math.round(minutes))+'"';
+}
+
 function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<string>()) {
   const state = document.querySelector<HTMLElement>('.data-state');
   if (state) state.textContent = 'Datenstand Freizeit-Tipps: ' + data.dataUpdated;
@@ -114,7 +123,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
     const list = document.querySelector<HTMLElement>(selector + ' .tour-list');
     if (!list) return;
     list.innerHTML = items.map(item =>
-      '<article class="tour-card filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '">' +
+      '<article' + tourAttributes(item) + ' class="tour-card filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '">' +
       '<div class="tour-top"><span class="tour-category">' + dataEscape(item.label) + '</span><span class="meta-label">' + dataEscape(item.metaLabel) + '</span></div>' +
       '<h4>' + dataEscape(item.title) + '</h4><p>' + dataEscape(item.description) + '</p>' +
       '<div class="tour-meta">' + (item.meta ?? []).map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +

@@ -36,10 +36,10 @@
 .routine-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .routine-heading h2{margin:6px 0 0}
 #personalPlanner .routines-box .routine-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}
-#personalPlanner .routine-card{padding:14px;background:#f8fafd}
+#personalPlanner .routine-card{padding:12px;background:#f8fafd;gap:10px}
 #personalPlanner .routine-card h3{margin:6px 0;font-size:1rem}
-#personalPlanner .routine-card p{margin:0 0 10px;font-size:.8rem}
-#personalPlanner .routine-actions{grid-template-columns:1fr;margin-top:12px}
+#personalPlanner .routine-card p{margin:0;font-size:.8rem}
+#personalPlanner .routine-actions{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:0}
 #personalPlanner .routine-actions button{min-height:42px;font-weight:600}
 .routine-planned{display:inline-block;font-size:.75rem;color:#29664e;background:#e6f4ec;border-radius:6px;padding:4px 7px}
 .routine-edit-list>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #e3e9f2}
@@ -50,7 +50,7 @@
 #personalPlanner .suggestion-source>h3{font-size:1.1rem}
 #personalPlanner .suggestion-source .planner-idea:first-of-type{border-color:#dce3ee;background:#fff}
 #personalPlanner .suggestion-source:first-child .planner-idea:first-of-type{border-color:#2c62bc;background:#f4f8ff}
-@media(max-width:700px){#personalPlanner .routines-box .routine-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.routine-heading{align-items:start}.routine-edit-list>div{align-items:start;flex-direction:column}#personalPlanner .routine-card{padding:12px}#personalPlanner .routine-card h3{font-size:.9rem}}
+@media(max-width:700px){#personalPlanner .routines-box .routine-grid{grid-template-columns:1fr}.routine-heading{align-items:start}.routine-edit-list>div{align-items:start;flex-direction:column}#personalPlanner .routine-card{padding:12px}#personalPlanner .routine-card h3{font-size:.9rem}}
 @media(max-width:340px){#personalPlanner .routines-box .routine-grid{grid-template-columns:1fr}}
 
 /* Calendar first: only the currently needed planning step is expanded. */
@@ -116,9 +116,8 @@
 #personalPlanner #plannerSettings>summary:focus-visible{outline:3px solid #2366d1;outline-offset:3px;border-radius:8px}
 #personalPlanner #plannerSettings[open]>summary{margin-bottom:16px}
 /* Manage each activity where it is shown, without a second list. */
-.routine-manage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-#personalPlanner .routine-manage button{background:#fff!important;color:#53647d!important;border:1px solid #ccd6e6!important;font-weight:500;font-size:.825rem!important;padding:9px 5px!important}
-#personalPlanner .routine-manage [data-action="deleteRoutine"]{color:#a33138!important}
+#personalPlanner .routine-actions button:not(:first-child){background:#fff!important;color:#53647d!important;border:1px solid #ccd6e6!important;font-weight:500;font-size:.825rem!important;padding:9px 5px!important}
+#personalPlanner .routine-actions [data-action="deleteRoutine"]{color:#a33138!important}
 #personalPlanner #routineSection{border-top:1px solid #e3e9f2;margin-top:18px;padding-top:8px;scroll-margin-top:90px}
 /* Keep the calendar controls with the calendar and let actions speak for themselves. */
 #personalPlanner .planner-heading{margin:16px 0 12px}

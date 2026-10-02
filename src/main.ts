@@ -135,7 +135,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
 
   const discoveries = document.querySelector<HTMLElement>('#discoveries .discovery-timeline');
   if (discoveries) discoveries.innerHTML = data.discoveries.map(item =>
-    '<article class="discovery-item"><time>' + dataEscape(item.time) + '</time><div><span class="mini-badge">' + dataEscape(item.badge) + '</span>' +
+    '<article class="discovery-item"><div><div class="discovery-header"><time>' + dataEscape(item.time) + '</time><span class="mini-badge">' + dataEscape(item.badge) + '</span></div>' +
     '<h3>' + dataEscape(item.title) + '</h3><p>' + dataEscape(item.description) + '</p><div class="item-actions">' +
     sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, 'discoveries') + favoriteMarkup(item, true) + '</div></div></article>'
   ).join('');

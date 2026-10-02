@@ -344,3 +344,17 @@ section[id],h1[id]{scroll-margin-top:85px}
 .card .item-actions .details-btn,.idea-card .item-actions .details-btn,.tour-card .item-actions .details-btn,.discovery-item .item-actions .details-btn,.item-actions .favorite-btn,.lifestyle-actions .favorite-btn,.lifestyle-actions .hide-card-btn,.lifestyle-actions [data-personal-action]{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;min-height:40px!important;padding:8px 10px!important;font-size:.875rem!important;line-height:1.35!important;border-radius:9px!important;white-space:normal!important;text-align:center!important;box-sizing:border-box!important}
 .item-actions .info-link,.lifestyle-actions .info-link{font-size:.875rem!important;line-height:1.4!important;padding:6px 0!important;white-space:normal!important;justify-self:start!important}.item-actions .rating-btn,.lifestyle-actions .rating-btn{width:36px!important;min-width:36px!important;height:36px!important;padding:4px!important;font-size:1rem!important;margin:0!important}
 @media(max-width:760px){.lifestyle-meta{flex-wrap:wrap!important;gap:7px!important}.lifestyle-meta>span,.lifestyle-meta .imdb-rating,.lifestyle-meta .trailer-meta{font-size:.875rem!important;white-space:normal!important}.card .item-actions,.idea-card .item-actions,.tour-card .item-actions,.discovery-item .item-actions,.lifestyle-card .lifestyle-actions{gap:8px!important}.item-actions .rating-actions,.lifestyle-actions .rating-actions{justify-content:flex-end!important}}
+
+/* Compact event cards: one header, one content column, one action bar. */
+.discovery-item{display:block; padding:16px; border-radius:16px}
+.discovery-item>div{min-width:0}
+.discovery-header{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.discovery-item .discovery-header time{background:none;padding:0; border-radius:0; font-size:.8rem;line-height:1.4;font-weight:700;color:#53647d}
+.discovery-header .mini-badge{background:none;padding:0;border-radius:0;font-size:.8rem;line-height:1.4;color:#53647d;font-weight:500}
+.discovery-item h3{margin:8px 0 5px;font-size:1.05rem;line-height:1.35}
+.discovery-item p{margin:0;font-size:.875rem;line-height:1.45}
+.discovery-item .item-actions{grid-template-columns:auto auto auto minmax(0,1fr) auto!important;grid-template-areas:"plan favorite details source rating"!important;gap:6px!important;margin:12px 0 0!important;padding-top:12px!important}
+.discovery-item .item-actions .details-btn:not([data-personal-action]){background:#fff!important;color:#53647d!important;border:1px solid #ccd6e6!important;box-shadow:none!important;font-weight:500}
+.discovery-item .item-actions .info-link{justify-self:center!important;font-weight:500;font-size:.8rem!important}
+.discovery-item .item-actions .details-btn,.discovery-item .item-actions .favorite-btn{font-size:.8rem!important;padding:7px 10px!important;min-height:40px!important}
+@media(max-width:1000px){.discovery-item .item-actions{grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-template-areas:"plan favorite details" "source source rating"!important}.discovery-item .item-actions .info-link{justify-self:start!important}}

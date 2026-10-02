@@ -422,7 +422,7 @@ export function initPlanner(database: SupabaseClient) {
   const enhance=()=>document.querySelectorAll<HTMLButtonElement>('[data-favorite],[data-plan-favorite]').forEach(b=>{
     const saved=b.hasAttribute('data-plan-favorite');
     if(!b.dataset.title||saved&&b.dataset.plannerWired||!saved&&b.parentElement?.querySelector('[data-personal-action]'))return;
-    const action=saved?b:document.createElement('button');action.type='button';action.className='details-btn';action.dataset.personalAction='true';action.textContent=saved?'Im Kalender einplanen':'In meine Planung';
+    const action=saved?b:document.createElement('button');action.type='button';action.className='details-btn';action.dataset.personalAction='true';action.textContent=saved?'Im Kalender einplanen':b.closest('.discovery-item')?'Einplanen':'In meine Planung';
     if(saved)b.dataset.plannerWired='true';
     action.addEventListener('click',()=>{
       const original=saved?Array.from(document.querySelectorAll<HTMLButtonElement>('.filterable [data-favorite]')).find(source=>source.dataset.id===b.dataset.suggestionId):b;

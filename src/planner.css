@@ -31,3 +31,24 @@
 #personalPlanner .event-delete-menu button{width:100%;min-height:40px;padding:8px;font-size:.8rem;line-height:1.4;text-align:left;white-space:normal;overflow-wrap:normal;background:#fff;color:#a33138;border:1px solid #dfcbd0;border-radius:7px}
 #personalPlanner .event-delete-menu button:hover{background:#fff1f2;border-color:#ba7c84}
 #personalPlanner .event-delete-menu>summary:focus-visible{outline:2px solid #306dcc;outline-offset:2px;border-radius:4px}
+
+/* Standard activities and recommendations share one scheduling flow. */
+.routine-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.routine-heading h2{margin:6px 0 0}
+#personalPlanner .routines-box .routine-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:18px 0}
+#personalPlanner .routine-card{padding:14px;background:#f8fafd}
+#personalPlanner .routine-card h3{margin:6px 0;font-size:1rem}
+#personalPlanner .routine-card p{margin:0 0 10px;font-size:.8rem}
+#personalPlanner .routine-actions{grid-template-columns:1fr;margin-top:12px}
+#personalPlanner .routine-actions button{min-height:42px;font-weight:600}
+.routine-planned{display:inline-block;font-size:.75rem;color:#29664e;background:#e6f4ec;border-radius:6px;padding:4px 7px}
+.routine-edit-list>div{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #e3e9f2}
+.routine-edit-list strong{font-size:.9rem}
+.idea-scheduler{border:2px solid #779bd2;background:#f8fbff;scroll-margin-top:90px}
+#personalPlanner .idea-scheduler h2{margin-top:8px}
+.suggestion-source+.suggestion-source{border-top:1px solid #dce3ee;margin-top:24px;padding-top:12px}
+#personalPlanner .suggestion-source>h3{font-size:1.1rem}
+#personalPlanner .suggestion-source .planner-idea:first-of-type{border-color:#dce3ee;background:#fff}
+#personalPlanner .suggestion-source:first-child .planner-idea:first-of-type{border-color:#2c62bc;background:#f4f8ff}
+@media(max-width:700px){#personalPlanner .routines-box .routine-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.routine-heading{align-items:start}.routine-edit-list>div{align-items:start;flex-direction:column}#personalPlanner .routine-card{padding:12px}#personalPlanner .routine-card h3{font-size:.9rem}}
+@media(max-width:340px){#personalPlanner .routines-box .routine-grid{grid-template-columns:1fr}}

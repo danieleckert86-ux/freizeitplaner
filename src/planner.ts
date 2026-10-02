@@ -3,10 +3,10 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 
 type Appointment = { id: string; title: string; date: string; start: string; end: string; owner: string; uncertain: boolean; repeat: boolean; excludedDates?: string[] };
 type Slot = { id: string; date: string; start: string; end: string; energy: string; mood: string; effort: string };
-type Entry = { id: string; title: string; url: string; date: string; start: string; end: string; slotId: string; status: string; createdAt: string; proposedAt: string; organizedAt: string; doneAt: string; note: string; next: string };
+type Entry = { id: string; title: string; url: string; date: string; start: string; end: string; slotId: string; status: string; createdAt: string; proposedAt: string; organizedAt: string; doneAt: string; note: string; next: string; routineId?: string; source?: string };
 type Routine = { id: string; title: string; minutes: number; energy: string; mood: string; effort: string; outdoor: boolean; next: string };
 type State = { routines?: Routine[]; version: 1; appointments: Appointment[]; slots: Slot[]; entries: Entry[]; checks: string[] };
-type Idea = { title: string; url: string; next: string; outdoor: boolean; minutes?: number };
+type Idea = { title: string; url: string; next: string; outdoor: boolean; minutes?: number; source?: string; routineId?: string; date?: string };
 const defaultRoutines = (): Routine[] => [
   {id:'walk',title:'Spazieren durch die Stadt',minutes:45,energy:'low',mood:'outdoor',effort:'spontaneous',outdoor:true,next:'Eva eine gemeinsame Runde zu Beginn des Zeitfensters vorschlagen.'},
   {id:'swim',title:'Schwimmen',minutes:90,energy:'medium',mood:'movement',effort:'prepare',outdoor:false,next:'Öffnungszeiten und Badebetrieb prüfen, Zeitpunkt abstimmen und Schwimmsachen vorbereiten.'},
@@ -41,7 +41,7 @@ function validState(v: unknown): v is State {
     && s.checks.every(validDate)
     && s.appointments.every(a => strings(a, ['id','title','date','start','end','owner']) && validDate(a.date) && validTime(a.start) && validTime(a.end) && a.end > a.start && typeof a.uncertain === 'boolean' && typeof a.repeat === 'boolean' && (a.excludedDates === undefined || Array.isArray(a.excludedDates) && a.excludedDates.every(validDate)))
     && s.slots.every(a => strings(a, ['id','date','start','end','energy','mood','effort']) && validDate(a.date) && validTime(a.start) && validTime(a.end) && a.end > a.start && ['low','medium','high'].includes(a.energy) && ['unknown','outdoor','movement','food','culture'].includes(a.mood) && ['spontaneous','prepare','trip'].includes(a.effort))
-    && s.entries.every(a => strings(a, ['id','title','url','date','start','end','slotId','status','createdAt','proposedAt','organizedAt','doneAt','note','next']) && statuses.includes(a.status) && (!a.date || validDate(a.date)) && (!a.start || validTime(a.start)) && (!a.end || validTime(a.end)) && ['createdAt','proposedAt','organizedAt','doneAt'].every(k => !(a as unknown as Record<string,string>)[k] || !isNaN(Date.parse((a as unknown as Record<string,string>)[k]))));
+    && s.entries.every(a => strings(a, ['id','title','url','date','start','end','slotId','status','createdAt','proposedAt','organizedAt','doneAt','note','next']) && statuses.includes(a.status) && (a.routineId === undefined || typeof a.routineId === 'string') && (a.source === undefined || typeof a.source === 'string') && (!a.date || validDate(a.date)) && (!a.start || validTime(a.start)) && (!a.end || validTime(a.end)) && ['createdAt','proposedAt','organizedAt','doneAt'].every(k => !(a as unknown as Record<string,string>)[k] || !isNaN(Date.parse((a as unknown as Record<string,string>)[k]))));
 }
 
 export function initPlanner(database: SupabaseClient) {
@@ -69,6 +69,8 @@ export function initPlanner(database: SupabaseClient) {
   let openEditor = '';
   let openSection = '';
   let editingRoutine = '';
+  let pendingIdea: Idea | null = null;
+  let scheduleSlot = '';
   const energyOptions: [string,string][] = [['low','Wenig'],['medium','Mittel'],['high','Viel']];
   const moodOptions: [string,string][] = [['outdoor','Draußen'],['movement','Bewegung'],['food','Genuss'],['culture','Kultur']];
   const effortOptions: [string,string][] = [['spontaneous','Spontan'],['prepare','Etwas vorbereiten'],['trip','Kleiner Ausflug']];
@@ -145,17 +147,20 @@ export function initPlanner(database: SupabaseClient) {
   const clash = (s: Slot) => conflicts(s).length > 0 || state.entries.some(a => a.slotId !== s.id && a.date === s.date && a.status !== 'Abgelehnt' && a.start && overlaps(a, s));
   const options = (values: [string, string][], chosen = '') => values.map(([value, text]) => `<option value="${e(value)}" ${value === chosen ? 'selected' : ''}>${e(text)}</option>`).join('');
   const button = (action: string, text: string, id = '') => `<button type="button" data-action="${action}" data-id="${e(id)}">${text}</button>`;
+  const duration = (s: {start:string;end:string}) => Number(s.end.slice(0,2))*60 + Number(s.end.slice(3)) - Number(s.start.slice(0,2))*60 - Number(s.start.slice(3));
+  const occupied = (s: Slot) => state.entries.some(a => a.slotId === s.id && a.status !== 'Abgelehnt');
+  const canSchedule = (s: Slot, idea: Idea) => s.date >= today() && (!idea.date || idea.date === s.date) && !clash(s) && !occupied(s) && duration(s) >= (idea.minutes ?? 0);
   function ideas(s: Slot): Idea[] {
     const wet = (rain[s.date] ?? 0) >= 50;
     const pool: Idea[] = [];
-    const minutes = Number(s.end.slice(0,2))*60 + Number(s.end.slice(3)) - Number(s.start.slice(0,2))*60 - Number(s.start.slice(3));
+    const minutes = duration(s);
     const ranks: Record<string,number> = {low:0,medium:1,high:2};
     const effortRanks: Record<string,number> = {spontaneous:0,prepare:1,trip:2};
     const routines = (state.routines ?? []).filter(r => r.minutes <= minutes && ranks[r.energy] <= ranks[s.energy] && effortRanks[r.effort] <= effortRanks[s.effort] && !(wet && r.outdoor));
     routines.sort((a,b) => (s.mood === b.mood ? 20 : 0) - (s.mood === a.mood ? 20 : 0) || ranks[a.energy] - ranks[b.energy] || b.minutes - a.minutes);
-    routines.forEach(r => pool.push({title:r.title,next:r.next,outdoor:r.outdoor,url:'',minutes:r.minutes}));
+    routines.forEach(r => pool.push({title:r.title,next:r.next,outdoor:r.outdoor,url:'',minutes:r.minutes,source:'routine',routineId:r.id}));
     // Dated events are only offered on their exact date. Unknown durations require a check.
-    if (s.effort !== 'spontaneous' && s.energy !== 'low') {
+    {
       const cards = Array.from(document.querySelectorAll<HTMLElement>('.filterable[data-date]')).filter(card => card.dataset.date === s.date && !card.classList.contains('expired'));
       cards.forEach(card => {
         const title = card.querySelector('h3,h4')?.textContent?.trim();
@@ -163,15 +168,15 @@ export function initPlanner(database: SupabaseClient) {
         if (!title || (outdoor && wet) || (card.classList.contains('tour-card') && minutes < 360)) return;
         if (s.mood === 'food' && card.dataset.category !== 'essen') return;
         if (s.mood === 'culture' && !['kultur','musik'].includes(card.dataset.category || '')) return;
-        pool.unshift({title, url: card.querySelector<HTMLAnchorElement>('a.info-link')?.href || '', outdoor, next:'Uhrzeit, Dauer, Anfahrt und Verfügbarkeit in der Originalquelle prüfen; anschließend Eva konkret vorschlagen.'});
+        pool.push({source:'recommendation',date:s.date,title, url: card.querySelector<HTMLAnchorElement>('a.info-link')?.href || '', outdoor, next:'Uhrzeit, Dauer, Anfahrt und Verfügbarkeit in der Originalquelle prüfen; anschließend Eva konkret vorschlagen.'});
       });
     }
-    return pool.filter((a, i) => pool.findIndex(b => b.title === a.title) === i && !(wet && a.outdoor) && (a.minutes ?? 0) <= minutes).slice(0,3);
+    return pool.filter((a, i) => pool.findIndex(b => b.title === a.title) === i && !(wet && a.outdoor) && (a.minutes ?? 0) <= minutes);
   }
-  function addEntry(title: string, url = '', status = 'Idee gespeichert', slot?: Slot, next = 'Eva einen konkreten Zeitpunkt vorschlagen.') {
+  function addEntry(title: string, url = '', status = 'Idee gespeichert', slot?: Slot, next = 'Eva einen konkreten Zeitpunkt vorschlagen.', origin?: Idea) {
     const now = new Date().toISOString();
     openSection='';
-    mutate(() => { state.entries.unshift({id:crypto.randomUUID(), title, url:safeUrl(url), date:slot?.date || '', start:slot?.start || '', end:slot?.end || '', slotId:slot?.id || '', status, createdAt:now, proposedAt:status === 'Vorgeschlagen' ? now : '', organizedAt:'', doneAt:'', note:'', next}); }, status === 'Vorgeschlagen' ? 'Als tatsächlich vorgeschlagen protokolliert.' : 'Idee gespeichert. Nächster Schritt: konkret abstimmen.');
+    mutate(() => { state.entries.unshift({id:crypto.randomUUID(), title, url:safeUrl(url), date:slot?.date || '', start:slot?.start || '', end:slot?.end || '', slotId:slot?.id || '', status, createdAt:now, proposedAt:status === 'Vorgeschlagen' ? now : '', organizedAt:'', doneAt:'', note:'', next,routineId:origin?.routineId,source:origin?.source}); }, status === 'Vorgeschlagen' ? 'Als tatsächlich vorgeschlagen protokolliert.' : 'Idee gespeichert. Nächster Schritt: konkret abstimmen.');
   }
   function weekMarkup() {
     const names=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
@@ -180,9 +185,38 @@ export function initPlanner(database: SupabaseClient) {
       return `<article class="week-day ${date===today()?'is-today':''} ${date===activeDate?'is-selected':''}"><header><span>${name}</span><strong>${new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(day(date))}</strong>${date===today()?'<small>Heute</small>':''}</header><div class="week-day-items">${events.map(a=>`<div class="week-event ${a.uncertain?'is-uncertain':''}"><time>${a.start}–${a.end}</time><strong>${e(a.title)}</strong><span>${e(a.owner)}${a.repeat?' · wöchentlich':''}${a.uncertain?' · unklar':''}</span><details class="event-delete-menu"><summary aria-label="${e(a.title)} am ${label(date)} löschen">Löschen</summary><div><button type="button" data-action="deleteOccurrence" data-id="${e(a.id)}" data-date="${date}">${a.repeat?'Nur diesen Termin löschen':'Termin löschen'}</button>${a.repeat?`<button type="button" data-action="deleteSeries" data-id="${e(a.id)}">Gesamte Serie löschen</button>`:''}</div></details></div>`).join('')}${entries.map(a=>`<button type="button" class="week-plan" data-action="openEntry" data-id="${e(a.id)}"><time>${a.start?`${a.start}${a.end?'–'+a.end:''}`:'Zeit noch offen'}</time><strong>${e(a.title)}</strong><span>${e(a.status)}</span></button>`).join('')}${slots.filter(a=>!entries.some(x=>x.slotId===a.id)).map(a=>`<button type="button" class="week-free ${clash(a)?'has-conflict':''}" data-action="selectSlot" data-id="${a.id}"><time>${a.start}–${a.end}</time><strong>${clash(a)?'Bitte erst klären':'Zeit für eine Idee'}</strong></button>`).join('')}${!events.length&&!entries.length&&!slots.length?'<p class="week-day-empty">Noch nichts eingetragen</p>':''}</div><button type="button" class="week-add" data-action="selectDay" data-id="${date}">Zeitfenster planen</button></article>`;
     }).join('')}</div></section>`;
   }
+  function beginPlanning(idea: Idea) {
+    pendingIdea=idea;scheduleSlot=selectedSlot;
+    if(idea.date){activeDate=idea.date;week=monday(idea.date);}
+    render();
+    document.querySelector<HTMLButtonElement>('[data-view="planning"]')?.click();
+    host?.querySelector('#ideaScheduler')?.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  function schedulerMarkup() {
+    if(!pendingIdea)return '';
+    const idea=pendingIdea;
+    const available=state.slots.filter(s=>inWeek(s.date)&&canSchedule(s,idea)).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+    const slot=available.find(s=>s.id===scheduleSlot);
+    const date=slot?.date || idea.date || (activeDate>=today()?activeDate:today());
+    const endMinutes=Math.min(1439,18*60+30+(idea.minutes??60));
+    const end=slot?.end || `${String(Math.floor(endMinutes/60)).padStart(2,'0')}:${String(endMinutes%60).padStart(2,'0')}`;
+    return `<section class="planner-box idea-scheduler" id="ideaScheduler" aria-label="Aktivität einplanen"><span class="section-kicker">${idea.source==='routine'?'Meine Standardaktivität':'Aus den Empfehlungen'}</span><h2>${e(idea.title)} einplanen</h2><p>${e(idea.next)}</p>${idea.minutes?`<p class="planner-small">Plane mindestens ${idea.minutes} Minuten inklusive Vorbereitung und Anfahrt ein.</p>`:'<p class="planner-warning">Uhrzeit, Dauer und Verfügbarkeit bitte zuerst in der Quelle prüfen. Das Zeitfenster legst du selbst fest.</p>'}${safeUrl(idea.url)?`<a href="${e(idea.url)}" target="_blank" rel="noopener noreferrer">Quelle prüfen</a>`:''}
+      ${available.length?`<label>Freies Zeitfenster dieser Woche<select id="ideaSlot">${options([['','Neues Zeitfenster festlegen'],...available.map(s=>[s.id,`${label(s.date)} · ${s.start}–${s.end}`] as [string,string])],slot?.id||'')}</select></label>`:'<p class="planner-small">Lege einen Zeitpunkt fest, den du mit Eva abgestimmt hast. Bereits belegte Zeiten werden beim Speichern geprüft.</p>'}
+      <form id="ideaScheduleForm" class="planner-form" data-slot-id="${slot?.id||''}"><label>Tag<input name="date" type="date" min="${today()}" required value="${date}" ${slot||idea.date?'readonly':''}></label><label class="planner-time">Von<input name="start" type="time" required value="${slot?.start||'18:30'}" ${slot?'readonly':''}></label><label class="planner-time">Bis<input name="end" type="time" required value="${end}" ${slot?'readonly':''}></label><button class="planner-submit">In die Woche einplanen</button></form><div class="planner-actions">${button('cancelSchedule','Abbrechen')}${button('saveUnscheduled','Erst einmal als Idee merken')}</div><p class="planner-small">Das Einplanen zählt erst als Vorschlag, wenn du es tatsächlich angesprochen hast.</p></section>`;
+  }
+  function suggestionsMarkup(s: Slot) {
+    const pool=ideas(s);
+    return `<div class="suggestion-sources">${(['routine','recommendation'] as const).map(source=>{
+      const picks=pool.map((idea,index)=>({idea,index})).filter(x=>x.idea.source===source).slice(0,3);
+      return `<section class="suggestion-source" aria-label="${source==='routine'?'Passende Standardaktivitäten':'Aktuelle Eventvorschläge'}"><h3>${source==='routine'?'Deine Standardaktivitäten':'Aktuelle Eventvorschläge'}</h3><p class="planner-small">${source==='routine'?'Vertraute Ideen, passend zu Dauer, Energie und Aufwand.':'Empfehlungen für genau diesen Tag. Uhrzeit und Dauer bitte prüfen.'}</p>${picks.map(({idea:a,index})=>`<article class="planner-idea"><span class="section-kicker">${source==='routine'?'Aus deiner Liste':'Aktuelle Empfehlung'}</span><h3>${e(a.title)}</h3><p>${e(a.next)}</p>${safeUrl(a.url)?`<a href="${e(a.url)}" target="_blank" rel="noopener noreferrer">Originalquelle prüfen</a>`:''}${a.minutes?`<p class="planner-small">Etwa ${a.minutes} Minuten.</p>`:'<p class="planner-small">Dauer noch prüfen</p>'}${button('chooseIdea',occupied(s)?'Zeitfenster bereits geplant':source==='routine'?'Das plane ich ein':'Zeitpunkt prüfen & einplanen',String(index))}</article>`).join('')||`<p class="planner-small">${source==='routine'?'Keine Standardaktivität passt zu diesen Angaben. Passe die Auswahl an oder ergänze deine Liste.':'Für diesen Tag und diese Auswahl gibt es aktuell keine Eventempfehlung.'}</p>`}</section>`;
+    }).join('')}</div>`;
+  }
   function routinesMarkup() {
     const routines=state.routines??[];const r=routines.find(x=>x.id===editingRoutine);
-    return `<section class="planner-box routines-box"><details id="routineSection" ${openSection==='routines'?'open':''}><summary><span>Unsere Standardaktivitäten</span><span class="planner-entry-meta">${routines.length} einfache Ideen für jeden Wochentag</span></summary><p>Hier ergänzt und bearbeitest du eure vertrauten Aktivitäten. Dauer bitte inklusive Vorbereitung und Anfahrt eintragen.</p><div class="routine-grid">${routines.map(x=>`<article class="routine-card"><div><span class="routine-category">${e(moodOptions.find(o=>o[0]===x.mood)?.[1]||'Aktivität')}</span><h3>${e(x.title)}</h3><p>${x.minutes} Min. · ${e(energyOptions.find(o=>o[0]===x.energy)?.[1]||'')} Energie${x.outdoor?' · draußen':''}</p></div><div class="routine-actions">${button('routinePlan','Einplanen',x.id)}${button('editRoutine','Bearbeiten',x.id)}${button('deleteRoutine','Entfernen',x.id)}</div></article>`).join('')||'<p>Ergänze deine erste Standardaktivität.</p>'}</div><h3>${r?'Standardaktivität bearbeiten':'Eine Standardaktivität ergänzen'}</h3><form id="routineForm" class="planner-form"><label>Aktivität<input name="title" required maxlength="200" value="${e(r?.title||'')}" placeholder="Zum Beispiel: Am Lech spazieren"></label><label>Dauer in Minuten<input name="minutes" type="number" min="5" max="1440" required value="${r?.minutes||45}"></label><label>Energie<select name="energy">${options(energyOptions,r?.energy||'low')}</select></label><label>Kategorie<select name="mood">${options(moodOptions,r?.mood||'outdoor')}</select></label><label>Aufwand<select name="effort">${options(effortOptions,r?.effort||'spontaneous')}</select></label><label class="planner-check"><input name="outdoor" type="checkbox" ${r?.outdoor?'checked':''}>Draußen</label><label class="routine-next">Vorbereitung / nächster Schritt<input name="next" maxlength="500" value="${e(r?.next||'')}" placeholder="Was musst du vorher klären?"></label><button class="planner-submit">${r?'Änderungen speichern':'Aktivität ergänzen'}</button>${r?button('cancelRoutine','Abbrechen'):''}</form></details></section>`;
+    return `<section class="planner-box routines-box" aria-label="Meine Standardaktivitäten"><div class="routine-heading"><div><span class="section-kicker">Deine vertrauten Ideen</span><h2>Meine Standardaktivitäten</h2></div><span class="planner-entry-meta">${routines.length} Aktivitäten</span></div><p>Schwimmen, Spazieren, Kajak … Wähle eine Aktivität und danach einen Zeitpunkt. Aktuelle Eventvorschläge findest du bei deinen freien Zeitfenstern.</p><div class="routine-grid">${routines.map(x=>{
+      const count=state.entries.filter(a=>inWeek(a.date)&&a.status!=='Abgelehnt'&&(a.routineId===x.id||!a.routineId&&a.title===x.title)).length;
+      return `<article class="routine-card"><div><span class="routine-category">${e(moodOptions.find(o=>o[0]===x.mood)?.[1]||'Aktivität')}</span><h3>${e(x.title)}</h3><p>${x.minutes} Min. · ${e(energyOptions.find(o=>o[0]===x.energy)?.[1]||'')} Energie</p>${count?`<span class="routine-planned">${count}× diese Woche eingeplant</span>`:''}</div><div class="routine-actions">${button('routinePlan','Einplanen',x.id)}</div></article>`;
+    }).join('')||'<p>Ergänze deine erste Standardaktivität.</p>'}</div><details id="routineSection" ${openSection==='routines'?'open':''}><summary>Liste ergänzen &amp; bearbeiten</summary><div class="routine-edit-list">${routines.map(x=>`<div><strong>${e(x.title)}</strong><div class="planner-actions">${button('editRoutine','Bearbeiten',x.id)}${button('deleteRoutine','Entfernen',x.id)}</div></div>`).join('')}</div><h3>${r?'Standardaktivität bearbeiten':'Eine Standardaktivität ergänzen'}</h3><form id="routineForm" class="planner-form"><label>Aktivität<input name="title" required maxlength="200" value="${e(r?.title||'')}" placeholder="Zum Beispiel: Am Lech spazieren"></label><label>Dauer in Minuten<input name="minutes" type="number" min="5" max="1440" required value="${r?.minutes||45}"></label><label>Energie<select name="energy">${options(energyOptions,r?.energy||'low')}</select></label><label>Kategorie<select name="mood">${options(moodOptions,r?.mood||'outdoor')}</select></label><label>Aufwand<select name="effort">${options(effortOptions,r?.effort||'spontaneous')}</select></label><label class="planner-check"><input name="outdoor" type="checkbox" ${r?.outdoor?'checked':''}>Draußen</label><label class="routine-next">Vorbereitung / nächster Schritt<input name="next" maxlength="500" value="${e(r?.next||'')}" placeholder="Was musst du vorher klären?"></label><button class="planner-submit">${r?'Änderungen speichern':'Aktivität ergänzen'}</button>${r?button('cancelRoutine','Abbrechen'):''}</form></details></section>`;
   }
   function render() {
     if (!host) return;
@@ -199,6 +233,7 @@ export function initPlanner(database: SupabaseClient) {
       <p class="planner-message" role="status">${e(message)}</p><p class="planner-small">Gemeinsamer Stand für alle Geräte · ohne Login. ${button('refresh','Jetzt aktualisieren')}</p>
       ${weekMarkup()}
       <div class="planner-next"><strong>Dein nächster Schritt</strong><p>${!state.checks.includes(week) ? 'Nimm dir fünf Minuten: feste Termine klären und ein bis zwei freie Zeitfenster markieren.' : slots.length === 0 ? 'Trage ein freies Zeitfenster ein. Unbekannte Termine bitte zuerst klären.' : pending.length ? e(pending[0].next) : 'Wähle einen passenden Vorschlag für eines deiner Zeitfenster.'}</p>${button('calendar','Planungserinnerungen für den Kalender')}</div>
+      ${schedulerMarkup()}
       ${routinesMarkup()}
       <div class="planner-steps"><section class="planner-box"><details class="planner-setup" ${openSection === 'setup' || !state.appointments.length && !slots.length ? 'open' : ''}><summary>Termine &amp; freie Zeitfenster</summary><p>Yoga, Töpfern und Verabredungen eintragen. „Unklar“ heißt: erst nachfragen.</p>
       <form id="appointmentForm" class="planner-form"><label>Termin<input name="title" required maxlength="120" placeholder="Zum Beispiel: Yoga"></label><label>Person<select name="owner">${options([['Daniel','Ich'],['Eva','Eva'],['Beide','Beide']])}</select></label><label>Datum<input name="date" type="date" required value="${activeDate}"></label><label class="planner-time">Von<input name="start" type="time" required value="18:00"></label><label class="planner-time">Bis<input name="end" type="time" required value="19:30"></label><div class="planner-options" role="group" aria-label="Terminoptionen"><label class="planner-check"><input name="repeat" type="checkbox">Wöchentlich</label><label class="planner-check"><input name="uncertain" type="checkbox">Noch unklar</label></div><button class="planner-submit">Termin hinzufügen</button></form>
@@ -210,7 +245,7 @@ export function initPlanner(database: SupabaseClient) {
       ${chosen ? `<div class="planner-slot"><p>${label(chosen.date)} · ${chosen.start}–${chosen.end} ${button('deleteSlot','Zeitfenster entfernen',chosen.id)}</p>${clash(chosen) ? '<p class="planner-warning">Dieses Zeitfenster überschneidet sich mit einem Termin oder Vorhaben. Bitte erst klären oder ein anderes wählen.</p>' : ''}${rain[chosen.date] !== undefined ? `<p>Regenwahrscheinlichkeit: ${rain[chosen.date]} % · Tagesprognose Open-Meteo</p>` : '<p class="planner-small">Keine Wetterprognose verfügbar. Vor einer Aktivität draußen bitte Wetter prüfen.</p>'}
       <div class="planner-form"><label>Energie<select data-slot-field="energy">${options([['low','Wenig'],['medium','Mittel'],['high','Viel']],chosen.energy)}</select></label><label>Was wäre angenehm?<select data-slot-field="mood">${options([['unknown','Weiß nicht'],['outdoor','Draußen'],['movement','Bewegung'],['food','Genuss'],['culture','Kultur']],chosen.mood)}</select></label><label>Aufwand<select data-slot-field="effort">${options([['spontaneous','Spontan'],['prepare','Etwas vorbereiten'],['trip','Kleiner Ausflug']],chosen.effort)}</select></label></div>
       <p class="planner-small">${state.entries.some(a => a.slotId === chosen.id && a.status !== 'Abgelehnt') ? 'Für dieses Zeitfenster hast du bereits ein Vorhaben. Bearbeite es unten oder entferne es, bevor du ein anderes auswählst.' : ''}</p><p class="planner-small">Wenn nichts Konkretes dagegenspricht, nimm den ersten passenden Vorschlag. Neue Ideen sind nicht jede Woche nötig.</p>
-      ${clash(chosen) || chosen.date < today() ? (chosen.date < today() ? '<p>Dieses Zeitfenster liegt in der Vergangenheit. Wähle eines ab heute.</p>' : '') : ideas(chosen).map((a,i) => `<article class="planner-idea"><span class="section-kicker">${i === 0 ? 'Mein Vorschlag für dich' : 'Alternative'}</span><h3>${e(a.title)}</h3><p>${e(a.next)}</p>${safeUrl(a.url) ? `<a href="${e(a.url)}" target="_blank" rel="noopener noreferrer">Originalquelle prüfen</a>` : ''}${a.minutes ? `<p class="planner-small">Zeit einplanen: etwa ${a.minutes} Minuten.</p>` : ''}${button('chooseIdea',state.entries.some(x => x.slotId === chosen.id && x.status !== 'Abgelehnt') ? 'Zeitfenster bereits geplant' : 'Das bereite ich vor',String(i))}</article>`).join('') || '<p>Keine Standardaktivität passt zu diesen Angaben. Ändere die Auswahl oder ergänze deine Liste.</p>'}</div>` : ''}</section></div>
+      ${clash(chosen) || chosen.date < today() ? (chosen.date < today() ? '<p>Dieses Zeitfenster liegt in der Vergangenheit. Wähle eines ab heute.</p>' : '') : suggestionsMarkup(chosen)}</div>` : ''}</section></div>
       <section class="planner-box"><h2>3. Vorschlagen und umsetzen</h2><p>Eine gespeicherte Idee zählt erst dann als vorgeschlagen, wenn du sie tatsächlich angesprochen oder geschrieben hast.</p><div class="planner-stats"><span><strong>${proposals}</strong> vorgeschlagen</span><span><strong>${organized}</strong> organisiert</span><span><strong>${done}</strong> gemacht</span></div><p class="planner-small">Gezählt nach dem Datum der jeweiligen Handlung in dieser Woche.</p>
       <form id="entryForm" class="planner-form"><label>Eigener Vorschlag<input name="title" required maxlength="200" placeholder="Zum Beispiel: Dienstag schwimmen"></label><label>Datum der Aktivität<input name="date" type="date" value="${activeDate}"></label><label>Eintragen als<select name="status">${options([['Idee gespeichert','Idee gespeichert'],['Vorgeschlagen','Gerade tatsächlich vorgeschlagen']])}</select></label><button class="planner-submit">Eintragen</button></form>
       <h3>Vorhaben dieser Woche</h3>${state.entries.filter(a => inWeek(a.date) || !a.date && inWeek(actionDate(a.createdAt))).map(entryMarkup).join('') || '<p>Noch kein Vorhaben eingetragen.</p>'}
@@ -227,6 +262,22 @@ export function initPlanner(database: SupabaseClient) {
     host.querySelectorAll<HTMLDetailsElement>('.planner-entry-editor').forEach(el=>el.addEventListener('toggle',()=>{if(el.open)openEditor=el.closest<HTMLElement>('[data-entry]')?.dataset.entry||'';}));
     host.querySelector<HTMLDetailsElement>('.planner-setup')?.addEventListener('toggle',ev=>{if((ev.target as HTMLDetailsElement).open)openSection='setup';});
     host.querySelector<HTMLDetailsElement>('#routineSection')?.addEventListener('toggle',ev=>{if((ev.target as HTMLDetailsElement).open)openSection='routines';});
+    host.querySelector<HTMLSelectElement>('#ideaSlot')?.addEventListener('change',ev=>{scheduleSlot=(ev.target as HTMLSelectElement).value;render();});
+    host.querySelector<HTMLFormElement>('#ideaScheduleForm')?.addEventListener('submit',async ev=>{
+      ev.preventDefault();if(!pendingIdea)return;
+      const form=ev.currentTarget as HTMLFormElement;const d=new FormData(form);const idea=pendingIdea;
+      const existing=state.slots.find(s=>s.id===form.dataset.slotId);
+      const candidate:Slot=existing??{id:crypto.randomUUID(),date:String(d.get('date')),start:String(d.get('start')),end:String(d.get('end')),energy:'medium',mood:'unknown',effort:'spontaneous'};
+      if(!validDate(candidate.date)||!validTime(candidate.start)||!validTime(candidate.end)||candidate.end<=candidate.start||!canSchedule(candidate,idea)){
+        message='Dieser Zeitpunkt passt nicht: Prüfe Datum, Dauer und Überschneidungen. Wähle eine freie Zeit ab heute.';render();return;
+      }
+      const now=new Date().toISOString();
+      if(await mutate(()=>{
+        if(!existing)state.slots.push(candidate);
+        selectedSlot=candidate.id;activeDate=candidate.date;week=monday(candidate.date);
+        state.entries.unshift({id:crypto.randomUUID(),title:idea.title,url:safeUrl(idea.url),date:candidate.date,start:candidate.start,end:candidate.end,slotId:candidate.id,status:'Idee gespeichert',createdAt:now,proposedAt:'',organizedAt:'',doneAt:'',note:'',next:idea.next,routineId:idea.routineId,source:idea.source});
+      },'In deine Woche eingeplant. Nächster Schritt: konkret vorschlagen.')){pendingIdea=null;render();host.querySelector('.week-board')?.scrollIntoView({behavior:'smooth',block:'start'});}
+    });
     host.querySelector<HTMLFormElement>('#routineForm')?.addEventListener('submit',async ev=>{
       ev.preventDefault();const d=new FormData(ev.currentTarget as HTMLFormElement);
       const r:Routine={id:editingRoutine||crypto.randomUUID(),title:String(d.get('title')).trim(),minutes:Number(d.get('minutes')),energy:String(d.get('energy')),mood:String(d.get('mood')),effort:String(d.get('effort')),outdoor:d.has('outdoor'),next:String(d.get('next')).trim()||'Eva einen konkreten Zeitpunkt vorschlagen.'};
@@ -268,7 +319,9 @@ export function initPlanner(database: SupabaseClient) {
       if(action==='selectSlot'){selectedSlot=id!;activeDate=state.slots.find(x=>x.id===id)?.date||activeDate;render();host.querySelector('#guidedIdeas')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
       if(action==='openEntry'){openEditor=id!;render();host.querySelector('[data-entry="'+CSS.escape(id!)+'"]')?.scrollIntoView({behavior:'smooth',block:'center'});return;}
       if(action==='editRoutine'){editingRoutine=id!;openSection='routines';render();return;}
-      if(action==='routinePlan'){const routine=state.routines?.find(x=>x.id===id);const slot=state.slots.find(x=>x.id===selectedSlot);if(!routine)return;if(!slot||clash(slot)||slot.date<today()){message='Wähle zuerst ein freies Zeitfenster ohne Überschneidung.';openSection='setup';render();return;}const minutes=Number(slot.end.slice(0,2))*60+Number(slot.end.slice(3))-Number(slot.start.slice(0,2))*60-Number(slot.start.slice(3));if(routine.minutes>minutes){message='Für diese Aktivität ist dein Zeitfenster zu kurz.';render();return;}if(state.entries.some(x=>x.slotId===slot.id&&x.status!=='Abgelehnt')){message='Dieses Zeitfenster ist bereits geplant.';render();return;}addEntry(routine.title,'','Idee gespeichert',slot,routine.next);return;}
+      if(action==='routinePlan'){const r=state.routines?.find(x=>x.id===id);if(r)beginPlanning({title:r.title,url:'',next:r.next,outdoor:r.outdoor,minutes:r.minutes,source:'routine',routineId:r.id});return;}
+      if(action==='cancelSchedule'){pendingIdea=null;render();return;}
+      if(action==='saveUnscheduled'){const idea=pendingIdea;if(idea){pendingIdea=null;addEntry(idea.title,idea.url,'Idee gespeichert',undefined,idea.next,idea);}return;}
       if(action==='deleteRoutine'){if(!confirm('Diese Standardaktivität entfernen? Bereits geplante Vorhaben bleiben erhalten.'))return;await mutate(()=>{state.routines=state.routines?.filter(x=>x.id!==id);});return;}
       if(action==='cancelRoutine'){editingRoutine='';render();return;}
       if(action==='prev'||action==='next'||action==='current'){week=action==='current'?monday(today()):addDays(week,action==='prev'?-7:7);render();return;}
@@ -278,7 +331,7 @@ export function initPlanner(database: SupabaseClient) {
       if(action==='activityCalendar'){calendar(state.entries.find(x=>x.id===id));return;}
       if(action==='cancelImport'){backup=null;render();return;}
       if(action==='confirmImport'&&backup){const imported=backup;if(await mutate(()=>{state={...imported,routines:imported.routines ?? defaultRoutines()};},'Sicherung gemeinsam übernommen.'))backup=null;render();return;}
-      if(action==='chooseIdea'){const s=state.slots.find(x=>x.id===selectedSlot);if(!s||clash(s)||s.date<today())return;const a=ideas(s)[Number(id)];if(!a||state.entries.some(x=>x.slotId===s.id&&x.status!=='Abgelehnt'))return;addEntry(a.title,a.url,'Idee gespeichert',s,a.next);return;}
+      if(action==='chooseIdea'){const slot=state.slots.find(x=>x.id===selectedSlot);if(!slot||clash(slot)||slot.date<today()||occupied(slot))return;const idea=ideas(slot)[Number(id)];if(!idea)return;if(idea.source==='recommendation'){beginPlanning(idea);return;}addEntry(idea.title,idea.url,'Idee gespeichert',slot,idea.next,idea);return;}
       if(action==='deleteOccurrence'||action==='deleteSeries'){
         const appointment=state.appointments.find(a=>a.id===id);const date=b.dataset.date;
         if(!appointment || action==='deleteOccurrence' && (!validDate(date)||!appointmentsFor(date!).some(a=>a.id===id)))return;
@@ -328,9 +381,9 @@ export function initPlanner(database: SupabaseClient) {
   const enhance=()=>document.querySelectorAll<HTMLButtonElement>('[data-favorite]').forEach(b=>{
     if(!b.dataset.title||b.parentElement?.querySelector('[data-personal-action]'))return;
     const action=document.createElement('button');action.type='button';action.className='details-btn';action.dataset.personalAction='true';action.textContent='In meine Planung';
-    action.addEventListener('click',()=>{addEntry(b.dataset.title!,b.dataset.url || '');document.querySelector<HTMLButtonElement>('[data-view="planning"]')?.click();});action.disabled=!loaded||saving;b.insertAdjacentElement('afterend',action);
+    action.addEventListener('click',()=>{const card=b.closest<HTMLElement>('.filterable');const date=card?.dataset.date;beginPlanning({title:b.dataset.title!,url:b.dataset.url||'',next:'Uhrzeit, Dauer, Anfahrt und Verfügbarkeit prüfen; anschließend Eva konkret vorschlagen.',outdoor:card?.dataset.category==='outdoor',source:'recommendation',date:validDate(date)?date:undefined});});action.disabled=!loaded||saving;b.insertAdjacentElement('afterend',action);
   });
-  new MutationObserver(enhance).observe(document.querySelector('#app')!,{childList:true,subtree:true});
+  new MutationObserver(records=>{enhance();if(!isEditing()&&records.some(record=>record.target instanceof Element && record.target.closest('#topCards,#alternativeList,#hikeGroup,#bikeGroup')))render();}).observe(document.querySelector('#app')!,{childList:true,subtree:true});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refreshCloud();});
   window.addEventListener('focus',()=>{void refreshCloud();});
   window.setInterval(()=>{if(!document.hidden)void refreshCloud();},15000);

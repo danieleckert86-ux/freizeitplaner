@@ -265,7 +265,7 @@ export function initPlanner(database: SupabaseClient) {
     })));
     host.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(b=>b.addEventListener('click',async ()=>{
       const action=b.dataset.action,id=b.dataset.id;
-      if(action==='selectDay'){activeDate=id!;selectedSlot=state.slots.find(x=>x.date===activeDate)?.id||'';openSection='setup';render();host.querySelector('#guidedIdeas')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
+      if(action==='selectDay'){activeDate=id!;selectedSlot=state.slots.find(x=>x.date===activeDate)?.id||'';openSection='setup';render();host.querySelector('.planner-setup')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
       if(action==='selectSlot'){selectedSlot=id!;activeDate=state.slots.find(x=>x.id===id)?.date||activeDate;render();host.querySelector('#guidedIdeas')?.scrollIntoView({behavior:'smooth',block:'start'});return;}
       if(action==='openEntry'){openEditor=id!;render();host.querySelector('[data-entry="'+CSS.escape(id!)+'"]')?.scrollIntoView({behavior:'smooth',block:'center'});return;}
       if(action==='editRoutine'){editingRoutine=id!;openSection='routines';render();return;}

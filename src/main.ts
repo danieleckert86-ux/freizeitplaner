@@ -703,6 +703,7 @@ function renderFavorites() {
       '</div>' +
       '<div class="favorite-actions">' +
       '<a class="info-link" href="' + escapeAttr(item.url) + '" target="_blank" rel="noopener noreferrer">Originalquelle</a>' +
+      '<button class="details-btn" type="button" data-plan-favorite data-title="' + escapeAttr(item.title) + '" data-url="' + escapeAttr(item.url) + '" data-category="' + escapeAttr(normalizeCategory(item.category)) + '" data-suggestion-id="' + escapeAttr(item.suggestionId) + '">Im Kalender einplanen</button>' +
       '<button class="remove-favorite" type="button" data-remove="' + escapeAttr(item.id) + '">Entfernen</button>' +
       '</div>';
     favoritesList.appendChild(row);

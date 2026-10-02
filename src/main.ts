@@ -231,7 +231,7 @@ type Favorite = {
 };
 
 async function bootstrap() {
-  initPlanner();
+  initPlanner(supabase);
 
   const viewButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-view]'));
   const viewSections = Array.from(document.querySelectorAll<HTMLElement>('[data-app-view]'));

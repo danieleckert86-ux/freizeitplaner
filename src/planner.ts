@@ -1,4 +1,5 @@
 import './planner.css';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 type Appointment = { id: string; title: string; date: string; start: string; end: string; owner: string; uncertain: boolean; repeat: boolean };
 type Slot = { id: string; date: string; start: string; end: string; energy: string; mood: string; effort: string };
@@ -29,26 +30,92 @@ function validState(v: unknown): v is State {
     && s.entries.every(a => strings(a, ['id','title','url','date','start','end','slotId','status','createdAt','proposedAt','organizedAt','doneAt','note','next']) && statuses.includes(a.status) && (!a.date || validDate(a.date)) && (!a.start || validTime(a.start)) && (!a.end || validTime(a.end)) && ['createdAt','proposedAt','organizedAt','doneAt'].every(k => !(a as unknown as Record<string,string>)[k] || !isNaN(Date.parse((a as unknown as Record<string,string>)[k]))));
 }
 
-export function initPlanner() {
+export function initPlanner(database: SupabaseClient) {
   const host = document.querySelector<HTMLElement>('#personalPlanner');
   if (!host) return;
   let state = empty();
-  let damaged = false;
-  let message = '';
-  try { const raw = localStorage.getItem(KEY); if (raw) { const parsed = JSON.parse(raw); if (!validState(parsed)) throw Error(); state = parsed; } }
-  catch { damaged = true; message = 'Gespeicherte Daten konnten nicht gelesen werden. Bitte eine Sicherung importieren; vorhandene Daten werden nicht überschrieben.'; }
+  let loaded = false;
+  let saving = false;
+  let refreshing = false;
+  let revision = -1;
+  let message = 'Gemeinsame Planung wird geladen …';
+  let legacy: State | null = null;
+  // Read the previous version once to migrate it, never persist new planning data locally.
+  try { const raw = localStorage.getItem(KEY); if (raw) { const parsed: unknown = JSON.parse(raw); if (validState(parsed)) legacy = parsed; } } catch { /* Cloud data remains authoritative. */ }
+  async function readCloud() {
+    const { data, error } = await database.from('personal_planning').select('payload,revision').eq('id', 'shared').abortSignal(AbortSignal.timeout(12000)).single();
+    if (error || !data || !validState(data.payload) || !Number.isSafeInteger(Number(data.revision))) throw Error('Cloud data unavailable');
+    return { state: data.payload as State, revision: Number(data.revision) };
+  }
+  const isEditing = () => host?.contains(document.activeElement) && ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName || '');
   const actionDate = (stamp: string) => stamp ? new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin' }).format(new Date(stamp)) : '';
   let week = day(today()).getUTCDay() === 0 ? addDays(monday(today()),7) : monday(today());
   let selectedSlot = '';
   let rain: Record<string, number> = {};
   let backup: State | null = null;
-  const mutate = (fn: () => void, feedback = 'Gespeichert auf diesem Gerät.') => {
-    if (damaged) { message = 'Bitte zuerst eine gültige Sicherung importieren.'; render(); return; }
+  const mutate = async (fn: () => void, feedback = 'Gespeichert. Auf allen Geräten verfügbar.') => {
+    if (!loaded || saving) { message = saving ? 'Speicherung läuft. Bitte kurz warten.' : 'Die gemeinsame Planung muss zuerst geladen werden.'; return false; }
     const previous = JSON.stringify(state);
-    try { fn(); localStorage.setItem(KEY, JSON.stringify(state)); message = feedback; }
-    catch { state = JSON.parse(previous); message = 'Speichern fehlgeschlagen. Bitte eine Sicherung exportieren und den Browserspeicher prüfen.'; }
-    render();
+    saving = true;
+    let payload: State;
+    try { fn(); if (!validState(state)) throw Error(); payload = JSON.parse(JSON.stringify(state)); }
+    catch { state = JSON.parse(previous); saving = false; message = 'Änderung ungültig. Bitte Datum und Uhrzeiten prüfen.'; render(); return false; }
+    message = 'Wird gemeinsam gespeichert …';
+    setBusy();
+    try {
+      const { data, error } = await database.from('personal_planning').update({ payload }).eq('id','shared').eq('revision',revision).select('payload,revision').abortSignal(AbortSignal.timeout(12000)).maybeSingle();
+      if (error) throw error;
+      if (!data) {
+        const latest = await readCloud(); state = latest.state; revision = latest.revision;
+        message = 'Auf einem anderen Gerät wurde die Planung geändert. Der aktuelle Stand ist geladen. Bitte deine Änderung noch einmal vornehmen.';
+        return false;
+      }
+      if (!validState(data.payload)) throw Error();
+      state = data.payload; revision = Number(data.revision); message = feedback;
+      return true;
+    } catch {
+      state = JSON.parse(previous);
+      message = 'Speichern fehlgeschlagen. Diese Änderung wurde nicht bestätigt. Prüfe die Verbindung und versuche es erneut.';
+      return false;
+    } finally { saving = false; render(); }
   };
+  function setBusy() {
+    const status = host?.querySelector<HTMLElement>('.planner-message'); if (status) status.textContent = message;
+    host?.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement|HTMLButtonElement>('input,select,textarea,button').forEach(el => {
+      const a = el.dataset.action;
+      el.disabled = saving || (!loaded && !['prev','next','current','refresh'].includes(a || ''));
+    });
+    document.querySelectorAll<HTMLButtonElement>('[data-personal-action]').forEach(el => { el.disabled = !loaded || saving; });
+  }
+  async function refreshCloud(manual = false) {
+    if (saving || refreshing || (!manual && loaded && isEditing())) return;
+    refreshing = true;
+    try {
+      const latest = await readCloud();
+      const changed = !loaded || latest.revision !== revision;
+      // A poll must not replace a form the user began editing while the request was running.
+      if (loaded && !manual && isEditing()) return;
+      state = latest.state; revision = latest.revision; loaded = true;
+      if (legacy) {
+        const old = legacy;
+        const merge = <T extends {id:string}>(shared:T[], local:T[]) => [...shared, ...local.filter(a => !shared.some(b => b.id === a.id))];
+        const hasData = old.appointments.length || old.slots.length || old.entries.length || old.checks.length;
+        if (!hasData || await mutate(() => {
+          state.appointments = merge(state.appointments,old.appointments);
+          state.slots = merge(state.slots,old.slots);
+          state.entries = merge(state.entries,old.entries);
+          state.checks = [...new Set([...state.checks,...old.checks])];
+        }, 'Bisherige Gerätedaten übernommen. Deine Planung ist auf allen Geräten verfügbar.')) {
+          legacy = null;
+          try { localStorage.removeItem(KEY); } catch { /* No new local data is written. */ }
+        }
+      } else if (changed || manual) {
+        message = manual ? 'Gemeinsamer Stand aktualisiert.' : 'Gemeinsame Planung geladen.';
+      }
+      if (changed || manual) render();
+    } catch { message = loaded ? 'Aktualisierung gerade nicht möglich. Der zuletzt geladene Stand bleibt sichtbar.' : 'Gemeinsame Planung konnte nicht geladen werden. Bitte die Verbindung prüfen und erneut laden.'; render(); }
+    finally { refreshing = false; }
+  }
   const inWeek = (date: string) => date >= week && date < addDays(week, 7);
   const appointmentsFor = (date: string) => state.appointments.filter(a => a.date === date || (a.repeat && a.date <= date && day(a.date).getUTCDay() === day(date).getUTCDay()));
   const overlaps = (a: {start: string; end: string}, b: {start: string; end: string}) => a.start < b.end && b.start < a.end;
@@ -104,7 +171,7 @@ export function initPlanner() {
     const appointments = state.appointments.filter(a => a.repeat ? a.date < addDays(week,7) : inWeek(a.date));
     host.innerHTML = `<div class="planner-heading"><div><p class="section-kicker">Deine persönliche Planung</p><h1>Meine Woche</h1><p>Ein bis zwei Vorhaben reichen. Erst Zeit finden, dann einen passenden Vorschlag machen.</p></div><div class="planner-week-nav">${button('prev','Vorige Woche')}${button('current','Diese Woche')}${button('next','Nächste Woche')}</div></div>
       <h2>${label(week)} – ${label(addDays(week,6))}</h2>
-      <p class="planner-message" role="status">${e(message)}</p>
+      <p class="planner-message" role="status">${e(message)}</p><p class="planner-small">Gemeinsamer Stand für alle Geräte · ohne Login. ${button('refresh','Jetzt aktualisieren')}</p>
       <div class="planner-next"><strong>Dein nächster Schritt</strong><p>${!state.checks.includes(week) ? 'Nimm dir fünf Minuten: feste Termine klären und ein bis zwei freie Zeitfenster markieren.' : slots.length === 0 ? 'Trage ein freies Zeitfenster ein. Unbekannte Termine bitte zuerst klären.' : pending.length ? e(pending[0].next) : 'Wähle einen passenden Vorschlag für eines deiner Zeitfenster.'}</p>${button('calendar','Planungserinnerungen für den Kalender')}</div>
       <div class="planner-steps"><section class="planner-box"><h2>1. Wann ist Raum?</h2><p>Yoga, Töpfern und Verabredungen eintragen. „Unklar“ heißt: erst nachfragen.</p>
       <form id="appointmentForm" class="planner-form"><label>Termin<input name="title" required maxlength="120" placeholder="Zum Beispiel: Yoga"></label><label>Person<select name="owner">${options([['Daniel','Ich'],['Eva','Eva'],['Beide','Beide']])}</select></label><label>Datum<input name="date" type="date" required value="${inWeek(today()) ? today() : week}"></label><label>Von<input name="start" type="time" required value="18:00"></label><label>Bis<input name="end" type="time" required value="19:30"></label><label class="planner-check"><input name="repeat" type="checkbox">Wöchentlich</label><label class="planner-check"><input name="uncertain" type="checkbox">Noch unklar</label><button>Termin hinzufügen</button></form>
@@ -121,8 +188,8 @@ export function initPlanner() {
       <form id="entryForm" class="planner-form"><label>Eigener Vorschlag<input name="title" required maxlength="200" placeholder="Zum Beispiel: Samstag schwimmen"></label><label>Datum der Aktivität<input name="date" type="date"></label><label>Eintragen als<select name="status">${options([['Idee gespeichert','Idee gespeichert'],['Vorgeschlagen','Gerade tatsächlich vorgeschlagen']])}</select></label><button>Eintragen</button></form>
       <h3>Vorhaben dieser Woche</h3>${state.entries.filter(a => inWeek(a.date) || !a.date && inWeek(actionDate(a.createdAt))).map(entryMarkup).join('') || '<p>Noch kein Vorhaben eingetragen.</p>'}
       <details class="planner-history"><summary>Mein Vorschlagsprotokoll · ${state.entries.length} Einträge</summary><p>Deine Gedächtnisstütze: Ideen, tatsächliche Vorschläge und Rückmeldungen.</p>${state.entries.map(entryMarkup).join('') || '<p>Noch keine Einträge.</p>'}</details></section>
-      <details class="planner-storage"><summary>Speicherung und Sicherung</summary><p>Termine und Protokoll bleiben in diesem Browser auf diesem Gerät. Keine automatische Synchronisierung. Beim Löschen der Browserdaten gehen sie verloren. Exportiere regelmäßig eine Sicherung.</p>${button('export','Sicherung exportieren')}<label>Sicherung importieren<input id="plannerImport" type="file" accept="application/json,.json"></label>${backup ? `<p>Gültige Sicherung: ${backup.entries.length} Einträge, ${backup.appointments.length} Termine. Import ersetzt die persönlichen Planungsdaten auf diesem Gerät.</p>${button('confirmImport','Diese Sicherung übernehmen')}${button('cancelImport','Abbrechen')}` : ''}</details>`;
-    wire();
+      <details class="planner-storage"><summary>Speicherung und Sicherung</summary><p>Termine, Zeitfenster und Vorschlagsprotokoll werden gemeinsam online gespeichert. Alle Geräte sehen denselben Stand. Jeder mit Zugriff auf die App kann ihn lesen und bearbeiten. Eine Sicherung kannst du zusätzlich exportieren.</p>${button('export','Sicherung exportieren')}<label>Sicherung importieren<input id="plannerImport" type="file" accept="application/json,.json"></label>${backup ? `<p>Gültige Sicherung: ${backup.entries.length} Einträge, ${backup.appointments.length} Termine. Import ersetzt die gemeinsame Planung für alle Geräte.</p>${button('confirmImport','Diese Sicherung übernehmen')}${button('cancelImport','Abbrechen')}` : ''}</details>`;
+    wire(); setBusy();
   }
   function entryMarkup(a: Entry) {
     const stamp = (s: string) => s ? new Intl.DateTimeFormat('de-DE',{timeZone:'Europe/Berlin',dateStyle:'short',timeStyle:'short'}).format(new Date(s)) : 'Noch nicht';
@@ -159,14 +226,15 @@ export function initPlanner() {
         a.next=el.value==='Vorgeschlagen'||el.value==='Offen'?'Rückmeldung und Zeitpunkt mit Eva klären.':el.value==='Zugesagt'?'Öffnungszeiten, Reservierung und Vorbereitung erledigen.':el.value==='Organisiert'?'Vor dem Termin letzte Details prüfen.':el.value==='Abgelehnt'?'Kurz festhalten, was nicht passte.':el.value==='Gemacht'?'Kurz notieren, wie es euch gefallen hat.':'Eva einen konkreten Zeitpunkt vorschlagen.';
       }
     })));
-    host.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(b=>b.addEventListener('click',()=>{
+    host.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(b=>b.addEventListener('click',async ()=>{
       const action=b.dataset.action,id=b.dataset.id;
       if(action==='prev'||action==='next'||action==='current'){week=action==='current'?monday(today()):addDays(week,action==='prev'?-7:7);render();return;}
+      if(action==='refresh'){await refreshCloud(true);return;}
       if(action==='export'){download(JSON.stringify(state,null,2),'freizeitplaner-sicherung-'+today()+'.json','application/json');return;}
       if(action==='calendar'){calendar();return;}
       if(action==='activityCalendar'){calendar(state.entries.find(x=>x.id===id));return;}
       if(action==='cancelImport'){backup=null;render();return;}
-      if(action==='confirmImport'&&backup){try{localStorage.setItem(KEY,JSON.stringify(backup));state=backup;backup=null;damaged=false;message='Sicherung übernommen.';}catch{message='Import konnte nicht gespeichert werden.';}render();return;}
+      if(action==='confirmImport'&&backup){const imported=backup;if(await mutate(()=>{state=imported;},'Sicherung gemeinsam übernommen.'))backup=null;render();return;}
       if(action==='chooseIdea'){const s=state.slots.find(x=>x.id===selectedSlot);if(!s||clash(s)||s.date<today())return;const a=ideas(s)[Number(id)];if(!a||state.entries.some(x=>x.slotId===s.id&&x.status!=='Abgelehnt'))return;addEntry(a.title,a.url,'Idee gespeichert',s,a.next);return;}
       if(action==='deleteEntry'){const entry=state.entries.find(x=>x.id===id);if(!entry||!confirm(`„${entry.title}“ aus deinem persönlichen Protokoll entfernen?`))return;}
       mutate(()=>{
@@ -208,11 +276,14 @@ export function initPlanner() {
   const enhance=()=>document.querySelectorAll<HTMLButtonElement>('[data-favorite]').forEach(b=>{
     if(!b.dataset.title||b.parentElement?.querySelector('[data-personal-action]'))return;
     const action=document.createElement('button');action.type='button';action.className='details-btn';action.dataset.personalAction='true';action.textContent='In meine Planung';
-    action.addEventListener('click',()=>{addEntry(b.dataset.title!,b.dataset.url || '');document.querySelector<HTMLButtonElement>('[data-view="planning"]')?.click();});b.insertAdjacentElement('afterend',action);
+    action.addEventListener('click',()=>{addEntry(b.dataset.title!,b.dataset.url || '');document.querySelector<HTMLButtonElement>('[data-view="planning"]')?.click();});action.disabled=!loaded||saving;b.insertAdjacentElement('afterend',action);
   });
   new MutationObserver(enhance).observe(document.querySelector('#app')!,{childList:true,subtree:true});
-  window.addEventListener('storage',ev=>{if(ev.key!==KEY)return;try{const parsed=ev.newValue?JSON.parse(ev.newValue):empty();if(!validState(parsed))throw Error();state=parsed;damaged=false;message='Planung aus einem anderen Tab übernommen.';render();}catch{message='Änderung aus einem anderen Tab konnte nicht gelesen werden.';render();}});
-  render();enhance();
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refreshCloud();});
+  window.addEventListener('focus',()=>{void refreshCloud();});
+  window.setInterval(()=>{if(!document.hidden)void refreshCloud();},15000);
+  render();enhance();setBusy();
+  void refreshCloud();
   const params=new URLSearchParams({latitude:'48.3705',longitude:'10.8978',daily:'precipitation_probability_max',timezone:'Europe/Berlin',forecast_days:'14'});
   fetch('https://api.open-meteo.com/v1/forecast?'+params).then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{if(data.daily?.time)rain=Object.fromEntries(data.daily.time.map((d:string,i:number)=>[d,data.daily.precipitation_probability_max[i]]));if(!host.contains(document.activeElement))render();}).catch(()=>{});
 }

@@ -326,64 +326,6 @@ section[id],h1[id]{scroll-margin-top:85px}
  .lifestyle-card-buttons{flex-wrap:wrap;justify-content:flex-end}
 }
 
-/* Mobile action layout after adding taste ratings */
-@media(max-width:760px){
- .card .item-actions,.card .card-actions,
- .idea-card .item-actions,.tour-card .item-actions,.discovery-item .item-actions{
-   display:grid!important;
-   grid-template-columns:auto minmax(0,1fr)!important;
-   grid-template-areas:"details source" "rating favorite"!important;
-   column-gap:10px!important;
-   row-gap:8px!important;
-   align-items:center!important;
- }
- .card .details-btn,.idea-card .details-btn,.tour-card .details-btn,.discovery-item .details-btn{
-   grid-area:details!important;width:88px!important;
- }
- .card .info-link,.idea-card .info-link,.tour-card .info-link,.discovery-item .info-link{
-   grid-area:source!important;justify-self:start!important;
- }
- .card .rating-actions,.idea-card .rating-actions,.tour-card .rating-actions,.discovery-item .rating-actions{
-   grid-area:rating!important;justify-self:start!important;
- }
- .card .favorite-btn,.idea-card .favorite-btn,.tour-card .favorite-btn,.discovery-item .favorite-btn{
-   grid-area:favorite!important;width:auto!important;min-width:82px!important;justify-self:end!important;
- }
- .discovery-item .item-actions{
-   margin-left:-64px!important;
-   width:calc(100% + 64px)!important;
- }
-}
-
-/* Final compact mobile recommendation actions: one row */
-@media(max-width:760px){
- .card .item-actions,.card .card-actions,
- .idea-card .item-actions,.tour-card .item-actions,.discovery-item .item-actions{
-   display:flex!important;
-   flex-wrap:nowrap!important;
-   align-items:center!important;
-   gap:6px!important;
-   width:100%!important;
- }
- .card .details-btn,.idea-card .details-btn,.tour-card .details-btn,.discovery-item .details-btn{
-   width:auto!important;min-width:68px!important;min-height:32px!important;padding:5px 9px!important;font-size:11.5px!important;flex:0 0 auto!important;
- }
- .card .info-link,.idea-card .info-link,.tour-card .info-link,.discovery-item .info-link{
-   padding:4px 2px!important;font-size:11.5px!important;white-space:nowrap!important;flex:0 0 auto!important;
- }
- .card .rating-actions,.idea-card .rating-actions,.tour-card .rating-actions,.discovery-item .rating-actions{
-   display:inline-flex!important;gap:3px!important;flex:0 0 auto!important;margin-left:auto!important;
- }
- .card .rating-btn,.idea-card .rating-btn,.tour-card .rating-btn,.discovery-item .rating-btn{
-   width:29px!important;min-width:29px!important;height:30px!important;padding:2px!important;font-size:13px!important;
- }
- .card .favorite-btn,.idea-card .favorite-btn,.tour-card .favorite-btn,.discovery-item .favorite-btn{
-   width:auto!important;min-width:64px!important;min-height:32px!important;padding:5px 8px!important;font-size:11.5px!important;flex:0 0 auto!important;margin:0!important;
- }
- .idea-card .item-actions{margin-left:-39px!important;width:calc(100% + 39px)!important}
- .discovery-item .item-actions{margin-left:-64px!important;width:calc(100% + 64px)!important}
-}
-
 /* Compact movie/series metadata */
 .lifestyle-meta{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
 .trailer-link.trailer-meta{display:inline-flex;align-items:center;min-height:32px;padding:6px 10px;border-radius:10px;white-space:nowrap;font-size:12px;font-weight:750;text-decoration:none}
@@ -393,19 +335,12 @@ section[id],h1[id]{scroll-margin-top:85px}
  .lifestyle-actions{margin-top:12px}
 }
 
-/* Final compact lifestyle layout on phones */
-@media(max-width:760px){
- .lifestyle-meta{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:5px!important;overflow-x:auto!important;scrollbar-width:none}
- .lifestyle-meta::-webkit-scrollbar{display:none}
- .lifestyle-meta>span,.lifestyle-meta .imdb-rating,.lifestyle-meta .trailer-meta{
-   flex:0 0 auto!important;white-space:nowrap!important;font-size:10.5px!important;padding:6px 7px!important;min-height:30px!important;
- }
- .lifestyle-actions{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:5px!important;margin-top:12px!important}
- .lifestyle-links{display:flex!important;flex:0 0 auto!important}
- .lifestyle-links .info-link{font-size:11px!important;line-height:1.1!important;white-space:nowrap!important;padding:5px 2px!important}
- .lifestyle-card-buttons{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;gap:4px!important;margin-left:auto!important}
- .lifestyle-card-buttons .rating-actions{display:flex!important;gap:2px!important;flex:0 0 auto!important}
- .lifestyle-card-buttons .rating-btn{width:28px!important;min-width:28px!important;height:30px!important;padding:2px!important;font-size:13px!important}
- .lifestyle-card-buttons .favorite-btn{min-width:58px!important;min-height:32px!important;padding:5px 6px!important;font-size:11px!important}
- .lifestyle-card-buttons .hide-card-btn{min-height:32px!important;padding:5px 2px!important;font-size:10.5px!important;white-space:nowrap!important}
-}
+/* Consistent card footers. Primary actions above, context and ratings below. */
+.card .item-actions,.idea-card .item-actions,.tour-card .item-actions,.discovery-item .item-actions,.lifestyle-card .lifestyle-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-template-areas:"plan plan favorite" "details source rating"!important;gap:8px!important;align-items:center!important;margin:18px 0 0!important;padding-top:14px!important;border-top:1px solid #e1e7ef!important;width:100%!important;box-sizing:border-box!important}
+.lifestyle-card .lifestyle-actions{grid-template-areas:"plan plan favorite" "source hide rating"!important}
+.lifestyle-card .lifestyle-links,.lifestyle-card .lifestyle-card-buttons{display:contents!important}
+.card .item-actions>[data-personal-action],.idea-card .item-actions>[data-personal-action],.tour-card .item-actions>[data-personal-action],.discovery-item .item-actions>[data-personal-action],.lifestyle-card [data-personal-action]{grid-area:plan!important;background:#245bbb!important;color:white!important;border:1px solid #245bbb!important;width:100%!important}
+.item-actions .details-btn:not([data-personal-action]){grid-area:details!important}.item-actions .info-link,.lifestyle-actions .info-link{grid-area:source!important}.item-actions .rating-actions,.lifestyle-actions .rating-actions{grid-area:rating!important;display:flex!important;justify-content:flex-end!important;gap:5px!important;margin:0!important}.item-actions .favorite-btn,.lifestyle-actions .favorite-btn{grid-area:favorite!important;width:100%!important;margin:0!important}.lifestyle-actions .hide-card-btn{grid-area:hide!important}
+.card .item-actions .details-btn,.idea-card .item-actions .details-btn,.tour-card .item-actions .details-btn,.discovery-item .item-actions .details-btn,.item-actions .favorite-btn,.lifestyle-actions .favorite-btn,.lifestyle-actions .hide-card-btn,.lifestyle-actions [data-personal-action]{display:inline-flex!important;align-items:center!important;justify-content:center!important;min-width:0!important;min-height:40px!important;padding:8px 10px!important;font-size:.875rem!important;line-height:1.35!important;border-radius:9px!important;white-space:normal!important;text-align:center!important;box-sizing:border-box!important}
+.item-actions .info-link,.lifestyle-actions .info-link{font-size:.875rem!important;line-height:1.4!important;padding:6px 0!important;white-space:normal!important;justify-self:start!important}.item-actions .rating-btn,.lifestyle-actions .rating-btn{width:36px!important;min-width:36px!important;height:36px!important;padding:4px!important;font-size:1rem!important;margin:0!important}
+@media(max-width:760px){.lifestyle-meta{flex-wrap:wrap!important;gap:7px!important}.lifestyle-meta>span,.lifestyle-meta .imdb-rating,.lifestyle-meta .trailer-meta{font-size:.875rem!important;white-space:normal!important}.card .item-actions,.idea-card .item-actions,.tour-card .item-actions,.discovery-item .item-actions,.lifestyle-card .lifestyle-actions{gap:8px!important}.item-actions .rating-actions,.lifestyle-actions .rating-actions{justify-content:flex-end!important}}

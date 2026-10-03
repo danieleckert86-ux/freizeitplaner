@@ -273,7 +273,7 @@ async function bootstrap() {
   };
   viewButtons.forEach(button => button.addEventListener('click', () => setAppView(button.dataset.view ?? 'weekend')));
   document.querySelector<HTMLButtonElement>('[data-main-view=ideas]')?.addEventListener('click', () => setAppView(lastIdeaView));
-  setAppView('planning');
+  setAppView('events');
 
 const favoriteCategoryButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.favorite-category-filter'));
 const favoritesList = document.querySelector<HTMLElement>('#favoritesList');

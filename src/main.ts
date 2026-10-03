@@ -256,6 +256,7 @@ async function bootstrap() {
   const viewSections = Array.from(document.querySelectorAll<HTMLElement>('[data-app-view]'));
   let lastIdeaView = 'events';
   const setAppView = (view: string) => {
+    if (view === 'favorites') void loadFavorites();
     const isIdea = !['planning','favorites'].includes(view);
     if (isIdea) lastIdeaView = view;
     document.querySelector<HTMLElement>('.idea-nav')!.hidden = !isIdea;
@@ -273,6 +274,34 @@ async function bootstrap() {
   viewButtons.forEach(button => button.addEventListener('click', () => setAppView(button.dataset.view ?? 'weekend')));
   document.querySelector<HTMLButtonElement>('[data-main-view=ideas]')?.addEventListener('click', () => setAppView(lastIdeaView));
   setAppView('planning');
+
+const favoriteCategoryButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.favorite-category-filter'));
+const favoritesList = document.querySelector<HTMLElement>('#favoritesList');
+const favoritesEmpty = document.querySelector<HTMLElement>('#favoritesEmpty');
+const favoritesMessage = document.querySelector<HTMLElement>('#favoritesMessage');
+const savedCount = document.querySelector<HTMLElement>('#savedCount');
+
+const detailDialog = document.querySelector<HTMLDialogElement>('#detailDialog');
+const detailClose = document.querySelector<HTMLButtonElement>('#detailClose');
+const detailBadge = document.querySelector<HTMLElement>('#detailBadge');
+const detailTitle = document.querySelector<HTMLElement>('#detailTitle');
+const detailMeta = document.querySelector<HTMLElement>('#detailMeta');
+const detailDescription = document.querySelector<HTMLElement>('#detailDescription');
+const detailFacts = document.querySelector<HTMLElement>('#detailFacts');
+const detailSource = document.querySelector<HTMLAnchorElement>('#detailSource');
+const detailFavorite = document.querySelector<HTMLButtonElement>('#detailFavorite');
+const backToTop = document.querySelector<HTMLButtonElement>('#backToTop');
+const weatherGrid = document.querySelector<HTMLElement>('.weather-grid');
+
+let activeDay = 'all';
+let activeCategory = 'all';
+let activeFavoriteCategory = 'all';
+let favorites: Favorite[] = [];
+let detailFavoriteSource: HTMLButtonElement | null = null;
+
+let favoritesLoading = false;
+if (favoritesEmpty) favoritesEmpty.textContent = 'Merkliste wird geladen …';
+void loadFavorites();
 
   try { await loadRecommendationData(); } catch {
     const state = document.querySelector<HTMLElement>('.data-state');
@@ -314,7 +343,6 @@ async function bootstrap() {
 
 const dayButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.filter'));
 const categoryButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.category-filter'));
-const favoriteCategoryButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.favorite-category-filter'));
 const filterableItems = Array.from(document.querySelectorAll<HTMLElement>('.filterable[data-day]:not(.discovery-item)'));
 const topCards = Array.from(document.querySelectorAll<HTMLElement>('#topCards .filterable'));
 const ideaCards = Array.from(document.querySelectorAll<HTMLElement>('#alternativeList .filterable'));
@@ -331,29 +359,6 @@ const resultCount = document.querySelector<HTMLElement>('#resultCount');
 const resetFilters = document.querySelector<HTMLButtonElement>('#resetFilters');
 
 const favoriteButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-favorite]'));
-const favoritesList = document.querySelector<HTMLElement>('#favoritesList');
-const favoritesEmpty = document.querySelector<HTMLElement>('#favoritesEmpty');
-const favoritesMessage = document.querySelector<HTMLElement>('#favoritesMessage');
-const savedCount = document.querySelector<HTMLElement>('#savedCount');
-
-const detailDialog = document.querySelector<HTMLDialogElement>('#detailDialog');
-const detailClose = document.querySelector<HTMLButtonElement>('#detailClose');
-const detailBadge = document.querySelector<HTMLElement>('#detailBadge');
-const detailTitle = document.querySelector<HTMLElement>('#detailTitle');
-const detailMeta = document.querySelector<HTMLElement>('#detailMeta');
-const detailDescription = document.querySelector<HTMLElement>('#detailDescription');
-const detailFacts = document.querySelector<HTMLElement>('#detailFacts');
-const detailSource = document.querySelector<HTMLAnchorElement>('#detailSource');
-const detailFavorite = document.querySelector<HTMLButtonElement>('#detailFavorite');
-const backToTop = document.querySelector<HTMLButtonElement>('#backToTop');
-const weatherGrid = document.querySelector<HTMLElement>('.weather-grid');
-
-let activeDay = 'all';
-let activeCategory = 'all';
-let activeFavoriteCategory = 'all';
-let favorites: Favorite[] = [];
-let detailFavoriteSource: HTMLButtonElement | null = null;
-
 function berlinDateIso(date = new Date()) {
   const parts = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Europe/Berlin',
@@ -752,11 +757,14 @@ function renderFavorites() {
 }
 
 async function loadFavorites() {
+  if (favoritesLoading) return;
+  favoritesLoading = true;
   try {
     const { data, error } = await supabase
       .from('favorites')
       .select('id,suggestion_id,title,day,category,description,url,saved_at')
-      .order('saved_at', { ascending: false });
+      .order('saved_at', { ascending: false })
+      .abortSignal(AbortSignal.timeout(12000));
 
     if (error) throw error;
 
@@ -772,8 +780,12 @@ async function loadFavorites() {
     }));
 
     renderFavorites();
+    showFavoriteMessage('');
   } catch {
-    showFavoriteMessage('Merkliste konnte gerade nicht geladen werden.');
+    if (favoritesEmpty && favorites.length === 0) favoritesEmpty.textContent = 'Gespeicherte Einträge gerade nicht erreichbar.';
+    showFavoriteMessage('Merkliste konnte nicht geladen werden. Öffne „Gemerkt“ erneut, um es noch einmal zu versuchen.');
+  } finally {
+    favoritesLoading = false;
   }
 }
 
@@ -946,7 +958,6 @@ markPastItems();
 markWeatherDays();
 enhanceDetails();
 renderCurrentFilters();
-void loadFavorites();
 void loadWeather();
 }
 

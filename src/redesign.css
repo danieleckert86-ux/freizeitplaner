@@ -382,3 +382,18 @@ button:focus-visible,summary:focus-visible{outline:3px solid #245bbb;outline-off
 @media(max-width:480px){.main-nav .section-nav-btn{font-size:.9rem;padding:10px 6px}.idea-nav{gap:6px}.idea-nav button{font-size:.85rem;padding:9px 10px;flex:1 1 auto}.event-periods button{font-size:.825rem;padding:9px 10px}.card-more-panel{min-width:0;width:100%}}
 .card .item-actions[data-quiet],.idea-card .item-actions[data-quiet],.tour-card .item-actions[data-quiet],.discovery-item .item-actions[data-quiet],.lifestyle-card .lifestyle-actions[data-quiet]{display:flex!important;flex-wrap:wrap!important}
 .item-actions[data-quiet]>.favorite-btn,.lifestyle-actions[data-quiet]>.favorite-btn{width:auto!important;flex:0 0 auto}
+
+/* Compact primary actions in one row, including narrow screens. */
+.card .item-actions[data-quiet],.idea-card .item-actions[data-quiet],.tour-card .item-actions[data-quiet],.discovery-item .item-actions[data-quiet],.lifestyle-card .lifestyle-actions[data-quiet]{
+ display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto!important;
+ grid-template-areas:"plan favorite more"!important;gap:6px!important;margin-top:10px!important;padding-top:10px!important;position:relative;
+}
+.item-actions[data-quiet]>[data-personal-action],.lifestyle-actions[data-quiet]>[data-personal-action],
+.item-actions[data-quiet]>.favorite-btn,.lifestyle-actions[data-quiet]>.favorite-btn{
+ width:100%!important;min-width:0!important;min-height:40px!important;padding:8px 6px!important;font-size:.8rem!important;white-space:nowrap!important;margin:0!important;
+}
+.item-actions[data-quiet]>.card-more,.lifestyle-actions[data-quiet]>.card-more{
+ grid-area:more!important;position:static;margin:0!important;min-width:0;flex-basis:auto;
+}
+.card-more>summary{min-height:40px;padding:10px 6px;white-space:nowrap;font-size:.8rem}
+.card-more[open]>.card-more-panel{position:absolute;top:100%;right:0;z-index:10;width:100%;min-width:0;box-sizing:border-box;box-shadow:0 6px 18px #223f7420}

@@ -29,8 +29,8 @@
       </div>
     </header>
     <nav class="section-nav main-nav" aria-label="Hauptbereiche">
-      <button class="section-nav-btn active" type="button" data-main-view="planning" data-view="planning">Meine Woche</button>
-      <button class="section-nav-btn" type="button" data-main-view="ideas">Ideen</button>
+      <button class="section-nav-btn" type="button" data-main-view="planning" data-view="planning" disabled aria-disabled="true">Meine Woche</button>
+      <button class="section-nav-btn active" type="button" data-main-view="ideas">Ideen</button>
       <button class="section-nav-btn" type="button" data-main-view="favorites" data-view="favorites">Gemerkt</button>
     </nav>
     <nav class="idea-nav" aria-label="Ideen nach Bereich" hidden>
@@ -40,7 +40,7 @@
       <button type="button" data-view="movies">Filme &amp; Serien</button>
     </nav>
 
-    <section id="personalPlanner" class="view-section" data-app-view="planning" aria-label="Meine persönliche Wochenplanung"></section>
+    <section id="personalPlanner" class="view-section" data-app-view="planning" hidden aria-label="Meine persönliche Wochenplanung"></section>
 
     <section class="weekend-overview view-section" data-app-view="weekend" aria-labelledby="weekendTitle">
       <div class="overview-copy">

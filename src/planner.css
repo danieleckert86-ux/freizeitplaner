@@ -169,3 +169,24 @@ body:has(.planning-dialog[open]){overflow:hidden}
 #personalPlanner .week-day.is-drop-target{outline:3px solid #306dcc;background:#edf5ff}
 #personalPlanner .is-dragging{opacity:.45}
 @media(pointer:fine){#personalPlanner [draggable=true]{cursor:grab}#personalPlanner [draggable=true]:active{cursor:grabbing}}
+/* Dinner is a quiet, untimed footer for every calendar day. */
+#personalPlanner .day-dinner{margin-top:auto;padding:10px;border-top:1px solid #e3e9f2;background:#fffaf3}
+#personalPlanner .dinner-card{display:flex;flex-direction:column;gap:8px;min-width:0}
+#personalPlanner .dinner-label{display:flex;align-items:center;font-size:.75rem;font-weight:700;color:#8b623c}
+#personalPlanner .dinner-label .category-icon,#personalPlanner .dinner-add .category-icon{width:18px;height:18px;flex-basis:18px}
+#personalPlanner .dinner-title{font-size:.85rem;line-height:1.4;font-weight:650;color:#544633;overflow-wrap:anywhere;text-decoration:none}
+#personalPlanner .dinner-title:hover{text-decoration:underline}
+#personalPlanner .dinner-actions{display:flex;flex-wrap:wrap;gap:6px}
+#personalPlanner .dinner-actions button{font-size:.7rem;padding:5px 6px;min-height:32px;border-color:#e7ddce;color:#79644b;background:#fff}
+#personalPlanner .dinner-add{display:flex;align-items:center;justify-content:center;width:100%;min-height:40px;gap:4px;font-size:.75rem;background:transparent;color:#8b623c;border:1px dashed #ddcbb3;padding:8px 4px}
+#personalPlanner .dinner-picker h2{font-size:1.3rem}
+#personalPlanner .dinner-date-label,#personalPlanner .dinner-search{display:flex;flex-direction:column;gap:8px;margin:14px 0;font-size:.875rem}
+#personalPlanner .dinner-date-label input,#personalPlanner .dinner-search input{font:inherit;min-height:44px;padding:10px 12px;border:1px solid #cbd6e5;border-radius:9px;box-sizing:border-box;width:100%;background:white}
+#personalPlanner .dinner-current{font-size:.9rem}
+#personalPlanner .dinner-recipes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-height:48dvh;overflow:auto;padding:3px}
+#personalPlanner .dinner-recipe{display:flex;align-items:center;gap:12px;text-align:left;padding:10px!important;min-width:0;border:1px solid #e1e5ec;border-radius:12px;background:white;color:var(--text)}
+#personalPlanner .dinner-recipe img,#personalPlanner .dinner-image-placeholder{width:64px;height:64px;flex:0 0 64px;object-fit:cover;border-radius:8px;background:#fff4e4}
+#personalPlanner .dinner-image-placeholder{display:grid;place-items:center}
+#personalPlanner .dinner-recipe strong{font-size:.85rem;line-height:1.35;display:block}
+#personalPlanner .dinner-recipe small{display:block;font-size:.75rem;color:var(--muted);margin-top:6px}
+@media(max-width:700px){#personalPlanner .dinner-recipes{grid-template-columns:1fr}.day-dinner{padding:12px}}

@@ -358,3 +358,27 @@ section[id],h1[id]{scroll-margin-top:85px}
 .discovery-item .item-actions .info-link{justify-self:center!important;font-weight:500;font-size:.8rem!important}
 .discovery-item .item-actions .details-btn,.discovery-item .item-actions .favorite-btn{font-size:.8rem!important;padding:7px 10px!important;min-height:40px!important}
 @media(max-width:1000px){.discovery-item .item-actions{grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-template-areas:"plan favorite details" "source source rating"!important}.discovery-item .item-actions .info-link{justify-self:start!important}}
+/* Three main destinations, with separate idea categories. */
+.main-nav{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.main-nav .section-nav-btn{width:100%;min-height:46px;justify-content:center}
+.idea-nav,.event-periods{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 24px}
+.idea-nav[hidden]{display:none}
+.idea-nav button,.event-periods button{font:inherit;font-size:.9rem;min-height:42px;padding:9px 14px;background:#fff;border:1px solid #d7e1ed;color:#52627a;border-radius:10px;cursor:pointer}
+.idea-nav button.active,.event-periods button.active{background:#e9f1ff;border-color:#b8ceef;color:#245bbb;font-weight:700}
+.item-actions,.lifestyle-actions{display:flex!important;flex-wrap:wrap;gap:8px!important;align-items:center!important}
+.item-actions>[data-personal-action],.lifestyle-actions>[data-personal-action]{background:#245bbb;color:#fff;border:1px solid #245bbb;font-weight:650;min-height:42px;padding:9px 14px;border-radius:9px;font-size:.875rem}
+.item-actions>[data-favorite],.lifestyle-actions>[data-favorite]{min-height:42px;padding:9px 14px}
+.card-more{position:relative;margin-left:auto;font-size:.85rem}
+.card-more>summary{cursor:pointer;padding:11px 10px;min-height:42px;box-sizing:border-box;color:#64738a;list-style:none}
+.card-more>summary::-webkit-details-marker{display:none}
+.card-more>summary:after{content:' ···'}
+.card-more-panel{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:12px;background:#f0f4fa;border:1px solid #d7e1ed;border-radius:10px;min-width:220px}
+.card-more[open]{flex-basis:100%;margin-left:0}
+.card-more-panel .lifestyle-card-buttons,.card-more-panel .lifestyle-links{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.card-more-panel [data-favorite],.card-more-panel [data-personal-action]{display:none}
+.discovery-header time{white-space:normal!important;line-height:1.5}
+.discovery-item[hidden]{display:none!important}
+button:focus-visible,summary:focus-visible{outline:3px solid #245bbb;outline-offset:3px}
+@media(max-width:480px){.main-nav .section-nav-btn{font-size:.9rem;padding:10px 6px}.idea-nav{gap:6px}.idea-nav button{font-size:.85rem;padding:9px 10px;flex:1 1 auto}.event-periods button{font-size:.825rem;padding:9px 10px}.card-more-panel{min-width:0;width:100%}}
+.card .item-actions[data-quiet],.idea-card .item-actions[data-quiet],.tour-card .item-actions[data-quiet],.discovery-item .item-actions[data-quiet],.lifestyle-card .lifestyle-actions[data-quiet]{display:flex!important;flex-wrap:wrap!important}
+.item-actions[data-quiet]>.favorite-btn,.lifestyle-actions[data-quiet]>.favorite-btn{width:auto!important;flex:0 0 auto}

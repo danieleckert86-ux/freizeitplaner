@@ -134,8 +134,8 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   renderTours('#bikeGroup', data.bikes);
 
   const discoveries = document.querySelector<HTMLElement>('#discoveries .discovery-timeline');
-  if (discoveries) discoveries.innerHTML = data.discoveries.map(item =>
-    '<article class="discovery-item"><div><div class="discovery-header"><time>' + dataEscape(item.time) + '</time><span class="mini-badge">' + dataEscape(item.badge) + '</span></div>' +
+  if (discoveries) discoveries.innerHTML = [...data.top, ...data.ideas.filter(item => item.category !== 'wellness'), ...data.discoveries].filter((item,index,all) => all.findIndex(other => other.favorite.id === item.favorite.id) === index && item.date >= new Intl.DateTimeFormat('sv-SE', {timeZone:'Europe/Berlin'}).format(new Date())).sort((a,b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || '')).map(item =>
+    '<article class="discovery-item filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '"><div><div class="discovery-header"><time datetime="' + dataEscape(item.date) + '">' + dataEscape(new Intl.DateTimeFormat('de-DE', {weekday:'short',day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(new Date(item.date + 'T12:00:00Z'))) + (/^\d{2}:\d{2}$/.test(item.time || '') ? ' · ' + dataEscape(item.time) : '') + '</time><span class="mini-badge">' + dataEscape(item.badge) + '</span></div>' +
     '<h3>' + dataEscape(item.title) + '</h3><p>' + dataEscape(item.description) + '</p><div class="item-actions">' +
     sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, 'discoveries') + favoriteMarkup(item, true) + '</div></div></article>'
   ).join('');
@@ -245,8 +245,16 @@ async function bootstrap() {
 
   const viewButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-view]'));
   const viewSections = Array.from(document.querySelectorAll<HTMLElement>('[data-app-view]'));
+  let lastIdeaView = 'events';
   const setAppView = (view: string) => {
-    viewButtons.forEach(button => button.classList.toggle('active', button.dataset.view === view));
+    const isIdea = !['planning','favorites'].includes(view);
+    if (isIdea) lastIdeaView = view;
+    document.querySelector<HTMLElement>('.idea-nav')!.hidden = !isIdea;
+    document.querySelectorAll<HTMLButtonElement>('[data-main-view]').forEach(button => {
+      const active = button.dataset.mainView === (isIdea ? 'ideas' : view);
+      button.classList.toggle('active', active); button.setAttribute('aria-current', active ? 'page' : 'false');
+    });
+    viewButtons.filter(button => !button.hasAttribute('data-main-view')).forEach(button => {const active = button.dataset.view === view; button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active));});
     viewSections.forEach(section => {
       const active = section.dataset.appView === view;
       section.hidden = !active;
@@ -254,6 +262,7 @@ async function bootstrap() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   viewButtons.forEach(button => button.addEventListener('click', () => setAppView(button.dataset.view ?? 'weekend')));
+  document.querySelector<HTMLButtonElement>('[data-main-view=ideas]')?.addEventListener('click', () => setAppView(lastIdeaView));
   setAppView('planning');
 
   try { await loadRecommendationData(); } catch {
@@ -297,7 +306,7 @@ async function bootstrap() {
 const dayButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.filter'));
 const categoryButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.category-filter'));
 const favoriteCategoryButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.favorite-category-filter'));
-const filterableItems = Array.from(document.querySelectorAll<HTMLElement>('.filterable[data-day]'));
+const filterableItems = Array.from(document.querySelectorAll<HTMLElement>('.filterable[data-day]:not(.discovery-item)'));
 const topCards = Array.from(document.querySelectorAll<HTMLElement>('#topCards .filterable'));
 const ideaCards = Array.from(document.querySelectorAll<HTMLElement>('#alternativeList .filterable'));
 const hikeCards = Array.from(document.querySelectorAll<HTMLElement>('#hikeGroup .filterable'));
@@ -703,7 +712,7 @@ function renderFavorites() {
       '</div>' +
       '<div class="favorite-actions">' +
       '<a class="info-link" href="' + escapeAttr(item.url) + '" target="_blank" rel="noopener noreferrer">Originalquelle</a>' +
-      '<button class="details-btn" type="button" data-plan-favorite data-title="' + escapeAttr(item.title) + '" data-url="' + escapeAttr(item.url) + '" data-category="' + escapeAttr(normalizeCategory(item.category)) + '" data-suggestion-id="' + escapeAttr(item.suggestionId) + '">Im Kalender einplanen</button>' +
+      '<button class="details-btn" type="button" data-plan-favorite data-title="' + escapeAttr(item.title) + '" data-url="' + escapeAttr(item.url) + '" data-category="' + escapeAttr(normalizeCategory(item.category)) + '" data-suggestion-id="' + escapeAttr(item.suggestionId) + '">Einplanen</button>' +
       '<button class="remove-favorite" type="button" data-remove="' + escapeAttr(item.id) + '">Entfernen</button>' +
       '</div>';
     favoritesList.appendChild(row);
@@ -932,4 +941,33 @@ void loadFavorites();
 void loadWeather();
 }
 
+function quietCardActions() {
+  document.querySelectorAll<HTMLElement>('.item-actions,.lifestyle-actions').forEach(actions => {
+    if (actions.dataset.quiet) return;
+    const favorite = actions.querySelector('[data-favorite]');
+    const plan = actions.querySelector('[data-personal-action]');
+    if (!favorite || !plan) return;
+    actions.dataset.quiet = 'true';
+    const more = document.createElement('details'); more.className = 'card-more';
+    const summary = document.createElement('summary'); summary.textContent = 'Mehr';
+    summary.setAttribute('aria-label','Weitere Aktionen für ' + (favorite.getAttribute('data-title') || 'diese Idee'));
+    const panel = document.createElement('div'); panel.className = 'card-more-panel';
+    more.append(summary, panel);
+    Array.from(actions.children).forEach(child => {if (child !== favorite && child !== plan) panel.append(child);});
+    actions.append(plan, favorite, more);
+  });
+}
+new MutationObserver(quietCardActions).observe(document.querySelector('#app')!, {childList:true,subtree:true});
+document.querySelectorAll<HTMLButtonElement>('[data-event-period]').forEach(button => button.addEventListener('click', () => {
+  const now = new Date(); const today = new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(now);
+  const sunday = new Date(today + 'T12:00:00Z'); sunday.setUTCDate(sunday.getUTCDate() + (7 - sunday.getUTCDay()) % 7);
+  const end = sunday.toISOString().slice(0,10);
+  document.querySelectorAll<HTMLButtonElement>('[data-event-period]').forEach(b => {const active = b === button;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
+  let visible = 0;
+  document.querySelectorAll<HTMLElement>('.discovery-item').forEach(card => {
+    const date = card.dataset.date || ''; const show = date >= today && (button.dataset.eventPeriod === 'today' ? date === today : button.dataset.eventPeriod === 'week' ? date <= end : true);
+    card.hidden = !show; if (show) visible++;
+  });
+  document.querySelector<HTMLElement>('#eventsEmpty')!.hidden = visible > 0;
+}));
 void bootstrap();

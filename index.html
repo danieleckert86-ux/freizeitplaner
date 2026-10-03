@@ -31,19 +31,20 @@
       </div>
       <div class="header-actions">
         <span class="data-state">Datenstand Freizeit-Tipps: 28.09.2026</span>
-        <a class="saved-jump" href="#favorites" aria-label="Merkliste öffnen">
-          <span class="saved-label">Merkliste</span>
-          <span class="saved-count" id="savedCount">0</span>
-        </a>
+        <span id="savedCount" hidden>0</span>
       </div>
     </header>
-    <nav class="section-nav" aria-label="Bereiche">
-      <button class="section-nav-btn" type="button" data-view="planning">Meine Woche</button>
-      <button class="section-nav-btn active" type="button" data-view="weekend">Wochenende</button>
-      <button class="section-nav-btn" type="button" data-view="outdoor">Raus ins Grüne</button>
-      <button class="section-nav-btn" type="button" data-view="restaurants">Restaurants</button>
-      <button class="section-nav-btn" type="button" data-view="movies">Filme &amp; Serien</button>
-      <button class="section-nav-btn" type="button" data-view="favorites">Gemerkt</button>
+    <nav class="section-nav main-nav" aria-label="Hauptbereiche">
+      <button class="section-nav-btn active" type="button" data-main-view="planning" data-view="planning">Meine Woche</button>
+      <button class="section-nav-btn" type="button" data-main-view="ideas">Ideen</button>
+      <button class="section-nav-btn" type="button" data-main-view="favorites" data-view="favorites">Gemerkt</button>
+    </nav>
+    <nav class="idea-nav" aria-label="Ideen nach Bereich" hidden>
+      <button type="button" data-view="events">Veranstaltungen</button>
+      <button type="button" data-view="weekend">Wochenende</button>
+      <button type="button" data-view="outdoor">Raus ins Grüne</button>
+      <button type="button" data-view="restaurants">Restaurants</button>
+      <button type="button" data-view="movies">Filme &amp; Serien</button>
     </nav>
 
     <section id="personalPlanner" class="view-section" data-app-view="planning" aria-label="Meine persönliche Wochenplanung"></section>
@@ -161,14 +162,20 @@
       <div class="media-panel" data-media-panel="stream" hidden><p class="media-note">Nur Neuerscheinungen der letzten 60 Tage auf Netflix, Disney+, RTL+, ARD und ZDF.</p><div class="lifestyle-grid" id="streamList"></div></div>
     </section>
 
-    <section class="panel discovery-panel view-section" data-app-view="weekend" id="discoveries" aria-labelledby="discoveriesHeading">
+    <section class="panel discovery-panel view-section" data-app-view="events" id="discoveries" aria-labelledby="discoveriesHeading">
       <div class="section-head">
         <div>
           <p class="section-kicker">Schon mal vormerken</p>
-          <h2 id="discoveriesHeading">Schon etwas vor?</h2>
-          <p class="section-note">Besondere Entdeckungen für die nächsten drei Wochen.</p>
+          <h2 id="discoveriesHeading">Veranstaltungen für deine Woche</h2>
+          <p class="section-note">Konkrete Anlässe von Montag bis Sonntag, nach Datum sortiert.</p>
         </div>
       </div>
+      <nav class="event-periods" aria-label="Veranstaltungszeitraum">
+        <button type="button" data-event-period="all" class="active" aria-pressed="true">Nächste 21 Tage</button>
+        <button type="button" data-event-period="today" aria-pressed="false">Heute</button>
+        <button type="button" data-event-period="week" aria-pressed="false">Diese Woche</button>
+      </nav>
+      <p id="eventsEmpty" hidden>Für diesen Zeitraum sind gerade keine bestätigten Veranstaltungen verfügbar.</p>
       <div class="discovery-timeline">
       </div>
     </section>

@@ -131,5 +131,29 @@
 #personalPlanner .planner-next .next-activity{margin:0}
 #personalPlanner .weekly-check-start{background:none;border:0;padding:0;margin:12px 0 24px;justify-content:flex-end}
 #personalPlanner .settings-refresh{margin:0 0 14px}
+/* Compact calendar: each day ends after its own content. */
+#personalPlanner .week-days{align-items:start}
+#personalPlanner .week-day-items{flex:none;min-height:52px;padding:8px;gap:7px}
+#personalPlanner .week-day>header{min-height:64px;padding:10px}
+#personalPlanner .week-plan-open{padding:9px;gap:4px}
+#personalPlanner .week-quick-actions{flex-direction:row;flex-wrap:wrap;padding:0 7px 7px;gap:5px}
+#personalPlanner .week-quick-actions button{flex:1;min-height:34px}
+#personalPlanner .week-add{margin-top:4px;min-height:42px}
+#personalPlanner .planner-week-nav{flex-wrap:wrap}
+#personalPlanner .planner-week-nav [data-action=weeklyCheck]{background:#eaf2ff;border-color:#bdd0ee;color:#245bbb;font-weight:700}
+#personalPlanner .weekly-check{margin:0 0 20px;padding:18px;background:#f2f6fc;border:1px solid #dce5f2;border-radius:12px}
+#personalPlanner .weekly-check h2{font-size:1.15rem;margin:0 0 12px}
+#personalPlanner .weekly-check ol{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;padding:0;list-style:none;counter-reset:check}
+#personalPlanner .weekly-check li{padding:0;counter-increment:check}
+#personalPlanner .weekly-check li strong:before{content:counter(check) ' · ';color:#245bbb}
+#personalPlanner .weekly-check li p{font-size:.85rem;line-height:1.5}
+#personalPlanner .planning-dialog{padding:0;border:0;border-radius:18px;width:min(700px,calc(100vw - 32px));max-width:calc(100vw - 32px);max-height:calc(100dvh - 40px);overflow:auto;box-shadow:0 20px 80px #18324c40;color:#26364e;background:#f8fbff}
+#personalPlanner .planning-dialog::backdrop{background:#14243e80;backdrop-filter:blur(3px)}
+#personalPlanner .planning-dialog .planner-box{margin:0;border:0;padding:24px;background:transparent}
+#personalPlanner .planning-dialog .unified-idea-grid{grid-template-columns:1fr}
+#personalPlanner .planning-dialog .routine-heading{align-items:start}
+#personalPlanner .planning-dialog .routine-heading button{min-height:44px}
+body:has(.planning-dialog[open]){overflow:hidden}
+@media(max-width:700px){#personalPlanner .week-days{grid-template-columns:1fr}.week-day>header{flex-direction:row!important;align-items:center!important;min-height:0!important;gap:12px}#personalPlanner .week-day>header>strong{margin-left:auto}#personalPlanner .week-day-items{min-height:0}#personalPlanner .planner-week-nav{grid-template-columns:repeat(3,minmax(0,1fr))}#personalPlanner .planner-week-nav [data-action=weeklyCheck]{grid-column:1 / -1}#personalPlanner .weekly-check ol{grid-template-columns:1fr;gap:16px}#personalPlanner .planning-dialog{width:calc(100vw - 20px);max-width:calc(100vw - 20px);max-height:calc(100dvh - 24px);border-radius:16px}#personalPlanner .planning-dialog .planner-box{padding:20px 16px}}
 #personalPlanner .tool-group .planner-box>details>summary{min-height:64px;padding:15px 0!important}
 @media(max-width:700px){#personalPlanner .week-board-heading{align-items:stretch;gap:12px}#personalPlanner .planner-week-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}#personalPlanner .planner-week-nav button{padding:8px 6px;font-size:.8rem}#personalPlanner .weekly-check-start{align-items:stretch}}

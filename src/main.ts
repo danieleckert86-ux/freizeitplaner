@@ -381,7 +381,9 @@ function normalizeCategory(value: string) {
     markt: 'markt',
     'märkte/feste': 'markt',
     kultur: 'kultur',
-    'kultur/kino': 'kultur',
+    'kultur/kino': 'kino',
+    cinema: 'kino',
+    stream: 'streaming',
     kajak: 'kajak',
     'schwimmen/wellness': 'wellness',
     wellness: 'wellness',
@@ -709,6 +711,18 @@ function renderFavorites() {
       ? 'Noch nichts gemerkt. Nutze bei einer Empfehlung „Merken“.'
       : 'Keine gemerkten Vorschläge in dieser Kategorie.';
 
+  const filterNav = document.querySelector('.favorite-category-filters');
+  for (const item of favorites) {
+    const category = broadCategory(item.category);
+    if (!category || favoriteCategoryButtons.some(button => button.dataset.favoriteCategory === category)) continue;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'favorite-category-filter';
+    button.dataset.favoriteCategory = category;
+    button.textContent = category === 'wildcard' ? 'Sonstiges' : item.category;
+    filterNav?.appendChild(button);
+    favoriteCategoryButtons.push(button);
+  }
   favoriteCategoryButtons.forEach(button => {
     const active = button.dataset.favoriteCategory === activeFavoriteCategory;
     button.classList.toggle('active', active);
@@ -859,11 +873,11 @@ categoryButtons.forEach(button => {
   });
 });
 
-favoriteCategoryButtons.forEach(button => {
-  button.addEventListener('click', () => {
-    activeFavoriteCategory = button.dataset.favoriteCategory ?? 'all';
-    renderFavorites();
-  });
+document.querySelector('.favorite-category-filters')?.addEventListener('click', event => {
+  const button = (event.target as Element).closest<HTMLButtonElement>('[data-favorite-category]');
+  if (!button) return;
+  activeFavoriteCategory = button.dataset.favoriteCategory ?? 'all';
+  renderFavorites();
 });
 
 resetFilters?.addEventListener('click', () => {

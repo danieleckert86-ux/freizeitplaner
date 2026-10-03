@@ -157,3 +157,15 @@ body:has(.planning-dialog[open]){overflow:hidden}
 @media(max-width:700px){#personalPlanner .week-days{grid-template-columns:1fr}.week-day>header{flex-direction:row!important;align-items:center!important;min-height:0!important;gap:12px}#personalPlanner .week-day>header>strong{margin-left:auto}#personalPlanner .week-day-items{min-height:0}#personalPlanner .planner-week-nav{grid-template-columns:repeat(3,minmax(0,1fr))}#personalPlanner .planner-week-nav [data-action=weeklyCheck]{grid-column:1 / -1}#personalPlanner .weekly-check ol{grid-template-columns:1fr;gap:16px}#personalPlanner .planning-dialog{width:calc(100vw - 20px);max-width:calc(100vw - 20px);max-height:calc(100dvh - 24px);border-radius:16px}#personalPlanner .planning-dialog .planner-box{padding:20px 16px}}
 #personalPlanner .tool-group .planner-box>details>summary{min-height:64px;padding:15px 0!important}
 @media(max-width:700px){#personalPlanner .week-board-heading{align-items:stretch;gap:12px}#personalPlanner .planner-week-nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}#personalPlanner .planner-week-nav button{padding:8px 6px;font-size:.8rem}#personalPlanner .weekly-check-start{align-items:stretch}}
+/* Direct calendar editing and desktop drag targets. */
+#personalPlanner .calendar-day-picker{display:flex;flex-wrap:wrap;gap:6px;grid-column:1/-1}
+#personalPlanner .calendar-day-picker button{padding:8px;font-size:.8rem;min-height:40px}
+#personalPlanner .calendar-day-picker button[aria-pressed=true]{background:#245bbb;color:white;border-color:#245bbb}
+#personalPlanner .calendar-time-shifts{display:flex;align-items:center;flex-wrap:wrap;gap:8px;grid-column:1/-1}
+#personalPlanner .calendar-time-shifts output{font-weight:650;font-size:.9rem}
+#personalPlanner #calendarCollision{grid-column:1/-1;margin:0}
+#personalPlanner .calendar-undo{display:flex;align-items:center;gap:12px;background:#edf5ff;padding:10px 16px;border:1px solid #bed0ec;border-radius:12px}
+#personalPlanner .week-event-open{border:0;background:transparent;color:inherit;text-align:left;padding:0;min-height:36px;cursor:pointer;width:100%}
+#personalPlanner .week-day.is-drop-target{outline:3px solid #306dcc;background:#edf5ff}
+#personalPlanner .is-dragging{opacity:.45}
+@media(pointer:fine){#personalPlanner [draggable=true]{cursor:grab}#personalPlanner [draggable=true]:active{cursor:grabbing}}

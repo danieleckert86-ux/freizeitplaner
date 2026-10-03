@@ -424,3 +424,15 @@ button:focus-visible,summary:focus-visible{outline:3px solid #245bbb;outline-off
 .card-place{display:flex;align-items:flex-start;gap:6px;margin:5px 0 9px;font-size:.8rem;line-height:1.4;font-weight:650;color:#455973}
 .card-place>svg{width:16px;height:16px;flex:0 0 16px;margin-top:1px}
 .card-place small{display:block;margin-top:2px;font-size:.75rem;font-weight:500;color:var(--muted)}
+
+/* Equal recommendation heights with a shared baseline for actions. */
+.cards,.ideas-grid,.discovery-timeline,.lifestyle-grid,.tour-list{grid-auto-rows:1fr;align-items:stretch}
+.card,.tour-card,.lifestyle-card{display:flex;flex-direction:column;height:100%;min-width:0;box-sizing:border-box}
+.idea-card{height:100%;box-sizing:border-box}
+.idea-card .idea-content{display:flex;flex-direction:column;height:100%}
+.discovery-item{display:flex;flex-direction:column;height:100%;box-sizing:border-box}
+.discovery-item>div{display:flex;flex-direction:column;flex:1;min-width:0}
+.card .item-actions[data-quiet],.idea-card .item-actions[data-quiet],.tour-card .item-actions[data-quiet],.discovery-item .item-actions[data-quiet],.lifestyle-card .lifestyle-actions[data-quiet]{margin-top:auto!important;flex:0 0 auto}
+.card-place{flex:0 0 auto}
+.outdoor-group{display:flex;flex-direction:column;min-width:0}
+.outdoor-group .tour-list{flex:1}

@@ -41,7 +41,6 @@
     </nav>
     <nav class="idea-nav" aria-label="Ideen nach Bereich" hidden>
       <button type="button" data-view="events">Veranstaltungen</button>
-      <button type="button" data-view="weekend">Wochenende</button>
       <button type="button" data-view="outdoor">Raus ins Grüne</button>
       <button type="button" data-view="restaurants">Restaurants</button>
       <button type="button" data-view="movies">Filme &amp; Serien</button>
@@ -165,16 +164,17 @@
     <section class="panel discovery-panel view-section" data-app-view="events" id="discoveries" aria-labelledby="discoveriesHeading">
       <div class="section-head">
         <div>
-          <p class="section-kicker">Schon mal vormerken</p>
-          <h2 id="discoveriesHeading">Veranstaltungen für deine Woche</h2>
-          <p class="section-note">Konkrete Anlässe von Montag bis Sonntag, nach Datum sortiert.</p>
+          <h2 id="discoveriesHeading">Veranstaltungen</h2>
         </div>
       </div>
-      <nav class="event-periods" aria-label="Veranstaltungszeitraum">
-        <button type="button" data-event-period="all" class="active" aria-pressed="true">Nächste 21 Tage</button>
-        <button type="button" data-event-period="today" aria-pressed="false">Heute</button>
-        <button type="button" data-event-period="week" aria-pressed="false">Diese Woche</button>
-      </nav>
+      <label class="event-period-picker">Zeitraum
+        <select id="eventPeriod" aria-label="Veranstaltungszeitraum">
+          <option value="all">Nächste 21 Tage</option>
+          <option value="today">Heute</option>
+          <option value="week">Diese Woche</option>
+          <option value="weekend">Dieses Wochenende</option>
+        </select>
+      </label>
       <p id="eventsEmpty" hidden>Für diesen Zeitraum sind gerade keine bestätigten Veranstaltungen verfügbar.</p>
       <div class="discovery-timeline">
       </div>
@@ -241,3 +241,4 @@
 <script type="module" src="./src/main.ts"></script>
 </body>
 </html>
+

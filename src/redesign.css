@@ -451,3 +451,6 @@ button:focus-visible,summary:focus-visible{outline:3px solid #245bbb;outline-off
 .favorite-row .favorite-actions>*{font-size:13px;padding:8px 6px;white-space:nowrap}
 @media(max-width:1100px){.favorites-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:640px){.favorites-list{grid-template-columns:1fr}.favorite-row{padding:16px}}
+
+.main-nav .section-nav-btn:disabled{background:#e8ebf0;color:#9ba3b1;cursor:not-allowed;opacity:1;box-shadow:none}
+.main-nav .section-nav-btn:disabled:hover{background:#e8ebf0;filter:none}

@@ -248,7 +248,7 @@ export function initPlanner(database: SupabaseClient) {
   }
   function weeklyCheckMarkup() {
     if (!weeklyCheck) return '';
-    const planned = state.entries.filter(a=>inWeek(a.date)&&!['Abgelehnt','Gemacht'].includes(a.status));
+    const planned = state.entries.filter(a=>inWeek(a.date)&&a.date>=today()&&!['Abgelehnt','Gemacht'].includes(a.status));
     const next = planned.find(a=>!a.proposedAt);
     return `<section class="weekly-check" aria-label="Wochencheck"><h2>Fünf Minuten für deine Woche</h2><ol><li><strong>Termine prüfen</strong><p>Was steht bereits fest?</p>${button('checkAppointments','Termine öffnen')}</li><li><strong>Aktivitäten auswählen</strong><p>${planned.length ? `${planned.length} Vorhaben eingeplant.` : 'Ein oder zwei schöne Vorhaben reichen. Freie Zeit darf frei bleiben.'}</p>${button('checkPlan','Etwas planen')}</li><li><strong>Mit Eva besprechen</strong><p>${next?e(next.title):'Aktuell kein offenes Vorhaben zu besprechen.'}</p>${next?button('checkPropose','Vorhaben öffnen',next.id):button('checkIdeas','Ideen entdecken')}</li></ol><div class="planner-actions">${button('checked',state.checks.includes(week)?'Wochencheck erledigt ✓':'Wochencheck abschließen')}${button('weeklyCheck','Schließen')}</div></section>`;
   }
@@ -259,7 +259,7 @@ export function initPlanner(database: SupabaseClient) {
     if(!inWeek(activeDate)&&!draft&&!pendingIdea)activeDate=inWeek(today())?today():week;
     const proposed=state.entries.filter(a=>a.proposedAt&&inWeek(actionDate(a.proposedAt))).length;
     const done=state.entries.filter(a=>a.doneAt&&inWeek(actionDate(a.doneAt))).length;
-    const planned=state.entries.filter(a=>inWeek(a.date)&&!['Abgelehnt','Gemacht'].includes(a.status));
+    const planned=state.entries.filter(a=>inWeek(a.date)&&a.date>=today()&&!['Abgelehnt','Gemacht'].includes(a.status));
     const next=planned.find(a=>!a.proposedAt);
     const editor=state.entries.find(a=>a.id===openEditor);
     host.innerHTML=`<div class="planner-heading"><h1>Meine Woche</h1></div><p class="planner-message" role="status" ${routineFeedback(message)?'hidden':''}>${e(message)}</p>

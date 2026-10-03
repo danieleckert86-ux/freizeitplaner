@@ -137,7 +137,7 @@
 #personalPlanner .week-day>header{min-height:64px;padding:10px}
 #personalPlanner .week-plan-open{padding:9px;gap:4px}
 #personalPlanner .week-quick-actions{flex-direction:row;flex-wrap:wrap;padding:0 7px 7px;gap:5px}
-#personalPlanner .week-quick-actions button{flex:1;min-height:34px}
+#personalPlanner .week-quick-actions button{flex:1 0 90px;min-height:34px;white-space:nowrap;overflow-wrap:normal}
 #personalPlanner .week-add{margin-top:4px;min-height:42px}
 #personalPlanner .planner-week-nav{flex-wrap:wrap}
 #personalPlanner .planner-week-nav [data-action=weeklyCheck]{background:#eaf2ff;border-color:#bdd0ee;color:#245bbb;font-weight:700}

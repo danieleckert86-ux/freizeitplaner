@@ -442,3 +442,12 @@ button:focus-visible,summary:focus-visible{outline:3px solid #245bbb;outline-off
 .favorite-actions,.routine-actions{margin-top:auto!important;padding-top:10px}
 .favorite-row .favorite-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;align-items:center;width:100%}
 .favorite-row .favorite-actions>*{min-width:0;width:100%;min-height:40px;display:flex;align-items:center;justify-content:center;box-sizing:border-box}
+
+/* Saved ideas use the same card layout as recommendations. */
+.favorites-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.favorite-row{background:white;padding:20px;justify-content:flex-start;gap:12px;border-radius:20px}
+.favorite-copy{flex:1}
+.favorite-row .favorite-actions{border-top:1px solid var(--line);padding-top:12px}
+.favorite-row .favorite-actions>*{font-size:13px;padding:8px 6px;white-space:nowrap}
+@media(max-width:1100px){.favorites-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:640px){.favorites-list{grid-template-columns:1fr}.favorite-row{padding:16px}}

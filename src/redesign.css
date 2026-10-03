@@ -414,3 +414,13 @@ button:focus-visible,summary:focus-visible{outline:3px solid #245bbb;outline-off
 .icon-comedy,.icon-music,.icon-culture{color:#7658b0}
 .icon-swim,.icon-kayak,.icon-wellness{color:#268294}
 .planner-idea h3 .category-icon{width:20px;height:20px}
+
+/* Keep date, icon and concise category together; location has its own visible row. */
+.discovery-header{flex-wrap:nowrap!important;gap:8px;min-width:0}
+.discovery-item .discovery-header time{flex:0 0 auto;white-space:nowrap!important;font-size:.75rem}
+.discovery-header .mini-badge{flex:1 1 auto;min-width:0;white-space:nowrap;overflow:hidden;font-size:.75rem}
+.discovery-header .category-icon{width:20px;height:20px;flex:0 0 20px;margin-right:5px}
+.discovery-header .category-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-place{display:flex;align-items:flex-start;gap:6px;margin:5px 0 9px;font-size:.8rem;line-height:1.4;font-weight:650;color:#455973}
+.card-place>svg{width:16px;height:16px;flex:0 0 16px;margin-top:1px}
+.card-place small{display:block;margin-top:2px;font-size:.75rem;font-weight:500;color:var(--muted)}

@@ -1,6 +1,7 @@
 import { initPlanner } from './planner';
 import { neutralDescription } from './wording';
 import { categoryIcon } from './category-icons';
+import { recommendationPlace, travelNote } from './locations';
 import './styles.css';
 import { createClient } from '@supabase/supabase-js';
 
@@ -12,7 +13,7 @@ const supabase = createClient(
 
 type Recommendation = {
   day: string; category: string; date: string; title: string; description: string;
-  url: string; sourceLabel: string;
+  url: string; sourceLabel: string; location?: string; venue?: string; city?: string; address?: string;
   favorite: { id: string; title: string; dayLabel: string; categoryLabel: string; description: string; url: string };
   dayText?: string; badge?: string; facts?: string[]; why?: string;
   label?: string; meta?: string[]; metaLabel?: string; time?: string;
@@ -20,7 +21,7 @@ type Recommendation = {
 
 type LifestyleRecommendation = {
   id: string; title: string; type: string; description: string; meta: string[];
-  url: string; badge: string; imdbRating?: number; imdbUrl?: string; trailerUrl?: string;
+  url: string; badge: string; location?: string; venue?: string; city?: string; address?: string; platform?: string; imdbRating?: number; imdbUrl?: string; trailerUrl?: string;
 };
 
 type StreamRecommendation = LifestyleRecommendation & {
@@ -46,6 +47,12 @@ function dataEscape(value = '') {
   return value.replace(/[&<>"']/g, char => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;',
   })[char] ?? char);
+}
+
+function placeMarkup(item: Parameters<typeof recommendationPlace>[0], section = '') {
+  const place = recommendationPlace(item, section);
+  const travel = travelNote(item);
+  return '<div class="card-place"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>' + dataEscape(place) + (travel ? '<small>' + dataEscape(travel) + '</small>' : '') + '</span></div>';
 }
 
 function favoriteMarkup(item: Recommendation, compact = false) {
@@ -106,7 +113,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   if (top) top.innerHTML = data.top.map(item =>
     '<article class="card filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '">' +
     '<div class="card-top"><span class="day">' + dataEscape(item.dayText) + '</span><span class="badge">' + categoryIcon(item.category, item.badge || item.title) + dataEscape(item.badge) + '</span></div>' +
-    '<h3>' + dataEscape(item.title) + '</h3><p>' + dataEscape(neutralDescription(item.description)) + '</p>' +
+    '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' +
     '<div class="facts">' + (item.facts ?? []).map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +
     '<div class="why">' + dataEscape(neutralDescription(item.why)) + '</div><div class="card-actions item-actions">' +
     sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, 'weekend') + favoriteMarkup(item) + '</div></article>'
@@ -116,7 +123,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   if (ideas) ideas.innerHTML = data.ideas.map(item =>
     '<article class="idea-card filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '">' +
     '<div class="idea-visual" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="8"/></svg></div>' +
-    '<div class="idea-content"><span class="idea-category">' + categoryIcon(item.category, item.label || item.title) + dataEscape(item.label) + '</span><h3>' + dataEscape(item.title) + '</h3><p>' + dataEscape(neutralDescription(item.description)) + '</p>' +
+    '<div class="idea-content"><span class="idea-category">' + categoryIcon(item.category, item.label || item.title) + dataEscape(item.label) + '</span><h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' +
     '<div class="idea-meta">' + (item.meta ?? []).map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +
     '<div class="item-actions">' + sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, 'weekend') + favoriteMarkup(item, true) + '</div></div></article>'
   ).join('');
@@ -127,7 +134,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
     list.innerHTML = items.map(item =>
       '<article' + tourAttributes(item) + ' class="tour-card filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '">' +
       '<div class="tour-top"><span class="tour-category">' + categoryIcon(item.category, item.label || item.title) + dataEscape(item.label) + '</span><span class="meta-label">' + dataEscape(item.metaLabel) + '</span></div>' +
-      '<h4>' + dataEscape(item.title) + '</h4><p>' + dataEscape(neutralDescription(item.description)) + '</p>' +
+      '<h4>' + dataEscape(item.title) + '</h4>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' +
       '<div class="tour-meta">' + (item.meta ?? []).map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +
       '<div class="item-actions">' + sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, item.category) + favoriteMarkup(item, true) + '</div></article>'
     ).join('');
@@ -137,8 +144,8 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
 
   const discoveries = document.querySelector<HTMLElement>('#discoveries .discovery-timeline');
   if (discoveries) discoveries.innerHTML = [...data.top, ...data.ideas, ...data.discoveries].filter((item,index,all) => all.findIndex(other => other.favorite.id === item.favorite.id) === index && item.date >= new Intl.DateTimeFormat('sv-SE', {timeZone:'Europe/Berlin'}).format(new Date())).sort((a,b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || '')).map(item =>
-    '<article class="discovery-item filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '"><div><div class="discovery-header"><time datetime="' + dataEscape(item.date) + '">' + dataEscape(new Intl.DateTimeFormat('de-DE', {weekday:'short',day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(new Date(item.date + 'T12:00:00Z'))) + (/^\d{2}:\d{2}$/.test(item.time || '') ? ' · ' + dataEscape(item.time) : '') + '</time><span class="mini-badge">' + categoryIcon(item.category, item.badge || item.title) + dataEscape(item.badge || item.favorite.categoryLabel) + '</span></div>' +
-    '<h3>' + dataEscape(item.title) + '</h3><p>' + dataEscape(neutralDescription(item.description)) + '</p><div class="item-actions">' +
+    '<article class="discovery-item filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '"><div><div class="discovery-header"><time datetime="' + dataEscape(item.date) + '">' + dataEscape(new Intl.DateTimeFormat('de-DE', {weekday:'short',day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(new Date(item.date + 'T12:00:00Z'))) + (/^\d{2}:\d{2}$/.test(item.time || '') ? ' · ' + dataEscape(item.time) : '') + '</time><span class="mini-badge">' + categoryIcon(item.category, item.badge || item.title) + '<span class="category-label">' + dataEscape((item.badge || item.label || item.favorite.categoryLabel).split(/\s*[·×]\s*/)[0]) + '</span></span></div>' +
+    '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p><div class="item-actions">' +
     sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, 'discoveries') + favoriteMarkup(item, true) + '</div></div></article>'
   ).join('');
 
@@ -148,7 +155,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
     list.innerHTML = items.filter(item => !hiddenIds.has(item.id)).map(item =>
       '<article class="lifestyle-card" data-lifestyle-id="' + dataEscape(item.id) + '">' +
       '<div class="lifestyle-top"><span class="lifestyle-type">' + categoryIcon(section, item.type) + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(item.badge) + '</span></div>' +
-      '<h3>' + dataEscape(item.title) + '</h3><p>' + dataEscape(neutralDescription(item.description)) + '</p>' +
+      '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item, section) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' +
       '<div class="lifestyle-meta">' + item.meta.map(v => '<span>' + dataEscape(v.replace(/^Neu seit (\d{2})\.(\d{2})\.\d{4}$/, "Seit $1.$2.")) + '</span>').join('') +
       (item.imdbRating ? '<a class="imdb-rating" href="' + dataEscape(item.imdbUrl || item.url) + '" target="_blank" rel="noopener noreferrer">IMDb ' + dataEscape(item.imdbRating.toFixed(1).replace('.', ',')) + '</a>' : '') +
       (item.trailerUrl ? '<a class="trailer-link trailer-meta" href="' + dataEscape(item.trailerUrl) + '" target="_blank" rel="noopener noreferrer">▶ Trailer</a>' : '') + '</div>' +
@@ -709,7 +716,7 @@ function renderFavorites() {
     row.innerHTML =
       '<div class="favorite-copy">' +
       '<div class="favorite-meta">' + categoryIcon(item.category) + escapeHtml(['wandern', 'fahrrad'].includes(normalizeCategory(item.category)) ? item.category : [item.day, item.category].filter(Boolean).join(' · ')) + '</div>' +
-      '<h3>' + escapeHtml(item.title) + '</h3>' +
+      '<h3>' + escapeHtml(item.title) + '</h3>' + placeMarkup(item, normalizeCategory(item.category) === 'streaming' ? 'stream' : '') +
       '<p>' + escapeHtml(neutralDescription(item.description)) + '</p>' +
       '</div>' +
       '<div class="favorite-actions">' +

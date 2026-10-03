@@ -1,13 +1,15 @@
 import './planner.css';
 import { neutralDescription } from './wording';
 import { categoryIcon } from './category-icons';
+import { loadDinnerRecipes, recipeLink, type DinnerRecipe } from './dinner-recipes';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 type Appointment = { id: string; title: string; date: string; start: string; end: string; owner: string; uncertain: boolean; repeat: boolean; excludedDates?: string[]; googleEventId?: string; googleSeriesId?: string; googleAllDay?: boolean };
 type Slot = { id: string; date: string; start: string; end: string; energy: string; mood: string; effort: string };
 type Entry = { id: string; title: string; url: string; date: string; start: string; end: string; slotId: string; status: string; createdAt: string; proposedAt: string; organizedAt: string; doneAt: string; note: string; next: string; routineId?: string; source?: string };
 type Routine = { id: string; title: string; minutes: number; energy: string; mood: string; effort: string; outdoor: boolean; next: string };
-type State = { routines?: Routine[]; version: 1; appointments: Appointment[]; slots: Slot[]; entries: Entry[]; checks: string[]; googleDeleteSeries?: string[]; googleSync?: { lastSuccess: string; error?: string } };
+type Dinner = {id:string;date:string;recipeId:string;title:string};
+type State = { dinners?: Dinner[]; routines?: Routine[]; version: 1; appointments: Appointment[]; slots: Slot[]; entries: Entry[]; checks: string[]; googleDeleteSeries?: string[]; googleSync?: { lastSuccess: string; error?: string } };
 type Idea = { title: string; url: string; next: string; outdoor: boolean; minutes?: number; source?: string; routineId?: string; date?: string; start?: string; tourKind?: string; flexible?: boolean };
 const defaultRoutines = (): Routine[] => [
   {id:'walk',title:'Spazieren durch die Stadt',minutes:45,energy:'low',mood:'outdoor',effort:'spontaneous',outdoor:true,next:'Eine gemeinsame Runde zu Beginn des Zeitfensters vorschlagen.'},
@@ -42,6 +44,7 @@ function validState(v: unknown): v is State {
     && (s.routines === undefined || Array.isArray(s.routines) && s.routines.every(r => strings(r,['id','title','energy','mood','effort','next']) && Number.isInteger(r.minutes) && r.minutes >= 5 && r.minutes <= 1440 && typeof r.outdoor === 'boolean' && ['low','medium','high'].includes(r.energy) && ['outdoor','movement','food','culture'].includes(r.mood) && ['spontaneous','prepare','trip'].includes(r.effort)))
     && (s.googleDeleteSeries === undefined || Array.isArray(s.googleDeleteSeries) && s.googleDeleteSeries.every(id => typeof id === 'string'))
     && (s.googleSync === undefined || !!s.googleSync && typeof s.googleSync.lastSuccess === 'string' && (!s.googleSync.lastSuccess || !isNaN(Date.parse(s.googleSync.lastSuccess))) && (s.googleSync.error === undefined || typeof s.googleSync.error === 'string'))
+    && (s.dinners === undefined || Array.isArray(s.dinners) && s.dinners.every(d=>strings(d,['id','date','recipeId','title']) && validDate(d.date) && !!d.id && !!d.recipeId && !!d.title) && new Set(s.dinners.map(d=>d.date)).size===s.dinners.length && new Set(s.dinners.map(d=>d.id)).size===s.dinners.length)
     && s.checks.every(validDate)
     && s.appointments.every(a => strings(a, ['id','title','date','start','end','owner']) && validDate(a.date) && validTime(a.start) && validTime(a.end) && a.end > a.start && typeof a.uncertain === 'boolean' && typeof a.repeat === 'boolean' && (a.googleEventId === undefined || typeof a.googleEventId === 'string') && (a.googleSeriesId === undefined || typeof a.googleSeriesId === 'string') && (a.googleAllDay === undefined || typeof a.googleAllDay === 'boolean') && (a.excludedDates === undefined || Array.isArray(a.excludedDates) && a.excludedDates.every(validDate)))
     && s.slots.every(a => strings(a, ['id','date','start','end','energy','mood','effort']) && validDate(a.date) && validTime(a.start) && validTime(a.end) && a.end > a.start && ['low','medium','high'].includes(a.energy) && ['unknown','outdoor','movement','food','culture'].includes(a.mood) && ['spontaneous','prepare','trip'].includes(a.effort))
@@ -65,7 +68,7 @@ export function initPlanner(database: SupabaseClient) {
     if (error || !data || !validState(data.payload) || !Number.isSafeInteger(Number(data.revision))) throw Error('Cloud data unavailable');
     return { state: { ...data.payload, routines: data.payload.routines ?? defaultRoutines() } as State, revision: Number(data.revision) };
   }
-  const isEditing = () => !!calendarEdit || !!dragging || !!draft || !!pendingIdea || host?.contains(document.activeElement) && ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName || '');
+  const isEditing = () => !!dinnerDate || !!calendarEdit || !!dragging || !!draft || !!pendingIdea || host?.contains(document.activeElement) && ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName || '');
   const actionDate = (stamp: string) => stamp ? new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin' }).format(new Date(stamp)) : '';
   let week = day(today()).getUTCDay() === 0 ? addDays(monday(today()),7) : monday(today());
   let selectedSlot = '';
@@ -77,8 +80,14 @@ export function initPlanner(database: SupabaseClient) {
   let pendingIdea: Idea | null = null;
   let scheduleSlot = '';
   let calendarEdit: {kind:'entry'|'appointment'|'slot';id:string;date:string} | null = null;
+  let dinnerDate = '';
+  let dinnerEditingId = '';
+  let dinnerQuery = '';
+  let dinnerRecipes: DinnerRecipe[] = [];
+  let recipesLoading = false;
+  let recipesError = '';
   let dragging = '';
-  let undoMove: {state:State;revision:number} | null = null;
+  let undoMove: {state:State;revision:number;text?:string} | null = null;
   let draft: Slot | null = null;
   let draftReady = false;
   let moreIdeas = false;
@@ -192,7 +201,7 @@ export function initPlanner(database: SupabaseClient) {
       if(slot&&!state.slots.some(x=>x.id===slot.id))state.slots.push(slot);
       state.entries.unshift({id:crypto.randomUUID(),title,url:safeUrl(url),date:slot?.date||'',start:slot?.start||'',end:slot?.end||'',slotId:slot?.id||'',status,createdAt:now,proposedAt:status==='Vorgeschlagen'?now:'',organizedAt:'',doneAt:'',note:'',next,routineId:origin?.routineId,source:origin?.source});
     },status==='Vorgeschlagen'?'Als tatsächlich vorgeschlagen protokolliert.':slot?'Eingeplant. Nächster Schritt: konkret vorschlagen.':'Idee gespeichert.');
-    if(saved){calendarEdit=null;draft=null;draftReady=false;pendingIdea=null;render();host?.querySelector('.week-board')?.scrollIntoView({behavior:'smooth',block:'start'});}
+    if(saved){dinnerDate='';calendarEdit=null;draft=null;draftReady=false;pendingIdea=null;render();host?.querySelector('.week-board')?.scrollIntoView({behavior:'smooth',block:'start'});}
   }
   const entryLabel = (a: Entry) => a.status === 'Idee gespeichert' ? (a.date && a.start && a.end ? 'Geplant' : 'Gemerkt') : a.status;
   let dialogReturn = '';
@@ -248,11 +257,69 @@ export function initPlanner(database: SupabaseClient) {
     },'Termin verschoben.');
     if(saved){undoMove={state:before,revision};calendarEdit=null;render();}return saved;
   }
+  function dinnerMarkup(date:string) {
+    const dinner=state.dinners?.find(d=>d.date===date);
+    const title=dinnerRecipes.find(r=>r.id===dinner?.recipeId)?.title||dinner?.title;
+    return `<footer class="day-dinner">${dinner?`<div class="dinner-card" data-dinner-id="${e(dinner.id)}" data-dinner-date="${date}"><span class="dinner-label">${categoryIcon('essen')}Abendessen</span><a class="dinner-title" href="${e(recipeLink(dinner.recipeId))}" target="_blank" rel="noopener noreferrer">${e(title!)}</a><div class="dinner-actions">${button('chooseDinner','Ändern',date)}${button('removeDinner','Entfernen',dinner.id)}</div></div>`:`<button type="button" class="dinner-add" data-action="chooseDinner" data-id="${date}">${categoryIcon('essen')}Abendessen planen</button>`}</footer>`;
+  }
+  async function fetchDinnerRecipes() {
+    if(recipesLoading)return;
+    recipesLoading=true;recipesError='';render();
+    try {dinnerRecipes=await loadDinnerRecipes();}
+    catch(error){recipesError=error instanceof Error?error.message:'Rezepte konnten nicht geladen werden.';}
+    finally {recipesLoading=false;if(dinnerDate)render();}
+  }
+  function openDinner(date:string) {
+    dinnerDate=date;dinnerEditingId=state.dinners?.find(d=>d.date===date)?.id||'';dinnerQuery='';calendarEdit=null;draft=null;pendingIdea=null;render();void fetchDinnerRecipes();
+  }
+  function dinnerResultsMarkup() {
+    const filtered=dinnerRecipes.filter(r=>r.search.includes(dinnerQuery.toLocaleLowerCase('de-DE').trim()));
+    if(recipesLoading)return '<p role="status">Meine Rezepte werden geladen …</p>';
+    if(recipesError)return `<p role="alert">${e(recipesError)}</p>${button('retryRecipes','Erneut versuchen')}`;
+    return `<p class="planner-small" role="status">${filtered.length} Rezepte</p><div class="dinner-recipes">${filtered.map(r=>`<button type="button" class="dinner-recipe" data-recipe-id="${e(r.id)}">${r.image?`<img src="${e(r.image)}" alt="" loading="lazy" decoding="async">`:`<span class="dinner-image-placeholder" aria-hidden="true">${categoryIcon('essen')}</span>`}<span><strong>${e(r.title)}</strong><small>${e([r.category,r.minutes?`${r.minutes} Min.`:''].filter(Boolean).join(' · '))}</small></span></button>`).join('')||'<p>Keine passenden Rezepte. Ändere die Suche oder ergänze ein Rezept in der Rezepte-App.</p>'}</div>`;
+  }
+  function dinnerPickerMarkup() {
+    if(!dinnerDate)return '';
+    const current=state.dinners?.find(d=>d.id===dinnerEditingId);
+    return `<section class="planner-box dinner-picker" id="dinnerPicker"><div class="routine-heading"><div><span class="section-kicker">Meine Rezepte</span><h2>Abendessen planen</h2></div>${button('cancelDinner','Schließen')}</div><label class="dinner-date-label">Tag<input id="dinnerDate" type="date" required value="${dinnerDate}"></label><p class="planner-small">Das Gericht erscheint ohne Uhrzeit am Ende des Tages.</p>${current?`<p class="dinner-current">Geplant: <a href="${e(recipeLink(current.recipeId))}" target="_blank" rel="noopener noreferrer">${e(current.title)}</a></p>${current.date!==dinnerDate?button('moveCurrentDinner','Auf diesen Tag verschieben',current.id):''}`:''}<label class="dinner-search">Rezept oder Zutat suchen<input id="dinnerSearch" type="search" value="${e(dinnerQuery)}" placeholder="Zum Beispiel: Pasta oder Spinat"></label><div id="dinnerResults">${dinnerResultsMarkup()}</div></section>`;
+  }
+  async function moveDinner(id:string,date:string) {
+    const dinner=state.dinners?.find(d=>d.id===id);if(!dinner||dinner.date===date||!validDate(date))return;
+    const other=state.dinners?.find(d=>d.date===date);
+    if(other&&!confirm(`Am ${label(date)} ist bereits „${other.title}“ geplant. Die beiden Abendessen tauschen?`))return;
+    const before=JSON.parse(JSON.stringify(state)) as State;
+    if(await mutate(()=>{if(other)other.date=dinner.date;dinner.date=date;},other?'Abendessen getauscht.':'Abendessen verschoben.')){undoMove={state:before,revision,text:other?'Abendessen getauscht.':'Abendessen verschoben.'};dinnerDate='';render();}
+  }
+  function wireDinner() {
+    host?.querySelector<HTMLInputElement>('#dinnerSearch')?.addEventListener('input',ev=>{dinnerQuery=(ev.target as HTMLInputElement).value;const list=host?.querySelector('#dinnerResults');if(list){list.innerHTML=dinnerResultsMarkup();wireRecipeChoices();}});
+    host?.querySelector<HTMLInputElement>('#dinnerDate')?.addEventListener('change',ev=>{const date=(ev.target as HTMLInputElement).value;if(validDate(date)){dinnerDate=date;render();}});
+    wireRecipeChoices();
+    host?.querySelectorAll<HTMLElement>('[data-dinner-id]').forEach(el=>{
+      el.draggable=(window.matchMedia?.('(pointer:fine)').matches??false)&&loaded&&!saving;
+      el.addEventListener('dragstart',ev=>{if(!el.draggable||!ev.dataTransfer)return;dragging=JSON.stringify({kind:'dinner',id:el.dataset.dinnerId,date:el.dataset.dinnerDate});ev.dataTransfer.setData('application/x-freizeitplaner',dragging);ev.dataTransfer.effectAllowed='move';el.classList.add('is-dragging');});
+      el.addEventListener('dragend',()=>{dragging='';el.classList.remove('is-dragging');host?.querySelectorAll('.is-drop-target').forEach(x=>x.classList.remove('is-drop-target'));});
+    });
+  }
+  function wireRecipeChoices() {
+    host?.querySelectorAll<HTMLButtonElement>('[data-recipe-id]').forEach(b=>b.addEventListener('click',async()=>{
+      const recipe=dinnerRecipes.find(r=>r.id===b.dataset.recipeId);if(!recipe||!validDate(dinnerDate))return;
+      const date=dinnerDate;
+      const source=state.dinners?.find(d=>d.id===dinnerEditingId);const target=state.dinners?.find(d=>d.date===date&&d.id!==source?.id);
+      if(source&&target&&!confirm(`Am ${label(date)} ist bereits „${target.title}“ geplant. Die Tage der beiden Abendessen tauschen?`))return;
+      const saved=await mutate(()=>{
+        const dinners=state.dinners??[];if(source&&target)target.date=source.date;const existing=source||dinners.find(d=>d.date===date);
+        if(existing)Object.assign(existing,{date,recipeId:recipe.id,title:recipe.title});
+        else dinners.push({id:crypto.randomUUID(),date,recipeId:recipe.id,title:recipe.title});
+        state.dinners=dinners;activeDate=date;week=monday(date);
+      },'Abendessen geplant.');
+      if(saved){dinnerDate='';render();}
+    }));
+  }
   function weekMarkup() {
     const names=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
     return `<section class="week-board" aria-label="Wochenplan Montag bis Sonntag"><div class="week-board-heading"><h2>${label(week)} – ${label(addDays(week,6))}</h2><div class="planner-week-nav">${button('prev','Vorige Woche')}${button('current','Diese Woche')}${button('next','Nächste Woche')}${button('weeklyCheck',weeklyCheck?'Wochencheck schließen':'Wochencheck')}</div></div>${weeklyCheckMarkup()}<div class="week-days">${names.map((name,i)=>{
       const date=addDays(week,i);const entries=state.entries.filter(x=>x.date===date&&x.status!=='Abgelehnt').sort((a,b)=>a.start.localeCompare(b.start));const slots=state.slots.filter(x=>x.date===date);const events=appointmentsFor(date);
-      return `<article data-drop-date="${date}" class="week-day ${date===today()?'is-today':''} ${date===activeDate?'is-selected':''}"><header><span>${name}</span><strong>${new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(day(date))}</strong>${date===today()?'<small>Heute</small>':''}</header><div class="week-day-items">${events.map(a=>`<div data-calendar-kind="appointment" data-calendar-id="${e(a.id)}" data-calendar-occurrence="${date}" class="week-event ${a.uncertain?'is-uncertain':''}"><time>${a.googleAllDay?'Ganztägig':`${a.start}–${a.end}`}</time><button type="button" class="week-event-open" data-action="editAppointment" data-id="${e(a.id)}" data-date="${date}" aria-label="${e(a.title)}: Termin ändern"><strong>${e(a.title)}</strong></button><span>${e(a.owner)}${a.googleSeriesId?' · Serie':''}${a.repeat?' · wöchentlich':''}${a.uncertain?' · unklar':''}</span><details class="event-delete-menu"><summary aria-label="${e(a.title)} am ${label(date)} löschen">Löschen</summary><div><button type="button" data-action="deleteOccurrence" data-id="${e(a.id)}" data-date="${date}">${a.repeat||a.googleSeriesId?'Nur diesen Termin löschen':'Termin löschen'}</button>${a.repeat||a.googleSeriesId?`<button type="button" data-action="deleteSeries" data-id="${e(a.id)}">Gesamte Serie löschen</button>`:''}</div></details></div>`).join('')}${entries.map(a=>`<div class="week-plan" data-calendar-kind="entry" data-calendar-id="${e(a.id)}" data-calendar-occurrence="${date}"><button type="button" class="week-plan-open" data-action="openEntry" data-id="${e(a.id)}"><time>${a.start?`${a.start}${a.end?'–'+a.end:''}`:'Zeit noch offen'}</time><strong>${e(a.title)}</strong><span>${e(entryLabel(a))}</span></button><div class="week-quick-actions">${!a.proposedAt?button('proposed','Vorgeschlagen',a.id):''}${a.status!=='Gemacht'?button('done','Gemacht',a.id):''}</div></div>`).join('')}${slots.filter(a=>!entries.some(x=>x.slotId===a.id || x.start && x.end && x.start<=a.start && x.end>=a.end)).map(a=>`<button type="button" data-calendar-kind="slot" data-calendar-id="${e(a.id)}" data-calendar-occurrence="${date}" class="week-free ${clash(a)?'has-conflict':''}" data-action="selectSlot" data-id="${a.id}"><time>${a.start}–${a.end}</time><strong>${clash(a)?'Überschneidung prüfen':'Zeit für eine Idee'}</strong></button>`).join('')}${!events.length&&!entries.length&&!slots.length?'<p class="week-day-empty">Noch nichts eingetragen</p>':''}</div><button type="button" class="week-add" data-action="selectDay" data-id="${date}">Etwas planen</button><button type="button" class="week-fixed-add" data-action="fixedDay" data-id="${date}">Festen Termin eintragen</button></article>`;
+      return `<article data-drop-date="${date}" class="week-day ${date===today()?'is-today':''} ${date===activeDate?'is-selected':''}"><header><span>${name}</span><strong>${new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(day(date))}</strong>${date===today()?'<small>Heute</small>':''}</header><div class="week-day-items">${events.map(a=>`<div data-calendar-kind="appointment" data-calendar-id="${e(a.id)}" data-calendar-occurrence="${date}" class="week-event ${a.uncertain?'is-uncertain':''}"><time>${a.googleAllDay?'Ganztägig':`${a.start}–${a.end}`}</time><button type="button" class="week-event-open" data-action="editAppointment" data-id="${e(a.id)}" data-date="${date}" aria-label="${e(a.title)}: Termin ändern"><strong>${e(a.title)}</strong></button><span>${e(a.owner)}${a.googleSeriesId?' · Serie':''}${a.repeat?' · wöchentlich':''}${a.uncertain?' · unklar':''}</span><details class="event-delete-menu"><summary aria-label="${e(a.title)} am ${label(date)} löschen">Löschen</summary><div><button type="button" data-action="deleteOccurrence" data-id="${e(a.id)}" data-date="${date}">${a.repeat||a.googleSeriesId?'Nur diesen Termin löschen':'Termin löschen'}</button>${a.repeat||a.googleSeriesId?`<button type="button" data-action="deleteSeries" data-id="${e(a.id)}">Gesamte Serie löschen</button>`:''}</div></details></div>`).join('')}${entries.map(a=>`<div class="week-plan" data-calendar-kind="entry" data-calendar-id="${e(a.id)}" data-calendar-occurrence="${date}"><button type="button" class="week-plan-open" data-action="openEntry" data-id="${e(a.id)}"><time>${a.start?`${a.start}${a.end?'–'+a.end:''}`:'Zeit noch offen'}</time><strong>${e(a.title)}</strong><span>${e(entryLabel(a))}</span></button><div class="week-quick-actions">${!a.proposedAt?button('proposed','Vorgeschlagen',a.id):''}${a.status!=='Gemacht'?button('done','Gemacht',a.id):''}</div></div>`).join('')}${slots.filter(a=>!entries.some(x=>x.slotId===a.id || x.start && x.end && x.start<=a.start && x.end>=a.end)).map(a=>`<button type="button" data-calendar-kind="slot" data-calendar-id="${e(a.id)}" data-calendar-occurrence="${date}" class="week-free ${clash(a)?'has-conflict':''}" data-action="selectSlot" data-id="${a.id}"><time>${a.start}–${a.end}</time><strong>${clash(a)?'Überschneidung prüfen':'Zeit für eine Idee'}</strong></button>`).join('')}${!events.length&&!entries.length&&!slots.length?'<p class="week-day-empty">Noch nichts eingetragen</p>':''}</div><button type="button" class="week-add" data-action="selectDay" data-id="${date}">Etwas planen</button><button type="button" class="week-fixed-add" data-action="fixedDay" data-id="${date}">Festen Termin eintragen</button>${dinnerMarkup(date)}</article>`;
     }).join('')}</div></section>`;
   }
   function beginPlanning(idea: Idea) {
@@ -312,7 +379,7 @@ export function initPlanner(database: SupabaseClient) {
     const next=planned.find(a=>!a.proposedAt);
     const editor=state.entries.find(a=>a.id===openEditor);
     host.innerHTML=`<div class="planner-heading"><h1>Meine Woche</h1></div><p class="planner-message" role="status" ${routineFeedback(message)?'hidden':''}>${e(message)}</p>
-      ${undoMove?`<div class="calendar-undo" role="status">Termin verschoben. ${button('undoCalendar','Rückgängig')}</div>`:''}${weekMarkup()}${composerMarkup()}${schedulerMarkup()}${editCalendarMarkup()}
+      ${undoMove?`<div class="calendar-undo" role="status">${e(undoMove.text||'Termin verschoben.')} ${button('undoCalendar','Rückgängig')}</div>`:''}${weekMarkup()}${composerMarkup()}${schedulerMarkup()}${editCalendarMarkup()}${dinnerPickerMarkup()}
       ${editor?`<section class="planner-box selected-entry"><div class="routine-heading"><h2>Vorhaben bearbeiten</h2>${button('closeEntry','Schließen')}</div>${entryMarkup(editor)}</section>`:''}
       ${next?`<section class="planner-next"><div><h2>Gemeinsam besprechen</h2><p class="next-activity"><strong>${e(next.title)}</strong><span>${label(next.date)}${next.start?` · ${next.start}–${next.end}`:''}</span></p></div><div class="planner-actions">${button('proposed','Als vorgeschlagen markieren',next.id)}</div></section>`:''}
       <div class="planner-tools"><section class="tool-group" aria-label="Aktivitäten auswählen">${routinesMarkup()}</section><section class="tool-group" aria-label="Termine und Rückblick"><header><h2>Termine &amp; Rückblick</h2></header><div class="tool-group-grid">
@@ -321,14 +388,14 @@ export function initPlanner(database: SupabaseClient) {
       <section class="planner-box"><details class="planner-setup"><summary>${toolSummary('Google Kalender',state.googleSync?.lastSuccess?`Freizeitplaner · letzter Abgleich ${new Date(state.googleSync.lastSuccess).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}`:'Kalender „Freizeitplaner“ verbinden und automatisch abgleichen.',state.googleSync?.error?'Abgleich prüfen':state.googleSync?.lastSuccess?'Eingerichtet':'Einrichten')}</summary><p>${state.googleSync?.lastSuccess ? `Letzte Synchronisierung: ${e(new Date(state.googleSync.lastSuccess).toLocaleString('de-DE'))}. Änderungen werden etwa alle fünf Minuten abgeglichen.` : 'Noch nicht aktiviert. Die Verbindung benötigt einmalig deine Freigabe in Google.'}</p>${state.googleSync?.lastSuccess && Date.now()-Date.parse(state.googleSync.lastSuccess)>15*60*1000?'<p role="status">Seit mehr als 15 Minuten kein erfolgreicher Abgleich. Bitte das Google-Script und seinen Zeit-Trigger prüfen.</p>':''}${state.googleSync?.error?'<p role="alert">Der letzte Abgleich ist fehlgeschlagen. Bitte die Ausführungen im Google-Script prüfen.</p>':''}<p>Es wird ausschließlich der Google-Kalender „Freizeitplaner“ synchronisiert. Geplante Aktivitäten und feste Termine werden übertragen; gespeicherte Ideen ohne vollständigen Zeitpunkt bleiben im Planer. Google-Termine erscheinen als feste Termine. Bei gleichzeitigen Änderungen an Titel oder Zeitpunkt hat Google Vorrang; dein Vorschlagsprotokoll bleibt erhalten.</p><p>Aus Google werden die vergangenen 30 Tage und die kommenden zwölf Monate geladen. Ganztägige und mehrtägige Termine erscheinen pro Tag. Serien kannst du im Kalender einzeln oder vollständig löschen; Einzelne Termine kannst du hier verschieben. Serienregeln und mehrtägige Google-Termine bearbeitest du in Google.</p><ol><li><a href="https://script.google.com/home/start" target="_blank" rel="noopener noreferrer">Google Apps Script öffnen</a> und ein neues Projekt erstellen.</li><li><a href="/google-calendar/Code.gs" download>Verbindungscode herunterladen</a>, öffnen und vollständig in „Code.gs“ einsetzen.</li><li>Links unter „Dienste“ auf + klicken und „Google Calendar API“ hinzufügen.</li><li>Oben die Funktion <strong>install</strong> auswählen, ausführen und den Zugriff freigeben. Sie startet den ersten Abgleich und richtet den Fünf-Minuten-Takt ein.</li></ol><p class="planner-small">Kein Web-App-Deployment erforderlich. Die Verbindung läuft in deinem Google-Konto. Zum Beenden dort die Funktion „uninstall“ ausführen. Bitte nur ein Script-Projekt installieren.</p></details></section>
       <section class="planner-box"><details class="planner-storage"><summary>${toolSummary('Planung sichern','Eine Sicherung herunterladen oder einen gespeicherten Stand importieren.')}</summary><p>Die Planung wird gemeinsam online gespeichert. Jeder mit Zugriff auf die App kann sie lesen und bearbeiten.</p>${button('export','Sicherung exportieren')}<label>Sicherung importieren<input id="plannerImport" type="file" accept="application/json,.json"></label>${backup?`<p>Sicherung mit ${backup.entries.length} Einträgen. Die Übernahme ersetzt die Planung auf allen Geräten.</p>${button('confirmImport','Diese Sicherung übernehmen')}${button('cancelImport','Abbrechen')}`:''}</details></section></div></details></section>`;
     wire();setBusy();
-    const content=host.querySelector<HTMLElement>('#calendarEditor,#dayComposer,#ideaScheduler');
+    const content=host.querySelector<HTMLElement>('#dinnerPicker,#calendarEditor,#dayComposer,#ideaScheduler');
     if(content){
-      const dialog=document.createElement('dialog');dialog.className='planning-dialog';dialog.setAttribute('aria-label',calendarEdit?'Termin ändern':'Aktivität planen');
+      const dialog=document.createElement('dialog');dialog.className='planning-dialog';dialog.setAttribute('aria-label',dinnerDate?'Abendessen planen':calendarEdit?'Termin ändern':'Aktivität planen');
       content.replaceWith(dialog);dialog.append(content);
-      dialog.addEventListener('cancel',ev=>{ev.preventDefault();calendarEdit=null;draft=null;draftReady=false;pendingIdea=null;render();});
-      dialog.addEventListener('click',ev=>{if(ev.target===dialog){const r=dialog.getBoundingClientRect();const mouse=ev as MouseEvent;if(mouse.clientX<r.left||mouse.clientX>r.right||mouse.clientY<r.top||mouse.clientY>r.bottom){calendarEdit=null;draft=null;draftReady=false;pendingIdea=null;render();}}});
+      dialog.addEventListener('cancel',ev=>{ev.preventDefault();dinnerDate='';calendarEdit=null;draft=null;draftReady=false;pendingIdea=null;render();});
+      dialog.addEventListener('click',ev=>{if(ev.target===dialog){const r=dialog.getBoundingClientRect();const mouse=ev as MouseEvent;if(mouse.clientX<r.left||mouse.clientX>r.right||mouse.clientY<r.top||mouse.clientY>r.bottom){dinnerDate='';calendarEdit=null;draft=null;draftReady=false;pendingIdea=null;render();}}});
       if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','');
-      dialog.querySelector<HTMLInputElement>('input[name=start]')?.focus();
+      dialog.querySelector<HTMLInputElement>(dinnerDate?'#dinnerSearch':'input[name=start]')?.focus();
     }else if(dialogReturn){host.querySelector<HTMLElement>(dialogReturn)?.focus();dialogReturn='';}
 
   }
@@ -355,13 +422,13 @@ export function initPlanner(database: SupabaseClient) {
     host?.querySelectorAll<HTMLElement>('[data-drop-date]').forEach(el=>{
       el.addEventListener('dragover',ev=>{if(!dragging||saving)return;ev.preventDefault();if(ev.dataTransfer)ev.dataTransfer.dropEffect='move';el.classList.add('is-drop-target');});
       el.addEventListener('dragleave',ev=>{if(!el.contains(ev.relatedTarget as Node))el.classList.remove('is-drop-target');});
-      el.addEventListener('drop',ev=>{if(!dragging||saving)return;ev.preventDefault();const target=JSON.parse(dragging) as NonNullable<typeof calendarEdit>;dragging='';el.classList.remove('is-drop-target');const row=calendarRow(target);if(!row||target.date===el.dataset.dropDate)return;if(validTime(row.start)&&validTime(row.end))void moveCalendar(target,el.dataset.dropDate!,row.start,duration(row));else openCalendar(target.kind,target.id,el.dataset.dropDate!);});
+      el.addEventListener('drop',ev=>{if(!dragging||saving)return;ev.preventDefault();const target=JSON.parse(dragging) as NonNullable<typeof calendarEdit>|{kind:'dinner';id:string;date:string};dragging='';el.classList.remove('is-drop-target');if(target.kind==='dinner'){void moveDinner(target.id,el.dataset.dropDate!);return;}const row=calendarRow(target);if(!row||target.date===el.dataset.dropDate)return;if(validTime(row.start)&&validTime(row.end))void moveCalendar(target,el.dataset.dropDate!,row.start,duration(row));else openCalendar(target.kind,target.id,el.dataset.dropDate!);});
     });
   }
   function wire() {
     host?.querySelector<HTMLDetailsElement>('#plannerSettings')?.addEventListener('toggle',ev=>{settingsOpen=(ev.currentTarget as HTMLDetailsElement).open;});
     if (!host) return;
-    wireCalendar();
+    wireCalendar();wireDinner();
     host.querySelectorAll<HTMLDetailsElement>('.planner-entry-editor').forEach(el=>el.addEventListener('toggle',()=>{if(el.open)openEditor=el.closest<HTMLElement>('[data-entry]')?.dataset.entry||'';}));
     host.querySelector<HTMLDetailsElement>('.planner-setup')?.addEventListener('toggle',ev=>{if((ev.target as HTMLDetailsElement).open)openSection='setup';});
     host.querySelector<HTMLDetailsElement>('#routineSection')?.addEventListener('toggle',ev=>{routineFormOpen=(ev.currentTarget as HTMLDetailsElement).open;});
@@ -435,6 +502,11 @@ export function initPlanner(database: SupabaseClient) {
     })));
     host.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(b=>b.addEventListener('click',async ()=>{
       const action=b.dataset.action,id=b.dataset.id;
+      if(action==='chooseDinner'){openDinner(id!);return;}
+      if(action==='moveCurrentDinner'){await moveDinner(id!,dinnerDate);return;}
+      if(action==='cancelDinner'){dinnerDate='';render();return;}
+      if(action==='retryRecipes'){void fetchDinnerRecipes();return;}
+      if(action==='removeDinner'){await mutate(()=>{state.dinners=state.dinners?.filter(d=>d.id!==id);},'Abendessen entfernt.');return;}
       if(action==='editAppointment'){openCalendar('appointment',id!,b.dataset.date!);return;}
       if(action==='editEntryTime'){const a=state.entries.find(x=>x.id===id);if(a)openCalendar('entry',id!,a.date);return;}
       if(action==='calendarDetails'){calendarEdit=null;openEditor=id!;render();host.querySelector('.selected-entry')?.scrollIntoView({behavior:'smooth',block:'center'});return;}

@@ -436,3 +436,9 @@ button:focus-visible,summary:focus-visible{outline:3px solid #245bbb;outline-off
 .card-place{flex:0 0 auto}
 .outdoor-group{display:flex;flex-direction:column;min-width:0}
 .outdoor-group .tour-list{flex:1}
+
+.favorites-list,.routine-grid{grid-auto-rows:1fr;align-items:stretch}
+.favorite-row,.routine-card{display:flex;flex-direction:column;align-items:stretch;height:100%;box-sizing:border-box}
+.favorite-actions,.routine-actions{margin-top:auto!important;padding-top:10px}
+.favorite-row .favorite-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;align-items:center;width:100%}
+.favorite-row .favorite-actions>*{min-width:0;width:100%;min-height:40px;display:flex;align-items:center;justify-content:center;box-sizing:border-box}

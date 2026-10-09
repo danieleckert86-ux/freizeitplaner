@@ -3,6 +3,8 @@ import { neutralDescription } from './wording';
 import { categoryIcon } from './category-icons';
 import { recommendationPlace, travelNote } from './locations';
 import './styles.css';
+import './collection.css';
+import {upcomingEvents,eventInPeriod,catalogueFitLabel} from './collection';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -15,6 +17,7 @@ type Recommendation = {
   day: string; category: string; date: string; title: string; description: string;
   url: string; sourceLabel: string; location?: string; venue?: string; city?: string; address?: string;
   favorite: { id: string; title: string; dayLabel: string; categoryLabel: string; description: string; url: string };
+  id?: string; fitScore?: number; verifiedAt?: string; imported?: boolean; conditionsStatus?: string; bookingDeadline?: string;
   dayText?: string; badge?: string; facts?: string[]; why?: string;
   label?: string; meta?: string[]; metaLabel?: string; time?: string;
 };
@@ -41,6 +44,8 @@ type RecommendationData = {
   restaurants: LifestyleRecommendation[];
   cinema: LifestyleRecommendation[];
   stream: StreamRecommendation[];
+  catalogChecks?: Array<{id:string;url:string;status:string;checkedAt:string}>;
+  catalogSources?: Array<{id:string;url:string;hours:number}>;
 };
 
 function dataEscape(value = '') {
@@ -66,7 +71,7 @@ function favoriteMarkup(item: Recommendation, compact = false) {
 
 function sourceMarkup(item: Recommendation) {
   return '<a class="info-link" href="' + dataEscape(item.url) + '" target="_blank" rel="noopener noreferrer">' +
-    dataEscape((item.sourceLabel || 'Originalquelle').replace('Originalquelle', 'Quelle')) + '</a>';
+    dataEscape((item.sourceLabel || 'Originalquelle').replace('Originalquelle', 'Quelle')) + '</a><button class="hide-card-btn" type="button" data-hide-card data-id="'+dataEscape(item.id||item.favorite.id)+'" data-section="catalog" data-title="'+dataEscape(item.title)+'">Ausblenden</button>';
 }
 
 function ratingMarkup(id: string, title: string, section: string) {
@@ -93,8 +98,13 @@ function tourAttributes(item: Recommendation) {
 }
 
 function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<string>()) {
+  const hide=(items:Recommendation[])=>items.filter(x=>!hiddenIds.has(x.id||x.favorite?.id||''));
+  data={...data,top:hide(data.top),ideas:hide(data.ideas),discoveries:hide(data.discoveries),hikes:hide(data.hikes),bikes:hide(data.bikes)};
+  const evidence=document.querySelector<HTMLElement>('#collectionEvidence');
+  if(evidence){const checks=(data.catalogSources||[]).length?(data.catalogSources||[]).map(source=>{const found=(data.catalogChecks||[]).find(x=>x.id===source.id);return {id:source.id,checkedAt:found?.checkedAt||'',status:found?.status==='checked'&&Date.now()-Date.parse(found.checkedAt)>=-60000&&Date.now()-Date.parse(found.checkedAt)<=source.hours*3600000?'checked':'failed'};}):(data.catalogChecks||[]);evidence.innerHTML=checks.length?'<summary>Quellen geprüft: '+checks.filter(c=>c.status==='checked').length+'/'+checks.length+'</summary><ul>'+checks.map(c=>'<li>'+dataEscape(c.id)+' · '+(c.status==='checked'?'geprüft':'nicht vollständig geprüft')+' · '+dataEscape(c.checkedAt.slice(0,10))+'</li>').join('')+'</ul>':'<summary>Recherchestand</summary><p>Vorhandene Ideensammlung. Einzelne Quellenprüfungen sind für diesen Datenstand noch nicht dokumentiert.</p>';}
+
   const state = document.querySelector<HTMLElement>('.data-state');
-  if (state) state.textContent = 'Datenstand Freizeit-Tipps: ' + data.dataUpdated;
+  if (state) state.textContent = 'Sammlung: ' + (data.dataUpdated.includes('T')?new Intl.DateTimeFormat('de-DE').format(new Date(data.dataUpdated)):data.dataUpdated);
 
   const range = document.querySelector<HTMLElement>('.weekend-range');
   if (range) range.textContent = data.weekendRange;
@@ -131,11 +141,11 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   const renderTours = (selector: string, items: Recommendation[]) => {
     const list = document.querySelector<HTMLElement>(selector + ' .tour-list');
     if (!list) return;
-    list.innerHTML = items.map(item =>
+    list.innerHTML = items.sort((a,b)=>(b.fitScore||0)-(a.fitScore||0)).map(item =>
       '<article' + tourAttributes(item) + ' class="tour-card filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '">' +
       '<div class="tour-top"><span class="tour-category">' + categoryIcon(item.category, item.label || item.title) + dataEscape(item.label) + '</span><span class="meta-label">' + dataEscape(item.metaLabel) + '</span></div>' +
-      '<h4>' + dataEscape(item.title) + '</h4>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' +
-      '<div class="tour-meta">' + (item.meta ?? []).map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +
+      '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div><h4>' + dataEscape(item.title) + '</h4>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' +
+      '<p class="collection-condition">' + dataEscape(item.conditionsStatus||'Vor dem Ausflug Wetter, Sperrungen und Routenverlauf prüfen. Keine aktuelle Freigabe.') + '</p><div class="tour-meta">' + (item.meta ?? []).map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +
       '<div class="item-actions">' + sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, item.category) + favoriteMarkup(item, true) + '</div></article>'
     ).join('');
   };
@@ -143,9 +153,9 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   renderTours('#bikeGroup', data.bikes);
 
   const discoveries = document.querySelector<HTMLElement>('#discoveries .discovery-timeline');
-  if (discoveries) discoveries.innerHTML = [...data.top, ...data.ideas, ...data.discoveries].filter((item,index,all) => all.findIndex(other => other.favorite.id === item.favorite.id) === index && item.date >= new Intl.DateTimeFormat('sv-SE', {timeZone:'Europe/Berlin'}).format(new Date())).sort((a,b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || '')).map(item =>
+  if (discoveries) discoveries.innerHTML = upcomingEvents([...data.top,...data.ideas,...data.discoveries], new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date()),hiddenIds).map(item =>
     '<article class="discovery-item filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '"><div><div class="discovery-header"><time datetime="' + dataEscape(item.date) + '">' + dataEscape(new Intl.DateTimeFormat('de-DE', {weekday:'short',day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(new Date(item.date + 'T12:00:00Z'))) + (/^\d{2}:\d{2}$/.test(item.time || '') ? ' · ' + dataEscape(item.time) : '') + '</time><span class="mini-badge">' + categoryIcon(item.category, item.badge || item.title) + '<span class="category-label">' + dataEscape((item.badge || item.label || item.favorite.categoryLabel).split(/\s*[·×]\s*/)[0]) + '</span></span></div>' +
-    '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p><div class="item-actions">' +
+    '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div><h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' + (item.bookingDeadline?'<p class="collection-condition">Buchungsfrist: '+dataEscape(item.bookingDeadline)+'</p>':'') + '<div class="item-actions">' +
     sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, 'discoveries') + favoriteMarkup(item, true) + '</div></div></article>'
   ).join('');
 
@@ -168,7 +178,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   renderLifestyle('#cinemaList', data.cinema ?? [], 'cinema');
   renderLifestyle('#streamList', (data.stream ?? []).filter(item => {
     const age = (Date.now() - new Date(item.releaseDate + 'T00:00:00').getTime()) / 86400000;
-    return age >= 0 && age <= 60;
+    return !Number.isFinite(age) || age >= 0;
   }), 'stream');
 }
 
@@ -209,13 +219,17 @@ async function loadHiddenRecommendationIds() {
   const { data, error } = await supabase.from('hidden_recommendations').select('suggestion_id');
   if (error) {
     console.error('Hidden recommendations could not be loaded', error);
-    return new Set<string>();
+    throw new Error('Ausschlüsse gerade nicht erreichbar');
   }
   return new Set((data ?? []).map(row => row.suggestion_id as string));
 }
 
 async function loadRecommendationData() {
-  let data: RecommendationData;
+  let data: RecommendationData | undefined;
+  try {
+    const native=await fetch(import.meta.env.VITE_MORNING_CATALOG_URL || 'https://fahrrad-zur-arbei.vercel.app/api/leisure/catalog', {cache:'no-store'});
+    if(native.ok){const value=await native.json() as RecommendationData;if(value.schemaVersion===2)data=value;}
+  } catch { /* Existing catalogue remains the cutover fallback. */ }
 
   const { data: recommendationRow, error: recommendationError } = await supabase
     .from('recommendation_data')
@@ -223,7 +237,9 @@ async function loadRecommendationData() {
     .eq('id', 'current')
     .maybeSingle();
 
-  if (!recommendationError && recommendationRow?.payload) {
+  if (data) {
+    // Native worker catalog loaded. Supabase retains only saved decisions and planning.
+  } else if (!recommendationError && recommendationRow?.payload) {
     data = recommendationRow.payload as RecommendationData;
   } else {
     console.warn('Supabase recommendation data unavailable; using JSON fallback', recommendationError);
@@ -236,6 +252,7 @@ async function loadRecommendationData() {
   const [hiddenIds, ratings] = await Promise.all([loadHiddenRecommendationIds(), loadRecommendationRatings()]);
   renderRecommendationData(data, hiddenIds);
   wireRatingButtons(ratings);
+  document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));
 }
 
 type Favorite = {
@@ -254,26 +271,24 @@ async function bootstrap() {
 
   const viewButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-view]'));
   const viewSections = Array.from(document.querySelectorAll<HTMLElement>('[data-app-view]'));
-  let lastIdeaView = 'events';
+  document.body.classList.add('collection-mode');
   const setAppView = (view: string) => {
     if (view === 'favorites') void loadFavorites();
-    const isIdea = !['planning','favorites'].includes(view);
-    if (isIdea) lastIdeaView = view;
+    const isIdea = view==='collection';
     document.querySelector<HTMLElement>('.idea-nav')!.hidden = !isIdea;
     document.querySelectorAll<HTMLButtonElement>('[data-main-view]').forEach(button => {
-      const active = button.dataset.mainView === (isIdea ? 'ideas' : view);
+      const active = button.dataset.mainView === view;
       button.classList.toggle('active', active); button.setAttribute('aria-current', active ? 'page' : 'false');
     });
     viewButtons.filter(button => !button.hasAttribute('data-main-view')).forEach(button => {const active = button.dataset.view === view; button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active));});
     viewSections.forEach(section => {
-      const active = section.dataset.appView === view;
+      const active = section.dataset.appView === view || (view==='collection'&&['outdoor','restaurants','movies','planning'].includes(section.dataset.appView||''));
       section.hidden = !active;
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   viewButtons.forEach(button => button.addEventListener('click', () => setAppView(button.dataset.view ?? 'weekend')));
-  document.querySelector<HTMLButtonElement>('[data-main-view=ideas]')?.addEventListener('click', () => setAppView(lastIdeaView));
-  setAppView('events');
+  setAppView(location.hash==='#touren'?'collection':location.hash==='#gemerkt'?'favorites':'events');
 
 const favoriteCategoryButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.favorite-category-filter'));
 const favoritesList = document.querySelector<HTMLElement>('#favoritesList');
@@ -305,7 +320,7 @@ void loadFavorites();
 
   try { await loadRecommendationData(); } catch {
     const state = document.querySelector<HTMLElement>('.data-state');
-    if (state) state.textContent = 'Freizeit-Tipps gerade nicht verfügbar. Deine Wochenplanung funktioniert weiterhin.';
+    if (state) state.textContent = 'Sammlung gerade nicht verfügbar. Gemerkte Ideen bleiben erhalten.';
   }
 
   document.querySelectorAll<HTMLButtonElement>('[data-hide-card]').forEach(button => {
@@ -313,7 +328,7 @@ void loadFavorites();
       const id = button.dataset.id ?? '';
       const section = button.dataset.section ?? '';
       const title = button.dataset.title ?? '';
-      if (!id || !['restaurants', 'cinema', 'stream'].includes(section)) return;
+      if (!id || !['restaurants', 'cinema', 'stream','catalog'].includes(section)) return;
       button.disabled = true;
       button.textContent = 'Wird ausgeblendet …';
       const { error } = await supabase.from('hidden_recommendations').upsert({
@@ -325,7 +340,7 @@ void loadFavorites();
         button.textContent = 'Ausblenden';
         return;
       }
-      button.closest<HTMLElement>('.lifestyle-card')?.remove();
+      button.closest<HTMLElement>('.lifestyle-card,.discovery-item,.tour-card,.idea-card,.card')?.remove();
     });
   });
 
@@ -412,7 +427,7 @@ function markPastItems() {
 
   filterableItems.forEach(item => {
     const date = item.dataset.date;
-    if (date && date < today) {
+    if (date && date < today && item.dataset.flexibleTour !== 'true') {
       item.classList.add('expired');
       item.setAttribute('aria-hidden', 'true');
     }
@@ -615,7 +630,7 @@ function renderCurrentFilters() {
       return;
     }
 
-    const dayMatches = activeDay === 'all' || item.dataset.day === activeDay;
+    const dayMatches = item.dataset.flexibleTour==='true'||activeDay === 'all' || item.dataset.day === activeDay;
     const categoryMatchesCurrent = categoryMatches(item.dataset.category ?? '', activeCategory);
     item.classList.toggle('is-hidden', !(dayMatches && categoryMatchesCurrent));
   });
@@ -980,7 +995,7 @@ function quietCardActions() {
     if (actions.dataset.quiet) return;
     const favorite = actions.querySelector('[data-favorite]');
     const plan = actions.querySelector('[data-personal-action]');
-    if (!favorite || !plan) return;
+    if (!favorite) return;
     actions.dataset.quiet = 'true';
     const more = document.createElement('details'); more.className = 'card-more';
     const summary = document.createElement('summary'); summary.textContent = 'Mehr';
@@ -988,21 +1003,18 @@ function quietCardActions() {
     const panel = document.createElement('div'); panel.className = 'card-more-panel';
     more.append(summary, panel);
     Array.from(actions.children).forEach(child => {if (child !== favorite && child !== plan) panel.append(child);});
-    actions.append(plan, favorite, more);
+    if(plan)plan.remove();
+    actions.append(favorite, more);
   });
 }
 new MutationObserver(quietCardActions).observe(document.querySelector('#app')!, {childList:true,subtree:true});
 document.querySelector<HTMLSelectElement>('#eventPeriod')?.addEventListener('change', event => {
   const period = (event.currentTarget as HTMLSelectElement).value;
   const today = new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date());
-  const sunday = new Date(today + 'T12:00:00Z'); sunday.setUTCDate(sunday.getUTCDate() + (7 - sunday.getUTCDay()) % 7);
-  const end = sunday.toISOString().slice(0,10);
-  const friday = new Date(sunday); friday.setUTCDate(friday.getUTCDate() - 2);
-  const start = friday.toISOString().slice(0,10);
   let visible = 0;
   document.querySelectorAll<HTMLElement>('.discovery-item').forEach(card => {
     const date = card.dataset.date || '';
-    const show = date >= today && (period === 'today' ? date === today : period === 'week' ? date <= end : period === 'weekend' ? date >= start && date <= end : true);
+    const show = eventInPeriod(date,today,period);
     card.hidden = !show; if (show) visible++;
   });
   document.querySelector<HTMLElement>('#eventsEmpty')!.hidden = visible > 0;

@@ -28,18 +28,14 @@
         <span id="savedCount" hidden>0</span>
       </div>
     </header>
+    <div class="collection-intro"><h1>Gute Ideen bleiben.</h1><p>Deine Morgenmail zeigt die besten nächsten Schritte. Hier findest du den ganzen Freizeitvorrat – zum Entdecken und Merken.</p></div>
     <nav class="section-nav main-nav" aria-label="Hauptbereiche">
-      <button class="section-nav-btn" type="button" data-main-view="planning" data-view="planning" disabled aria-disabled="true">Meine Woche</button>
-      <button class="section-nav-btn active" type="button" data-main-view="ideas">Ideen</button>
+      <button class="section-nav-btn active" type="button" data-main-view="events" data-view="events">Events</button>
+      <button class="section-nav-btn" type="button" data-main-view="collection" data-view="collection">Touren &amp; Ideen</button>
       <button class="section-nav-btn" type="button" data-main-view="favorites" data-view="favorites">Gemerkt</button>
     </nav>
-    <nav class="idea-nav" aria-label="Ideen nach Bereich" hidden>
-      <button type="button" data-view="events">Veranstaltungen</button>
-      <button type="button" data-view="outdoor">Raus ins Grüne</button>
-      <button type="button" data-view="restaurants">Restaurants</button>
-      <button type="button" data-view="movies">Filme &amp; Serien</button>
-    </nav>
-
+    <nav class="idea-nav" hidden aria-label="Weitere Bereiche"></nav>
+    <details id="collectionEvidence" class="collection-source-status"><summary>Recherchestand</summary></details>
     <section id="personalPlanner" class="view-section" data-app-view="planning" hidden aria-label="Meine persönliche Wochenplanung"></section>
 
     <section class="weekend-overview view-section" data-app-view="weekend" aria-labelledby="weekendTitle">
@@ -127,7 +123,7 @@
     </section>
 
     <section class="outdoor-section view-section" data-app-view="outdoor" id="outdoorSection" aria-labelledby="outdoorHeading">
-      <div class="section-head"><div><p class="section-kicker">Draußen</p><h2 id="outdoorHeading">Raus ins Grüne</h2><p class="section-note">Wanderungen und Radtouren zusätzlich zu den übrigen Freizeitideen.</p></div></div>
+      <div class="section-head"><div><p class="section-kicker">Draußen</p><h2 id="outdoorHeading">Raus ins Grüne</h2><p class="section-note">Dauerhaft gesammelt. Grundsätzliche Passung und aktuelle Bedingungen werden getrennt geprüft.</p></div></div>
       <div class="outdoor-columns">
         <div class="outdoor-group" id="hikeGroup"><h3>Wanderungen</h3><div class="tour-list">
         </div></div>
@@ -152,7 +148,7 @@
         <button class="media-tab" type="button" data-media-tab="stream">Stream</button>
       </div>
       <div class="media-panel active" data-media-panel="cinema"><p class="media-note">Aktuell im Augsburger Kinoprogramm – unabhängig vom Wochentag.</p><div class="lifestyle-grid" id="cinemaList"></div></div>
-      <div class="media-panel" data-media-panel="stream" hidden><p class="media-note">Nur Neuerscheinungen der letzten 60 Tage auf Netflix, Disney+, RTL+, ARD und ZDF.</p><div class="lifestyle-grid" id="streamList"></div></div>
+      <div class="media-panel" data-media-panel="stream" hidden><p class="media-note">Gesammelte Film- und Serienideen. Aktuelle Verfügbarkeit beim Anbieter prüfen.</p><div class="lifestyle-grid" id="streamList"></div></div>
     </section>
 
     <section class="panel discovery-panel view-section" data-app-view="events" id="discoveries" aria-labelledby="discoveriesHeading">
@@ -163,7 +159,8 @@
       </div>
       <label class="event-period-picker">Zeitraum
         <select id="eventPeriod" aria-label="Veranstaltungszeitraum">
-          <option value="all">Nächste 21 Tage</option>
+          <option value="all">Nächste 90 Tage</option>
+          <option value="month">Nächste 30 Tage</option>
           <option value="today">Heute</option>
           <option value="week">Diese Woche</option>
           <option value="weekend">Dieses Wochenende</option>

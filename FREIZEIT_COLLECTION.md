@@ -13,3 +13,11 @@ Der Katalog wird bevorzugt aus `https://fahrrad-zur-arbei.vercel.app/api/leisure
 Der neue API-Worker und der kontrollierte Wechsel der Nacht-Recherche liegen im Repository `fahrrad-zur-arbei`, Modul04. Beide Änderungen gemeinsam integrieren; die App kann wegen ihres Rückfalls vorher veröffentlicht werden. Vor Aktivierung einen echten API-/DB-/Browser-Test durchführen. Noch kein Produktionswechsel durch diesen Fachchat.
 
 Geprüft: drei reine Sammlungstests, TypeScript und Vite-Produktionsbuild. Neue UI nicht im Browser geprüft. Bestehende Daten nicht zu Testzwecken verändert.
+# Prüfung 10.10.2026: Quellenstand ehrlich anzeigen
+
+Die integrierte Live-App liest bereits den zentralen Katalog. Dieser enthält36 importierte Ideen;28 allgemeine Quellenprüfungen fehlen. Ein fehlgeschlagener Einzelcheck ist kein vollständiger Quellenlauf und verifiziert den Import nicht.
+
+Die Quellenanzeige trennt nun „noch nicht geprüft“, „Prüfung fehlgeschlagen“, „Prüfung veraltet“ und „geprüft“. Vorhandene Originalprüfzeiten bleiben erhalten; fehlende Prüfungen erhalten keine Speicher-/Abrufzeit. „Sammlung gespeichert“ bezeichnet ausschließlich den Speicherstand. Einzelchecks werden separat gezählt. Keine Bewertungen, Favoriten oder versteckten IDs geändert.
+
+Validierung:4/4 Tests, TypeScript und Vite-Produktionsbuild. Morgenassistent-Fix separat in dessen Modul04 dokumentiert. Keine neue kostenpflichtige Recherche oder Produktionsdatenänderung während der Diagnose. Veröffentlichung erfolgt über00.
+

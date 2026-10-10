@@ -4,7 +4,7 @@ import { categoryIcon } from './category-icons';
 import { recommendationPlace, travelNote } from './locations';
 import './styles.css';
 import './collection.css';
-import {upcomingEvents,eventInPeriod,catalogueFitLabel} from './collection';
+import {upcomingEvents,eventInPeriod,catalogueFitLabel,collectionSourceStates} from './collection';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -44,7 +44,7 @@ type RecommendationData = {
   restaurants: LifestyleRecommendation[];
   cinema: LifestyleRecommendation[];
   stream: StreamRecommendation[];
-  catalogChecks?: Array<{id:string;url:string;status:string;checkedAt:string}>;
+  catalogChecks?: Array<{id:string;url:string;status:string;checkedAt:string;attemptedAt?:string;error?:string}>;
   catalogSources?: Array<{id:string;url:string;hours:number}>;
 };
 
@@ -101,10 +101,14 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   const hide=(items:Recommendation[])=>items.filter(x=>!hiddenIds.has(x.id||x.favorite?.id||''));
   data={...data,top:hide(data.top),ideas:hide(data.ideas),discoveries:hide(data.discoveries),hikes:hide(data.hikes),bikes:hide(data.bikes)};
   const evidence=document.querySelector<HTMLElement>('#collectionEvidence');
-  if(evidence){const checks=(data.catalogSources||[]).length?(data.catalogSources||[]).map(source=>{const found=(data.catalogChecks||[]).find(x=>x.id===source.id);return {id:source.id,checkedAt:found?.checkedAt||'',status:found?.status==='checked'&&Date.now()-Date.parse(found.checkedAt)>=-60000&&Date.now()-Date.parse(found.checkedAt)<=source.hours*3600000?'checked':'failed'};}):(data.catalogChecks||[]);evidence.innerHTML=checks.length?'<summary>Quellen geprüft: '+checks.filter(c=>c.status==='checked').length+'/'+checks.length+'</summary><ul>'+checks.map(c=>'<li>'+dataEscape(c.id)+' · '+(c.status==='checked'?'geprüft':'nicht vollständig geprüft')+' · '+dataEscape(c.checkedAt.slice(0,10))+'</li>').join('')+'</ul>':'<summary>Recherchestand</summary><p>Vorhandene Ideensammlung. Einzelne Quellenprüfungen sind für diesen Datenstand noch nicht dokumentiert.</p>';}
+  if(evidence){
+    const states=collectionSourceStates(data.catalogSources||[],data.catalogChecks||[]);
+    const rechecks=(data.catalogChecks||[]).filter(c=>c.id.startsWith('recheck/'));
+    evidence.innerHTML=states.length?'<summary>Quellen geprüft: '+states.filter(c=>c.state==='checked').length+'/'+states.length+'</summary><p>Speicherstand der Sammlung und tatsächliche Quellenprüfung sind getrennt. Importierte Ideen sind noch nicht verifiziert.</p><ul>'+states.map(c=>'<li>'+dataEscape(c.id)+' · '+dataEscape(c.label)+(c.checkedAt?' · letzte erfolgreiche Prüfung: '+dataEscape(c.checkedAt.slice(0,10)):'')+'</li>').join('')+'</ul>'+(rechecks.length?'<p>Einzelprüfungen: '+rechecks.filter(c=>c.status==='checked').length+' erfolgreich, '+rechecks.filter(c=>c.status!=='checked').length+' fehlgeschlagen. Eine Einzelprüfung ersetzt keinen vollständigen Quellenlauf.</p>':''):'<summary>Recherchestand</summary><p>Vorhandene Ideensammlung. Einzelne Quellenprüfungen sind für diesen Datenstand noch nicht dokumentiert.</p>';
+  }
 
   const state = document.querySelector<HTMLElement>('.data-state');
-  if (state) state.textContent = 'Sammlung: ' + (data.dataUpdated.includes('T')?new Intl.DateTimeFormat('de-DE').format(new Date(data.dataUpdated)):data.dataUpdated);
+  if (state) state.textContent = 'Sammlung gespeichert: ' + (data.dataUpdated.includes('T')?new Intl.DateTimeFormat('de-DE').format(new Date(data.dataUpdated)):data.dataUpdated);
 
   const range = document.querySelector<HTMLElement>('.weekend-range');
   if (range) range.textContent = data.weekendRange;

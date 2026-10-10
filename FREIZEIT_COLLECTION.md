@@ -1,37 +1,23 @@
 # Freizeitvorrat statt Wochenplaner
 
-Die Hauptoberfläche besteht aus Events, Touren & Ideen und Gemerkt. Die Morgenmail zeigt höchstens drei ausgewählte Tipps; alle übrigen Funde bleiben hier abrufbar.
+Die bestehende App zeigt Events, Touren & Ideen und Gemerkt. Die tägliche Morgenmail wählt im Code höchstens drei Tipps aus gespeicherten belegten Inhalten. Favoriten, Bewertungen, ausgeblendete Ideen, Routinen und Kalenderdaten bleiben in den bisherigen Supabase-Tabellen; keine Datenrücksetzung und keine neue Schreibberechtigung.
 
-- Events: 90-Tage-Horizont, Fitscore vor Termin, Filter heute/Woche/Wochenende/30Tage/90Tage. Quellenabdeckung sichtbar. Fehlende Bewertungen werden nicht als errechnete Scores dargestellt.
-- Wanderungen und Fahrradtouren: dauerhafte Sammlung, getrennt von einem veralteten Wochenenddatum. Grundsätzliche Passung und Bedingungen getrennt anzeigen; Wetter und Sperrungen vor dem Ausflug prüfen. Keine automatische Behauptung einer sicheren Befahrbarkeit.
-- Restaurants, Kino, Streaming und pflegbare bekannte Aktivitäten bleiben erhalten. Filmideen verschwinden nicht nach60Tagen; aktuelle Verfügbarkeit muss beim Anbieter geprüft werden.
-- Favoriten, Bewertungen, Ausblendungen und Routinen verwenden weiter die bestehenden Supabase-Tabellen. Die Kalender-/Wochenplaner-Oberfläche wird ausgeblendet; vorhandene Daten werden nicht gelöscht. Neue Aktionen benötigen weiterhin einen Benutzerklick.
-- Events und Touren können ebenfalls ausgeblendet werden. Scheitert das Laden der Ausschlüsse, wird keine Liste angezeigt, die versteckte Vorschläge wiederherstellt.
+Events haben einen 90-Tage-Horizont, Fitscore vor Termin, Filter heute/Woche/Wochenende/30/90 Tage. Unbekannte Passung bleibt unbekannt. Wanderungen/Fahrradtouren sind dauerhafte Sammlung; grundsätzliche Passung und konkrete Wetter-/Sperr-/Routeneignung bleiben getrennt. Ungeprüfte Importtouren sind keine sicheren Ausflugsempfehlungen. Restaurants, Kino und Streaming bleiben gespeichert; aktuelle Verfügbarkeit beim Anbieter prüfen. Scheitert das Laden der Ausschlüsse, werden keine versteckten Ideen wiederhergestellt.
 
-Der Katalog wird bevorzugt aus `https://fahrrad-zur-arbei.vercel.app/api/leisure/catalog` geladen. Mit `VITE_MORNING_CATALOG_URL` kann eine andere zentrale Origin konfiguriert werden. Deaktivierter/unerreichbarer Worker: alter Supabase-Katalog, danach vorhandene JSON-Datei als Rückfall. Keine Zugangsdaten in URLs; die öffentliche Katalogschnittstelle enthält weder Kalender noch Routinen, persönliche Rückmeldungen oder Häkchen.
+Der Katalog kommt bevorzugt aus `https://fahrrad-zur-arbei.vercel.app/api/leisure/catalog`, optional über `VITE_MORNING_CATALOG_URL`. Bei Nichterreichbarkeit bleiben der bisherige Supabase-Katalog und vorhandene JSON-Datei als Rückfall. Das Frontend recherchiert keine neuen Events. Die öffentliche Schnittstelle enthält keine Kalender, Profile, Routinen, Feedbackdaten, Häkchen oder Zugangsdaten.
 
-Der neue API-Worker und der kontrollierte Wechsel der Nacht-Recherche liegen im Repository `fahrrad-zur-arbei`, Modul04. Beide Änderungen gemeinsam integrieren; die App kann wegen ihres Rückfalls vorher veröffentlicht werden. Vor Aktivierung einen echten API-/DB-/Browser-Test durchführen. Noch kein Produktionswechsel durch diesen Fachchat.
+## Direkte Originalrecherche · Vorschlag für 00 · 10.10.2026
 
-Geprüft: drei reine Sammlungstests, TypeScript und Vite-Produktionsbuild. Neue UI nicht im Browser geprüft. Bestehende Daten nicht zu Testzwecken verändert.
-# Prüfung 10.10.2026: Quellenstand ehrlich anzeigen
+Geprüfte Basis dieses Repositories: `main` `dbf021664c1bd8a4fcf6647a140c65f3a5c5f623`. `AGENTS.md` und `ARCHITECTURE.md` sind hier nicht vorhanden. Architektur und Recherchevertrag stehen im Morgenassistenten unter `docs/modules/04-freizeitplaner.md` (Basis `2fbc90e8b8acb2d76f78551f92d8dde08e66e2c4`). Der vorherige Sparumbau ist bereits integriert; dieser Vorschlag wird separat als Draft-PR übergeben.
 
-Die integrierte Live-App liest bereits den zentralen Katalog. Dieser enthält36 importierte Ideen;28 allgemeine Quellenprüfungen fehlen. Ein fehlgeschlagener Einzelcheck ist kein vollständiger Quellenlauf und verifiziert den Import nicht.
+Der zentrale Worker ersetzt die alte Freizeit-KI-Pipeline durch drei direkt geprüfte Originalprogramme: Musikkantine, Kulturhaus abraxas und Kresslesmühle. Öffentliche zulässige Weiterleitungen werden unterstützt. Detailseiten müssen Datum, Beginn, Ort und Original-Link belegen. Einlass, unbekannte Anfahrt/Ende/Buchungsfrist und importierte Angaben werden nicht als gesichert ausgegeben. Absage und Ausverkauf verhindern Empfehlungen. KI-Ersatz für Events und Öffnungen wird vollständig entfernt; Jobs und Nachrichten bleiben unverändert. Events Di/Fr, größere Programme in gespeicherten fortsetzbaren Paketen. Tourensammlung erhalten; keine automatische breite KI-Tourenrecherche.
 
-Die Quellenanzeige trennt nun „noch nicht geprüft“, „Prüfung fehlgeschlagen“, „Prüfung veraltet“ und „geprüft“. Vorhandene Originalprüfzeiten bleiben erhalten; fehlende Prüfungen erhalten keine Speicher-/Abrufzeit. „Sammlung gespeichert“ bezeichnet ausschließlich den Speicherstand. Einzelchecks werden separat gezählt. Keine Bewertungen, Favoriten oder versteckten IDs geändert.
+Die aktive Quellenabdeckung umfasst genau diese drei Quellen. Historische zusätzliche Quellen und Einzelchecks bleiben gespeichert. Unvollständige Pakete sind keine erfolgreichen Null-Läufe. Fehlende, fehlgeschlagene, veraltete und erfolgreiche Prüfungen bleiben getrennt; Speicherzeit und erneuter DB-Abruf sind keine Quellenprüfung. Stabile Publisher-IDs erhalten die Nutzer-ID nach belegten Änderungen; Import bleibt Import ohne Originalbeleg.
 
-Validierung:4/4 Tests, TypeScript und Vite-Produktionsbuild. Morgenassistent-Fix separat in dessen Modul04 dokumentiert. Keine neue kostenpflichtige Recherche oder Produktionsdatenänderung während der Diagnose. Veröffentlichung erfolgt über00.
+`src/collection.ts` erläutert direkte HTTP-/Robots-/Parserfehler und bezeichnet `catalog_source_in_progress` als „Prüfung unvollständig“. Die bestehenden UI-Bereiche bleiben erhalten. Optionale öffentliche Felder `lastSuccessfulFetchAt` und `details` sind kompatibel mit älteren Antworten; ursprüngliches `checkedAt` wird nicht ersetzt. Kein Budget-/Modell-/Tokeninhalt im öffentlichen Katalog. Das bestehende **Freizeitbudget von 5 USD pro Berlin-Monat einschließlich Öffnungen** bleibt unabhängig von den Jobsuchen; kein zusätzlicher Budgetmechanismus in der App.
 
+Prüfung: `npm test`, `npx tsc --noEmit`, `npm run build`. Der zusätzliche Test belegt ehrliche Teilabdeckung, akzeptierte Mengen, HTTP502 und erhaltene Prüfzeitpunkte. Keine produktiven Schreibaktionen, keine Testmail, keine bezahlte Recherche und kein Browser-UI-Test in diesem Umbau.
 
-## Kostenarme Katalogpflege · 10.10.2026 · Vorschlag für00
+00 integriert beide PRs und prüft Preview, öffentlichen Katalog und gespeicherte Mailvorschau. Die bereits bestehende Katalog-URL und das zentrale Aktivierungsflag werden hier nicht verändert. Keine parallele alte Nacht-/KI-Recherche aktivieren. Direkte Routen-/Sperrprüfungen für konkrete Touren und weitere Event-/Kinoprovider bleiben offene Erweiterungen.
 
-Die Recherche lebt im Morgenassistenten; die App bleibt die öffentliche Sammlung mit unveränderten Favoriten, Bewertungen und ausgeblendeten IDs. Der gemeinsame Katalog unterstützt direkte öffentliche strukturierte Originaldaten und begrenzte KI-Ersatzprüfungen. Unveränderte geprüfte Events benötigen keine KI-Neuverarbeitung; Import/DB-Lektüre verifizieren keine Idee. Die Morgenmail wählt täglich maximal drei Tipps im Code.
-
-Quellenchecks dürfen optional `method`, `directError` und `nextAttemptAt` tragen. Die App zeigt unverändert missing/failed/stale/checked; ergänzend erläutert sie gemeinsame Job-/Freizeitbudgetpausen, begrenzte KI-Ersatzprüfungen, unveränderte ungeklärte Seiten und den frühestmöglichen Wiederholungsversuch. Letzter erfolgreicher Prüfzeitpunkt bleibt separat, fehlende Evidenz bleibt ohne Datum. Keine Kosten-/Token-/Kalenderdaten im öffentlichen Katalog, keine Recherche aus dem App-Frontend.
-
-Getestet:5/5 Collection-Tests, TypeScript und Vite-Produktionsbuild erfolgreich. Keine produktiven Schreibaktionen. Abhängigkeit: Morgenassistent stellt die optionalen öffentlichen Prüfmetadaten bereit; ältere Katalogantworten bleiben kompatibel. Branch/PR erst durch00 integrieren/aktivieren.
-
-
-
-## Integration 00 · 10.10.2026
-
-Nutzerentscheidung: eigenes Freizeitbudget von 5 USD pro Monat einschließlich Öffnungsprüfungen; Jobs Daniel und Eva haben unabhängige Grenzen. Budgethinweis zeigt deshalb Freizeitbudget. Keine Änderungen an gespeicherten Bewertungen, Favoriten oder Ausblendungen.
+Explizit als abgesagt/ausverkauft belegte vorhandene Events behalten ihre ID und alten Prüfzeitpunkt; `closed:true` verhindert ihre Anzeige als kommender Tipp. Nutzerentscheidungen werden nicht gelöscht. Ein später belegter gültiger Termin kann denselben Eintrag wieder öffnen.

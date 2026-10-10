@@ -33,3 +33,13 @@ test('budget pause, retry date and unchanged unresolved source stay visibly unve
  assert.equal(states[0].state,'failed');assert.ok(states[0].label.includes('Freizeitbudget'));assert.ok(states[0].label.includes('2026-10-17'));assert.equal(states[0].checkedAt,'');assert.ok(states[1].label.includes('weiterhin ungeklärt'));
 });
 
+
+test('partial direct batches and original HTTP failures remain visible without manufacturing evidence',()=>{
+ const states=collectionSourceStates([{id:'progress',hours:120},{id:'http',hours:120}],[{id:'progress',status:'failed',error:'catalog_source_in_progress',checkedAt:'',attemptedAt:'2026-10-10T05:00Z',lastSuccessfulFetchAt:'2026-10-10T05:01Z',details:{returned:50,attempted:24,accepted:12}},{id:'http',status:'failed',error:'catalog_direct_http_502',checkedAt:'2026-10-06T05:00Z'}],Date.parse('2026-10-10T05:02Z'));
+ assert.match(states[0].label,/Prüfung unvollständig/);assert.equal(states[0].checkedAt,'');assert.equal(states[0].accepted,12);assert.equal(states[0].lastSuccessfulFetchAt,'2026-10-10T05:01Z');assert.match(states[1].label,/HTTP 502/);assert.equal(states[1].checkedAt,'2026-10-06T05:00Z');
+});
+
+test('explicit cancellation preserves stored IDs and favorites while excluding the closed event from upcoming lists',()=>{
+ const stored=[{id:'favorite',favorite:{id:'favorite'},title:'Cancelled',date:'2026-10-11',closed:true},{id:'valid',title:'Other source',date:'2026-10-11'}];
+ assert.deepEqual(upcomingEvents(stored,'2026-10-10',new Set()).map(i=>i.id),['valid']);assert.equal(stored[0].favorite.id,'favorite');assert.equal(stored.length,2);
+});

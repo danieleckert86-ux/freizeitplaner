@@ -13,3 +13,12 @@ export function eventInPeriod(date:string,today:string,period:string){
 export function catalogueFitLabel(item:CollectionItem){
  return !item.imported&&Number.isFinite(item.fitScore)?`${Math.round(item.fitScore!)} / 100 · passt grundsätzlich`:'Passung noch nicht bewertet';
 }
+export type CollectionSourceCheck={id:string;status:string;checkedAt:string;attemptedAt?:string;error?:string};
+export function collectionSourceStates(sources:{id:string;hours:number}[],checks:CollectionSourceCheck[],now=Date.now()){
+ return sources.map(source=>{
+  const check=checks.find(c=>c.id===source.id),age=now-Date.parse(check?.checkedAt||'');
+  const state=!check?'missing':check.status!=='checked'?'failed':!Number.isFinite(age)||age < -60000||age>source.hours*3600000?'stale':'checked';
+  const labels={missing:'noch nicht geprüft',failed:'Prüfung fehlgeschlagen',stale:'Prüfung veraltet',checked:'geprüft'};
+  return {id:source.id,state,label:labels[state],checkedAt:check?.checkedAt||'',attemptedAt:check?.attemptedAt||''};
+ });
+}

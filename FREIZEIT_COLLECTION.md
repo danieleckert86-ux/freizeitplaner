@@ -29,3 +29,9 @@ Die Recherche lebt im Morgenassistenten; die App bleibt die öffentliche Sammlun
 Quellenchecks dürfen optional `method`, `directError` und `nextAttemptAt` tragen. Die App zeigt unverändert missing/failed/stale/checked; ergänzend erläutert sie gemeinsame Job-/Freizeitbudgetpausen, begrenzte KI-Ersatzprüfungen, unveränderte ungeklärte Seiten und den frühestmöglichen Wiederholungsversuch. Letzter erfolgreicher Prüfzeitpunkt bleibt separat, fehlende Evidenz bleibt ohne Datum. Keine Kosten-/Token-/Kalenderdaten im öffentlichen Katalog, keine Recherche aus dem App-Frontend.
 
 Getestet:5/5 Collection-Tests, TypeScript und Vite-Produktionsbuild erfolgreich. Keine produktiven Schreibaktionen. Abhängigkeit: Morgenassistent stellt die optionalen öffentlichen Prüfmetadaten bereit; ältere Katalogantworten bleiben kompatibel. Branch/PR erst durch00 integrieren/aktivieren.
+
+
+
+## Integration 00 · 10.10.2026
+
+Nutzerentscheidung: eigenes Freizeitbudget von 5 USD pro Monat einschließlich Öffnungsprüfungen; Jobs Daniel und Eva haben unabhängige Grenzen. Budgethinweis zeigt deshalb Freizeitbudget. Keine Änderungen an gespeicherten Bewertungen, Favoriten oder Ausblendungen.

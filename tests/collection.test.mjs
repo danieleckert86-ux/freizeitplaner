@@ -27,3 +27,8 @@ test('event filters cover Friday through Sunday and the month horizon',()=>{
  assert.equal(eventInPeriod('2026-11-08','2026-10-09','month'),true);
  assert.equal(eventInPeriod('2026-11-09','2026-10-09','month'),false);
 });
+
+test('budget pause, retry date and unchanged unresolved source stay visibly unverified',()=>{
+ const states=collectionSourceStates([{id:'paused',hours:120},{id:'unknown',hours:120}],[{id:'paused',status:'failed',checkedAt:'',error:'research_budget_paused',nextAttemptAt:'2026-10-17T00:00:00Z'},{id:'unknown',status:'failed',checkedAt:'',error:'catalog_direct_unchanged_unresolved'}]);
+ assert.equal(states[0].state,'failed');assert.ok(states[0].label.includes('gemeinsames Job-/Freizeitbudget'));assert.ok(states[0].label.includes('2026-10-17'));assert.equal(states[0].checkedAt,'');assert.ok(states[1].label.includes('weiterhin ungeklärt'));
+});

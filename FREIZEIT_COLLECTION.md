@@ -134,3 +134,6 @@ Touren, Restaurants/Cafés und Events zeigen eine Hauptaktion plus Mehr in einer
 
 ## Kompakte Vorschaukarten · 11.10.2026
 Touren und Gastronomie zeigen Titel, Ort, Passung und Tour-Eckdaten sowie Hauptaktion/Mehr. Beschreibungen und ausführliche Prüfhinweise bleiben im Details-Popup erhalten. Anfahrt entfällt in der Übersicht. Automatisch gleich hohe Rasterzeilen sind entfernt, damit lange Karten keine Leerflächen in anderen Zeilen erzeugen. Gespeicherte Originaldaten und Übernahme bleiben unverändert.
+
+## Kompakte Events · 11.10.2026
+Unter Aktuell bleiben Titel, Datum/Uhrzeit, Ort und Passung sichtbar. Die vollständige Beschreibung steht unter Mehr → Details. Belegte Buchungsfristen bleiben in der Übersicht sichtbar. Automatische gleiche Rasterhöhen und Anfahrt sind aus der Eventübersicht entfernt; Inhalte, Merkliste und Bewertungen unverändert.

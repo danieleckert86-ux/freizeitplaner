@@ -90,3 +90,15 @@ wurden in diesem Schritt nicht end-to-end live geprüft. Die neue Priorisierung
 spezieller Events und die Morgenmail sind ausdrücklich nicht Teil dieses ersten
 Vorrats-Schritts; ModuleResult v1, Quellenprüfungen und Recherchebudget bleiben
 unverändert. Keine KI-Recherche, keine Mail, keine Produktionsdatenänderung.
+
+
+
+## Maps-Orte als Basis · Nutzerkorrektur 11.10.2026
+
+Die vier Listen wurden vollständig im Browser gelesen: 58 Restaurants, 18 Schwimmorte, 29 Cafés, 7 Biergärten. 112 Nennungen ergeben nach drei Mehrfachnennungen und dem ausgeschlossenen Parkplatz 108 Orte. Die Ortsnamen werden als editierbare Basis ergänzt, nicht lediglich verlinkt. Café/Biergarten-Kategorien werden anhand lesbarer Maps-Kategorie bzw. ausdrücklich gelieferter Liste eingeordnet. Die Listenlinks entfallen aus der Oberfläche; importierte Einträge haben keinen erfundenen Original-Ortlink. Keine laufende Maps-Abfrage oder KI-Kosten.
+
+Zehn als geschlossen angezeigte Orte bleiben sichtbar und editierbar, aber vorerst nicht auswählbar. Die Sperre ist im Formular korrigierbar. Keine automatische Öffnungs-/Anfahrtsprüfung behaupten. Dauer, Anfahrt, Strecke und Höhenmeter bleiben unbekannt; Ort, Energie und Aufwand sind editierbare Planungseinordnungen. Ohne bekannte Dauer und Anfahrt keine automatische konkrete Fragebogenauswahl.
+
+`withMapsStock` ergänzt die Basis beim Cloud-Lesen im Arbeitsspeicher und erhält alle vorhandenen privaten Felder. Erste ausdrückliche Speicherung übernimmt sie mit `stockMapsVersion:1` und bestehender Revision in die gemeinsame Planung. Danach bleiben bearbeitete oder gelöschte Basisorte auf allen Geräten erhalten bzw. gelöscht. Vorhandene gleichnamige eigene Einträge haben Vorrang. Kein Zurücksetzen, keine Migration, keine Änderung an Morgenmail oder Eventauswahl.
+
+Validierung: 36 Tests einschließlich eindeutiger IDs, sichtbarer Basisorte, geschlossener Orte, eigener Änderungen, dauerhafter Löschung und fehlender Listenlinks; TypeScript und Build. Zusätzliche tatsächliche Speicher-/Lesefunktionen mit isoliertem Provider geprüft. Keine Produktionsschreibtests oder Mail.

@@ -1,0 +1,984 @@
+[
+  {
+    "id": "maps-restaurant-drei-k-niginnen",
+    "title": "Restaurant Drei Königinnen",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Deutsch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-tratto-s",
+    "title": "Restaurant Tratto's",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Italienisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-ristorante-massimiliano",
+    "title": "Ristorante Massimiliano",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Italienisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-the-green-garden",
+    "title": "The Green Garden",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. In der Liste als geschlossen angezeigt (11.10.2026); vor erneuter Nutzung prüfen. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft.",
+    "unavailable": true
+  },
+  {
+    "id": "maps-viktor-caf-bar",
+    "title": "VIKTOR Café & Bar",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Café. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft. Auch in deiner Caféliste."
+  },
+  {
+    "id": "maps-chantico-mexican-food-grottenau-4-in-der-theaterpassage-ludwigstr-13",
+    "title": "Chantico Mexican Food (Grottenau 4) in der Theaterpassage Ludwigstr.13",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Mexikanisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-sangam-augsburg",
+    "title": "Sangam Augsburg",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Indisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-kappeneck-restaurant-bar",
+    "title": "KAPPENECK - Restaurant & Bar",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Deutsch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-del-duomo",
+    "title": "Restaurant Del Duomo",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Italienisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-joe-s-la-perla",
+    "title": "Joe's La Perla",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Mexikanisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-il-giardino-da-peppino",
+    "title": "Restaurant Il Giardino da Peppino",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Italienisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-barrio-cocina",
+    "title": "Barrio Cocina",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Restaurant. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-il-segreto-italiano-italienisch-essen",
+    "title": "Il Segreto Italiano - Italienisch essen",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Italienisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-studio-napoli",
+    "title": "Studio Napoli",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Italienisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-caf-flora",
+    "title": "Café Flora",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Café. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft. Auch in deiner Caféliste."
+  },
+  {
+    "id": "maps-schillers-restaurant",
+    "title": "Schillers Restaurant",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Restaurant. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-mama-soul",
+    "title": "Restaurant Mama Soul",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Türkisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-ryu-vietnamese-streetfood",
+    "title": "Ryu - Vietnamese Streetfood",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Vietnamesisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-alt-athen",
+    "title": "Restaurant Alt Athen",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Griechisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-taverna-ikaros",
+    "title": "Taverna Ikaros",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Griechisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-cilantro",
+    "title": "Restaurant Cilantro",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Mexikanisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-goldener-stern",
+    "title": "Restaurant Goldener Stern",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Deutsch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-gasthof-kreisi",
+    "title": "Gasthof Kreisi",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Gasthof-Unterkunft. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-ehh-okay-aroma-des-orients",
+    "title": "EHH.OKAY – Aroma des Orients",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Restaurant. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-maseric-pizza",
+    "title": "Masericó Pizza",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Pizza. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-via-del-gusto-augsburg",
+    "title": "Via del Gusto Augsburg",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Geschäft für italienische Lebensmittel. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft. Einordnung als Restaurant prüfen."
+  },
+  {
+    "id": "maps-restaurant-song",
+    "title": "Restaurant Song",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Chinesisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-golden-rice-asian-kitchen-bar",
+    "title": "Golden Rice Asian Kitchen & Bar",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Vietnamesisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-perlach-acht",
+    "title": "Perlach Acht",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Deutsch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-landito-s-kitchen",
+    "title": "Restaurant Landito's Kitchen",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Syrisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-nuva-altstadt",
+    "title": "Nuva Altstadt",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Pizza. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-emmi-s-kitchen",
+    "title": "Restaurant Emmi's Kitchen",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Vegan. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-exotiko-am-dom",
+    "title": "EXOTIKO am Dom",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Restaurant. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-saigon-village",
+    "title": "Restaurant Saigon Village",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Vietnamesisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-jenny-vom-block",
+    "title": "Jenny vom Block",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Restaurant. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-gustavo",
+    "title": "Restaurant Gustavo",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Restaurant. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-gasthof-zur-linde",
+    "title": "Gasthof Zur Linde",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Bayerisches Restaurant. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-ferrari",
+    "title": "Restaurant Ferrari",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Italienisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-gastst-tte-kulperh-tte",
+    "title": "Gaststätte Kulperhütte",
+    "kind": "beer-garden",
+    "setting": "outside",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Biergarten. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft. Auch in deiner Biergartenliste."
+  },
+  {
+    "id": "maps-ratskeller-augsburg",
+    "title": "Ratskeller Augsburg",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Deutsch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-el-greco",
+    "title": "Restaurant El Greco",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Griechisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-n8-nachtstallung-restaurant",
+    "title": "N8 NachtStallung Restaurant",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Restaurant. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-dolce-vita",
+    "title": "Restaurant Dolce Vita",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Italienisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-schwarze-kiste-am-hochablass",
+    "title": "Schwarze Kiste am Hochablass",
+    "kind": "beer-garden",
+    "setting": "outside",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Biergarten. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-k-hners-landhaus-restaurant-catering-augsburg-hochzeiten-firmenfeiern",
+    "title": "Kühners Landhaus - Restaurant & Catering Augsburg ( Hochzeiten & Firmenfeiern )",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Deutsch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-fischerh-tte-friedberg",
+    "title": "Fischerhütte Friedberg",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Restaurant. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-caf-lamaimouna",
+    "title": "Café LaMaimouna",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Café. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-pastissima",
+    "title": "Restaurant Pastissima",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Italienisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-bombay-palace",
+    "title": "Restaurant Bombay Palace",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Indisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-bodega-la-bomba",
+    "title": "Bodega La Bomba",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Tapasbar. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-italiana-da-enzo",
+    "title": "Restaurant Italiana da Enzo",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Italienisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-gambrinuskeller",
+    "title": "Restaurant Gambrinuskeller",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Italienisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-la-piazzetta-friedberg",
+    "title": "La Piazzetta Friedberg",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Italienisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-hamburgerei-augsburg",
+    "title": "Hamburgerei Augsburg",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Hamburger. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-sonnendeck-augsburg",
+    "title": "Sonnendeck Augsburg",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. In der Liste als geschlossen angezeigt (11.10.2026); vor erneuter Nutzung prüfen. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft.",
+    "unavailable": true
+  },
+  {
+    "id": "maps-restaurant-shushu-falafel",
+    "title": "Restaurant Shushu Falafel",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Syrisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-bistro-nikos-werkstatt-enothek",
+    "title": "Bistro Nikos Werkstatt Enothek",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Griechisch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-nude-augsburg-veganes-restaurant-caf",
+    "title": "nude Augsburg - Veganes Restaurant & Café",
+    "kind": "restaurant",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Restaurantliste. Maps-Kategorie: Vegan. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-altes-stadtbad",
+    "title": "Altes Stadtbad",
+    "kind": "swim",
+    "setting": "inside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. Maps-Kategorie: Öffentliches Schwimmbad. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-stadtbad-friedberg",
+    "title": "Stadtbad Friedberg",
+    "kind": "swim",
+    "setting": "inside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. Maps-Kategorie: Öffentliches Schwimmbad. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-eiskanal-badebereich",
+    "title": "Eiskanal Badebereich",
+    "kind": "swim",
+    "setting": "outside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. Maps-Kategorie: See. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-freibad-lechhausen",
+    "title": "Freibad Lechhausen",
+    "kind": "swim",
+    "setting": "outside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. In der Liste als geschlossen angezeigt (11.10.2026); vor erneuter Nutzung prüfen. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft.",
+    "unavailable": true
+  },
+  {
+    "id": "maps-gartenhallenbad-stadtbergen",
+    "title": "Gartenhallenbad Stadtbergen",
+    "kind": "swim",
+    "setting": "inside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. Maps-Kategorie: Hallenschwimmbad. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-hallenbad-g-ggingen",
+    "title": "Hallenbad Göggingen",
+    "kind": "swim",
+    "setting": "inside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. Maps-Kategorie: Schwimmbad. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-spickelbad-hallenbad",
+    "title": "Spickelbad Hallenbad",
+    "kind": "swim",
+    "setting": "inside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. Maps-Kategorie: Schwimmbad. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-naturerlebnisbad-egling-e-v",
+    "title": "Naturerlebnisbad Egling e. V.",
+    "kind": "swim",
+    "setting": "outside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. Maps-Kategorie: Freibad. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-naturfreibad-fischach",
+    "title": "Naturfreibad Fischach",
+    "kind": "swim",
+    "setting": "outside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. In der Liste als geschlossen angezeigt (11.10.2026); vor erneuter Nutzung prüfen. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft.",
+    "unavailable": true
+  },
+  {
+    "id": "maps-freibad-b-renkeller",
+    "title": "Freibad Bärenkeller",
+    "kind": "swim",
+    "setting": "outside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. In der Liste als geschlossen angezeigt (11.10.2026); vor erneuter Nutzung prüfen. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft.",
+    "unavailable": true
+  },
+  {
+    "id": "maps-fribbe-freibad",
+    "title": "Fribbe Freibad",
+    "kind": "swim",
+    "setting": "outside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. In der Liste als geschlossen angezeigt (11.10.2026); vor erneuter Nutzung prüfen. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft.",
+    "unavailable": true
+  },
+  {
+    "id": "maps-freibad-dasing",
+    "title": "Freibad Dasing",
+    "kind": "swim",
+    "setting": "outside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. Maps-Kategorie: Öffentliches Schwimmbad. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-familienbad-am-pl-rrer",
+    "title": "Familienbad am Plärrer",
+    "kind": "swim",
+    "setting": "outside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. In der Liste als geschlossen angezeigt (11.10.2026); vor erneuter Nutzung prüfen. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft.",
+    "unavailable": true
+  },
+  {
+    "id": "maps-luftbad",
+    "title": "Luftbad",
+    "kind": "swim",
+    "setting": "outside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. Maps-Kategorie: Schwimmbad. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-naturfreibad-haunstetten",
+    "title": "Naturfreibad Haunstetten",
+    "kind": "swim",
+    "setting": "outside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. Maps-Kategorie: Freibad. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-friedberger-baggersee",
+    "title": "Friedberger Baggersee",
+    "kind": "swim",
+    "setting": "outside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. Maps-Kategorie: See. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-kuhsee",
+    "title": "Kuhsee",
+    "kind": "swim",
+    "setting": "outside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. Maps-Kategorie: Badesee. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-badestelle-proviantbach",
+    "title": "Badestelle Proviantbach",
+    "kind": "swim",
+    "setting": "outside",
+    "energy": "medium",
+    "effort": "prepare",
+    "note": "Aus deiner Schwimmliste. Maps-Kategorie: Badesee. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-caf-keck",
+    "title": "Café Keck",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Café. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-coffee-fellows-kaffee-bagels-fr-hst-ck",
+    "title": "Coffee Fellows - Kaffee, Bagels, Frühstück",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Café. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-starbucks",
+    "title": "Starbucks",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Coffeeshop. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-cumpanum-augsburg-moritzplatz-biob-ckerei",
+    "title": "CUMPANUM Augsburg Moritzplatz - Biobäckerei",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Bäckerei. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-bricks-caf-bar-augsburg",
+    "title": "Bricks Café & Bar - Augsburg",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. In der Liste als geschlossen angezeigt (11.10.2026); vor erneuter Nutzung prüfen. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft.",
+    "unavailable": true
+  },
+  {
+    "id": "maps-the-green-house",
+    "title": "The Green House",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Restaurant. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-meikes-schmeckerei",
+    "title": "Meikes Schmeckerei",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Bistro. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-micasa-breakfast-club-spritz-matcha-a-ai-booking",
+    "title": "MICASA - breakfast club | spritz | matcha | açai | booking",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Brunch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-caf-dreizehn-in-der-kresslesm-hle",
+    "title": "Café Dreizehn in der Kresslesmühle",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Vegan. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-caf-martini",
+    "title": "Café Martini",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Coffeeshop. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-yard-coffee",
+    "title": "Yard Coffee",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Café. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-la-boulangerie",
+    "title": "La Boulangerie",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Bäckerei. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-picnic",
+    "title": "Picnic",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Frühstück. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-anna-caf-bistro-restaurant",
+    "title": "anna Café | Bistro | Restaurant",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Café. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-cafe-himmelgr-n",
+    "title": "Cafe Himmelgrün",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Café. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-fr-ulein-smilla-caf-bar",
+    "title": "Fräulein Smilla Café & Bar",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Café. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-caf-nene",
+    "title": "Café NENE",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Café. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-eiscaf-am-brunnen",
+    "title": "Eiscafé am Brunnen",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. In der Liste als geschlossen angezeigt (11.10.2026); vor erneuter Nutzung prüfen. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft.",
+    "unavailable": true
+  },
+  {
+    "id": "maps-b-ckerei-konditorei-wolf",
+    "title": "Bäckerei Konditorei Wolf",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Bäckerei. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-pier-3-am-kuhsee",
+    "title": "Pier 3 am Kuhsee",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Restaurant. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-altstadtcaf-wei-gerber",
+    "title": "Altstadtcafé Weißgerber",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Café. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-caf-s-wald",
+    "title": "Café Süßwald",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Gebäck. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-mariandl-s-hofcaf",
+    "title": "Mariandl‘s Hofcafé",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Café. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-caf-dede",
+    "title": "Café DEDE",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Café. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-zhem",
+    "title": "zhem",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Café. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-yoboni",
+    "title": "Yoboni",
+    "kind": "cafe",
+    "setting": "both",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Caféliste. Maps-Kategorie: Frühstück. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-restaurant-j-gerhaus",
+    "title": "Restaurant Jägerhaus",
+    "kind": "beer-garden",
+    "setting": "outside",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Biergartenliste. Maps-Kategorie: Deutsch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-kultstrand",
+    "title": "KultStrand",
+    "kind": "beer-garden",
+    "setting": "outside",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Biergartenliste. In der Liste als geschlossen angezeigt (11.10.2026); vor erneuter Nutzung prüfen. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft.",
+    "unavailable": true
+  },
+  {
+    "id": "maps-waldgastst-tte-parkh-usl",
+    "title": "Waldgaststätte Parkhäusl",
+    "kind": "beer-garden",
+    "setting": "outside",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Biergartenliste. Maps-Kategorie: Biergarten. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-irish-pub-murdocks",
+    "title": "Irish Pub Murdocks",
+    "kind": "beer-garden",
+    "setting": "outside",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Biergartenliste. Maps-Kategorie: Irish Pub. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-gastst-tte-thing-augsburg",
+    "title": "Gaststätte Thing - Augsburg",
+    "kind": "beer-garden",
+    "setting": "outside",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Biergartenliste. Maps-Kategorie: Deutsch. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  },
+  {
+    "id": "maps-flo-l-nde-augsburg",
+    "title": "Floßlände Augsburg",
+    "kind": "beer-garden",
+    "setting": "outside",
+    "energy": "low",
+    "effort": "spontaneous",
+    "note": "Aus deiner Biergartenliste. Maps-Kategorie: Restaurant. Dauer und Anfahrt noch ergänzen; Öffnungszeiten ungeprüft."
+  }
+]

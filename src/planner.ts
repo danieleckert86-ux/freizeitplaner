@@ -1,3 +1,4 @@
+import {withMapsStock} from './maps-stock';
 import {stockMarkup,stockSources,stockKinds,validStockItem,draftFromFavorite,usableStock, type StockItem} from './activity-stock';
 import './planner.css';
 import {withKnownActivities, type KnownActivity} from './known-activities';
@@ -13,7 +14,7 @@ type Slot = { id: string; date: string; start: string; end: string; energy: stri
 type Entry = { id: string; title: string; url: string; date: string; start: string; end: string; slotId: string; status: string; createdAt: string; proposedAt: string; organizedAt: string; doneAt: string; note: string; next: string; routineId?: string; source?: string };
 type Routine = KnownActivity;
 type Dinner = {id:string;date:string;recipeId:string;title:string};
-type State = { activityStock?:StockItem[]; knownActivitiesVersion?:number; dinners?: Dinner[]; routines?: Routine[]; version: 1; appointments: Appointment[]; slots: Slot[]; entries: Entry[]; checks: string[]; googleDeleteSeries?: string[]; googleSync?: { lastSuccess: string; error?: string } };
+type State = { stockMapsVersion?:number; activityStock?:StockItem[]; knownActivitiesVersion?:number; dinners?: Dinner[]; routines?: Routine[]; version: 1; appointments: Appointment[]; slots: Slot[]; entries: Entry[]; checks: string[]; googleDeleteSeries?: string[]; googleSync?: { lastSuccess: string; error?: string } };
 type Idea = { title: string; url: string; next: string; outdoor: boolean; minutes?: number; source?: string; routineId?: string; date?: string; start?: string; tourKind?: string; flexible?: boolean };
 const defaultRoutines = (): Routine[] => [
   {id:'walk',title:'Spazieren durch die Stadt',minutes:45,energy:'low',mood:'outdoor',effort:'spontaneous',outdoor:true,next:'Eine gemeinsame Runde zu Beginn des Zeitfensters vorschlagen.'},
@@ -44,7 +45,7 @@ function validState(v: unknown): v is State {
   if (!v || typeof v !== 'object') return false;
   const s = v as State;
   const strings = (x: unknown, keys: string[]) => !!x && typeof x === 'object' && keys.every(k => typeof (x as Record<string, unknown>)[k] === 'string');
-  return (s.knownActivitiesVersion === undefined || s.knownActivitiesVersion === 1) && s.version === 1 && Array.isArray(s.appointments) && Array.isArray(s.slots) && Array.isArray(s.entries) && Array.isArray(s.checks)
+  return (s.stockMapsVersion === undefined || s.stockMapsVersion === 1) && (s.knownActivitiesVersion === undefined || s.knownActivitiesVersion === 1) && s.version === 1 && Array.isArray(s.appointments) && Array.isArray(s.slots) && Array.isArray(s.entries) && Array.isArray(s.checks)
     && (s.routines === undefined || Array.isArray(s.routines) && s.routines.every(r => strings(r,['id','title','energy','mood','effort','next']) && Number.isInteger(r.minutes) && r.minutes >= 5 && r.minutes <= 1440 && typeof r.outdoor === 'boolean' && ['low','medium','high'].includes(r.energy) && ['outdoor','movement','food','culture'].includes(r.mood) && ['spontaneous','prepare','trip'].includes(r.effort) && validActivityProperties(r)))
     && (s.activityStock===undefined||Array.isArray(s.activityStock)&&s.activityStock.length<=500&&s.activityStock.every(validStockItem)&&new Set(s.activityStock.map(x=>x.id)).size===s.activityStock.length)
     && (s.googleDeleteSeries === undefined || Array.isArray(s.googleDeleteSeries) && s.googleDeleteSeries.every(id => typeof id === 'string'))
@@ -71,7 +72,7 @@ export function initPlanner(database: SupabaseClient) {
   async function readCloud() {
     const { data, error } = await database.from('personal_planning').select('payload,revision').eq('id', 'shared').abortSignal(AbortSignal.timeout(12000)).single();
     if (error || !data || !validState(data.payload) || !Number.isSafeInteger(Number(data.revision))) throw Error('Cloud data unavailable');
-    return { state: withKnownActivities({ ...data.payload, routines: data.payload.routines ?? defaultRoutines() } as State), revision: Number(data.revision) };
+    return { state: withMapsStock(withKnownActivities({ ...data.payload, routines: data.payload.routines ?? defaultRoutines() } as State)), revision: Number(data.revision) };
   }
   const stockHost=document.querySelector<HTMLElement>('#activityStock');
   let stockDraft: StockItem|null=null;
@@ -619,7 +620,7 @@ export function initPlanner(database: SupabaseClient) {
       ev.preventDefault();if(!stockDraft||!loaded||saving)return;
       const d=new FormData(ev.currentTarget as HTMLFormElement);
       const number=(key:string)=>String(d.get(key)||'').trim()===''?null:Number(d.get(key));
-      const row={...stockDraft,title:String(d.get('title')).trim(),kind:String(d.get('kind')),url:String(d.get('url')).trim(),minutes:number('minutes'),travelMinutes:number('travelMinutes'),distanceKm:number('distanceKm'),elevationM:number('elevationM'),setting:String(d.get('setting')),energy:String(d.get('energy')),effort:String(d.get('effort')),note:String(d.get('note')).trim()};
+      const row={...stockDraft,unavailable:d.has('unavailable'),title:String(d.get('title')).trim(),kind:String(d.get('kind')),url:String(d.get('url')).trim(),minutes:number('minutes'),travelMinutes:number('travelMinutes'),distanceKm:number('distanceKm'),elevationM:number('elevationM'),setting:String(d.get('setting')),energy:String(d.get('energy')),effort:String(d.get('effort')),note:String(d.get('note')).trim()};
       if(!validStockItem(row)){stockMessage='Bitte gültige Angaben eingeben. Unbekannte Werte dürfen leer bleiben.';stockHost.querySelector<HTMLElement>('[role=status]')!.textContent=stockMessage;return;}
       stockDraft=row;
       if(await mutate(()=>{const list=state.activityStock??[];const i=list.findIndex(a=>a.id===row.id);if(i<0)list.push(row);else list[i]=row;state.activityStock=list;},'Vorratsidee gespeichert.')){stockDraft=null;stockMessage='Vorratsidee gespeichert. Auf allen Geräten verfügbar.';}
@@ -663,6 +664,7 @@ export function initPlanner(database: SupabaseClient) {
   const params=new URLSearchParams({latitude:'48.3705',longitude:'10.8978',daily:'precipitation_probability_max',timezone:'Europe/Berlin',forecast_days:'14'});
   fetch('https://api.open-meteo.com/v1/forecast?'+params).then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{if(data.daily?.time)rain=Object.fromEntries(data.daily.time.map((d:string,i:number)=>[d,data.daily.precipitation_probability_max[i]]));if(!host.contains(document.activeElement))render();}).catch(()=>{});
 }
+
 
 
 

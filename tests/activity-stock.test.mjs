@@ -1,3 +1,4 @@
+import {mapsStock,withMapsStock} from '../src/maps-stock.ts';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {stockKinds,stockLists,validStockItem,kindForActivity,kindForFavorite,draftFromFavorite,usableStock,matchingStock,stockMarkup,stockIdeaMarkup,publishStockFavorites,publishStockDecisions} from '../src/activity-stock.ts';
@@ -64,12 +65,32 @@ test('the existing five-question result includes a concrete matching idea and ke
  assert.equal((html.match(/Konkrete Idee:/g)||[]).length,1);
 });
 
-test('Maps lists remain source links, never silently populate stock or verify places',()=>{
- assert.equal(Object.keys(stockLists).length,4);
+test('stock groups no longer display Maps-list links',()=>{
  const html=stockMarkup([],null,true,false,'');
- for(const url of Object.values(stockLists))assert.ok(html.includes(url));
- assert.equal((html.match(/Deine Maps-Liste öffnen/g)||[]).length,4);
+ assert.ok(!html.includes('Deine Maps-Liste öffnen'));
+ for(const url of Object.values(stockLists))assert.ok(!html.includes(url));
  assert.equal((html.match(/0 gespeichert/g)||[]).length,9);
- assert.match(html,/Die Liste ist kein geprüfter Vorrat/);
- assert.match(html,/data-stock-kind="swim"/);
+});
+
+test('Maps imports contain 108 distinct editable places with unknown timings and no visible links',()=>{
+ const places=mapsStock();assert.equal(places.length,108);assert.equal(new Set(places.map(x=>x.id)).size,108);
+ assert.ok(places.every(validStockItem));assert.ok(places.every(x=>x.minutes===null&&x.travelMinutes===null&&x.url===''));
+ assert.ok(places.some(x=>x.title==='Altes Stadtbad'&&x.kind==='swim'));
+ assert.ok(places.some(x=>x.title==='Café Flora'&&x.kind==='cafe'));
+ assert.equal(places.filter(x=>x.title==='Gaststätte Kulperhütte').length,1);
+ assert.ok(!places.some(x=>x.title.startsWith('CARE U')));
+});
+test('Maps seeds preserve edits, deleted rows after save and unrelated private fields',()=>{
+ const own=idea('own',{title:'Café Flora',minutes:70});
+ const old={activityStock:[own],entries:[{id:'history'}],checks:['2026-10-11'],otherPrivateField:1};
+ const copy=JSON.stringify(old);const seeded=withMapsStock(old);assert.equal(JSON.stringify(old),copy);
+ assert.equal(seeded.activityStock.filter(x=>x.title==='Café Flora').length,1);assert.equal(seeded.activityStock[0].minutes,70);
+ seeded.activityStock=seeded.activityStock.filter(x=>x.title!=='Altes Stadtbad');
+ const reload=withMapsStock(JSON.parse(JSON.stringify(seeded)));assert.ok(!reload.activityStock.some(x=>x.title==='Altes Stadtbad'));assert.deepEqual(reload.entries,old.entries);assert.deepEqual(reload.checks,old.checks);assert.equal(reload.otherPrivateField,1);
+});
+test('closed imported places stay editable but are excluded from suggestions and planning',()=>{
+ const places=mapsStock();assert.equal(places.filter(x=>x.unavailable).length,10);
+ const closed=places.find(x=>x.unavailable);assert.ok(!usableStock(places,decisions()).some(x=>x.id===closed.id));
+ const html=stockMarkup([closed],null,true,false,'');assert.match(html,/Als geschlossen übernommen/);assert.match(html,/disabled>Einplanen/);
+ assert.ok(usableStock([{...closed,unavailable:false}],decisions()).length===1);
 });

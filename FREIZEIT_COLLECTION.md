@@ -149,3 +149,6 @@ Orte & Touren und Standardaktivitäten zeigen keinen Vormerk-Stern mehr; der Vor
 
 ## Gemeinsame Tourkategorien und Dauer · 11.10.2026
 Wanderungen und Fahrradtouren haben jeweils eine gemeinsame Kategorie. Alte Kurz-/Lang-Kennungen werden beim Lesen derselben Gruppe zugeordnet und bleiben gültig, ohne Daten umzuschreiben. Jede Tour behält Dauer, Details und Sterne. Schwimmbäder, Cafés, Restaurants und Biergärten zeigen keine Ortsdauer und kein Dauerfeld im Bearbeiten; frühere Werte bleiben erhalten. Die Auswahl verwendet hier die gepflegte Dauer der Standardaktivität. Individuelle Tourdauer bleibt ein Auswahlkriterium.
+
+## Geschmackstopliste bei Veranstaltungen
+Unter Aktuell → Veranstaltungen stehen bis zu drei kommende Events mit dem höchsten bekannten öffentlichen Fitscore (90 Tage). Neue Katalogdaten ersetzen automatisch schwächere Treffer beim Laden der App; unbekannte Passung und ungeprüfte Importe werden nicht als Top-Tipp ausgegeben. Abgesagte, vergangene und ausgeblendete Events bleiben ausgeschlossen. Die Topliste ist unabhängig vom Zeitraumfilter der übrigen Events. Jede Karte steht nur einmal auf der Seite; Vormerken und Mehr bleiben erhalten. Keine neue Recherche, Bewertungsgewichte, Migration oder Änderung der Mailauswahl.

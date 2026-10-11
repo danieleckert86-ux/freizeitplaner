@@ -159,6 +159,12 @@
           <h2 id="discoveriesHeading">Veranstaltungen</h2>
         </div>
       </div>
+      <div id="eventHighlights" class="event-highlights" hidden>
+        <h3>Deine Top 3</h3>
+        <p class="event-highlights-note">Die beste Geschmackspassung unter den kommenden Events · nächste 90 Tage.</p>
+        <div id="topEventList" class="discovery-timeline"></div>
+      </div>
+      <h3 class="event-list-heading">Weitere Events</h3>
       <label class="event-period-picker">Zeitraum
         <select id="eventPeriod" aria-label="Veranstaltungszeitraum">
           <option value="all">Nächste 90 Tage</option>
@@ -168,7 +174,7 @@
           <option value="weekend">Dieses Wochenende</option>
         </select>
       </label>
-      <p id="eventsEmpty" hidden>Für diesen Zeitraum sind gerade keine bestätigten Veranstaltungen verfügbar.</p>
+      <p id="eventsEmpty" hidden>Für diesen Zeitraum sind gerade keine weiteren Veranstaltungen verfügbar.</p>
       <div class="discovery-timeline">
       </div>
     </section>

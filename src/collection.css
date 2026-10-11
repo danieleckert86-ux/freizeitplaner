@@ -66,3 +66,11 @@
 .collection-mode .stock-row,.collection-mode #personalPlanner .known-row{grid-template-columns:minmax(0,1fr) auto!important}
 .finder-toolbar label[hidden]{display:none!important}
 .stock-dialog [data-stock-duration][hidden]{display:none!important}
+
+/* Taste highlights reuse each event card and its actions, without duplicate entries. */
+.event-highlights{margin:0 0 24px;padding:14px;border-radius:14px;background:#edf3ee}
+.event-highlights[hidden]{display:none!important}
+.event-highlights h3,.event-list-heading{margin:0 0 8px;font-size:18px;color:#315b43}
+.event-highlights .event-highlights-note{margin:0 0 12px;font-size:12px;color:#627469}
+.event-highlights .discovery-timeline{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:900px){.event-highlights .discovery-timeline{grid-template-columns:1fr}}

@@ -4,6 +4,10 @@ export function upcomingEvents<T extends CollectionItem>(items:T[],today:string,
  const seen=new Set<string>();
  return [...items].filter(x=>x.closed!==true&&x.date&&x.date>=today&&x.date<=last&&!hidden.has(x.id||x.favorite?.id||'')).sort((a,b)=>(b.fitScore||0)-(a.fitScore||0)||(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||'')).filter(x=>{const key=[x.title.trim().replace(/\s+/g,' ').toLocaleLowerCase('de'),x.date,x.time||''].join('|');if(seen.has(key))return false;seen.add(key);return true;});
 }
+/** Ranked independently of the list's period filter; unknown taste is never a top pick. */
+export function topTasteEvents<T extends CollectionItem>(items:T[],today:string,hidden:Set<string>):T[]{
+ return upcomingEvents(items.filter(x=>!x.imported&&Number.isFinite(x.fitScore)&&x.fitScore!>=0&&x.fitScore!<=100),today,hidden).slice(0,3);
+}
 export function eventInPeriod(date:string,today:string,period:string){
  const sunday=new Date(today+'T12:00:00Z');sunday.setUTCDate(sunday.getUTCDate()+(7-sunday.getUTCDay())%7);
  const weekEnd=sunday.toISOString().slice(0,10);const friday=new Date(sunday);friday.setUTCDate(friday.getUTCDate()-2);

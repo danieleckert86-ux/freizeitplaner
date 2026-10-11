@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {upcomingEvents,eventInPeriod,catalogueFitLabel} from '../src/collection.ts';
+import {upcomingEvents,topTasteEvents,eventInPeriod,catalogueFitLabel} from '../src/collection.ts';
 import {collectionSourceStates} from '../src/collection.ts';
 test('source evidence shows missing, failed and stale separately and never substitutes collection save time',()=>{
  const now=Date.parse('2026-10-10T05:00:00Z');
@@ -42,4 +42,17 @@ test('partial direct batches and original HTTP failures remain visible without m
 test('explicit cancellation preserves stored IDs and favorites while excluding the closed event from upcoming lists',()=>{
  const stored=[{id:'favorite',favorite:{id:'favorite'},title:'Cancelled',date:'2026-10-11',closed:true},{id:'valid',title:'Other source',date:'2026-10-11'}];
  assert.deepEqual(upcomingEvents(stored,'2026-10-10',new Set()).map(i=>i.id),['valid']);assert.equal(stored[0].favorite.id,'favorite');assert.equal(stored.length,2);
+});
+
+
+test('taste top three automatically replace the weakest event when a better new event arrives',()=>{
+ const events=[{id:'a',title:'A',date:'2026-10-20',fitScore:90},{id:'b',title:'B',date:'2026-10-12',fitScore:85},{id:'c',title:'C',date:'2026-11-01',fitScore:80}];
+ assert.deepEqual(topTasteEvents(events,'2026-10-11',new Set()).map(x=>x.id),['a','b','c']);
+ const added={id:'new',title:'New',date:'2026-12-01',fitScore:95};
+ assert.deepEqual(topTasteEvents([...events,added],'2026-10-11',new Set()).map(x=>x.id),['new','a','b']);
+ assert.equal(events.length,3);
+});
+test('top taste excludes unknown imports, cancelled, expired, distant and hidden events; deduplicates and allows fewer than three',()=>{
+ const rows=[{id:'ok',title:'Good',date:'2026-10-12',fitScore:70},{id:'duplicate',title:' good ',date:'2026-10-12',fitScore:60},{id:'unknown',title:'Unknown',date:'2026-10-12'},{id:'import',title:'Import',date:'2026-10-12',fitScore:100,imported:true},{id:'closed',title:'Closed',date:'2026-10-12',fitScore:99,closed:true},{id:'past',title:'Past',date:'2026-10-10',fitScore:99},{id:'far',title:'Far',date:'2027-03-01',fitScore:99},{id:'hidden',title:'Hidden',date:'2026-10-12',fitScore:99}];
+ assert.deepEqual(topTasteEvents(rows,'2026-10-11',new Set(['hidden'])).map(x=>x.id),['ok']);
 });

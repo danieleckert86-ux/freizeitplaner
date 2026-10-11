@@ -6,7 +6,7 @@ import { categoryIcon } from './category-icons';
 import { recommendationPlace, travelNote } from './locations';
 import './styles.css';
 import './collection.css';
-import {upcomingEvents,eventInPeriod,catalogueFitLabel,collectionSourceStates} from './collection';
+import {upcomingEvents,topTasteEvents,eventInPeriod,catalogueFitLabel,collectionSourceStates} from './collection';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -162,12 +162,14 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   renderTours('#hikeGroup', data.hikes);
   renderTours('#bikeGroup', data.bikes);
 
-  const discoveries = document.querySelector<HTMLElement>('#discoveries .discovery-timeline');
+  const discoveries = document.querySelector<HTMLElement>('#discoveries > .discovery-timeline');
   if (discoveries) discoveries.innerHTML = upcomingEvents([...data.top,...data.ideas,...data.discoveries], new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date()),hiddenIds).map(item =>
-    '<article class="discovery-item filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '"><div><div class="discovery-header"><time datetime="' + dataEscape(item.date) + '">' + dataEscape(new Intl.DateTimeFormat('de-DE', {weekday:'short',day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(new Date(item.date + 'T12:00:00Z'))) + (/^\d{2}:\d{2}$/.test(item.time || '') ? ' · ' + dataEscape(item.time) : '') + '</time><span class="mini-badge">' + categoryIcon(item.category, item.badge || item.title) + '<span class="category-label">' + dataEscape((item.badge || item.label || item.favorite.categoryLabel).split(/\s*[·×]\s*/)[0]) + '</span></span></div>' +
+    '<article class="discovery-item filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '" data-fit-score="' + (item.imported || !Number.isFinite(item.fitScore) ? '' : item.fitScore) + '"><div><div class="discovery-header"><time datetime="' + dataEscape(item.date) + '">' + dataEscape(new Intl.DateTimeFormat('de-DE', {weekday:'short',day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(new Date(item.date + 'T12:00:00Z'))) + (/^\d{2}:\d{2}$/.test(item.time || '') ? ' · ' + dataEscape(item.time) : '') + '</time><span class="mini-badge">' + categoryIcon(item.category, item.badge || item.title) + '<span class="category-label">' + dataEscape((item.badge || item.label || item.favorite.categoryLabel).split(/\s*[·×]\s*/)[0]) + '</span></span></div>' +
     '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div><h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' + (item.bookingDeadline?'<p class="collection-condition">Buchungsfrist: '+dataEscape(item.bookingDeadline)+'</p>':'') + '<div class="item-actions">' +
     sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, 'discoveries') + favoriteMarkup(item, true) + '</div></div></article>'
   ).join('');
+
+  refreshEventHighlights();
 
   const renderLifestyle = (selector: string, items: LifestyleRecommendation[], section: 'restaurants' | 'cinema' | 'stream') => {
     const list = document.querySelector<HTMLElement>(selector);
@@ -371,6 +373,8 @@ void loadFavorites();
         return;
       }
       button.closest<HTMLElement>('.lifestyle-card,.discovery-item,.tour-card,.idea-card,.card')?.remove();
+      refreshEventHighlights();
+      document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));
     });
   });
 
@@ -994,6 +998,24 @@ renderCurrentFilters();
 void loadWeather();
 }
 
+function refreshEventHighlights() {
+  const topList=document.querySelector<HTMLElement>('#topEventList');
+  const rest=document.querySelector<HTMLElement>('#discoveries > .discovery-timeline');
+  const block=document.querySelector<HTMLElement>('#eventHighlights');
+  if(!topList||!rest||!block)return;
+  const cards=Array.from(document.querySelectorAll<HTMLElement>('#discoveries .discovery-item'));
+  const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date());
+  const ranked=topTasteEvents(cards.map(card=>({card,title:card.querySelector('h3')?.textContent||'',date:card.dataset.date,time:card.querySelector('time')?.textContent?.split(' · ')[1],fitScore:card.dataset.fitScore?Number(card.dataset.fitScore):undefined})),today,new Set());
+  const selected=new Set(ranked.map(x=>x.card));
+  for(const card of cards){
+    if(selected.has(card))continue;
+    delete card.dataset.topEvent;
+    if(card.parentElement!==rest)rest.append(card);
+  }
+  for(const {card} of ranked){card.dataset.topEvent='true';card.hidden=false;topList.append(card);}
+  block.hidden=ranked.length===0;
+}
+
 function quietCardActions() {
   document.querySelectorAll<HTMLElement>('.item-actions,.lifestyle-actions').forEach(actions => {
     const primary=actions.querySelector<HTMLElement>('[data-stock-copy],[data-favorite]');
@@ -1016,7 +1038,7 @@ document.querySelector<HTMLSelectElement>('#eventPeriod')?.addEventListener('cha
   const period = (event.currentTarget as HTMLSelectElement).value;
   const today = new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date());
   let visible = 0;
-  document.querySelectorAll<HTMLElement>('.discovery-item').forEach(card => {
+  document.querySelectorAll<HTMLElement>('.discovery-item:not([data-top-event])').forEach(card => {
     const date = card.dataset.date || '';
     const show = eventInPeriod(date,today,period) && (!document.querySelector<HTMLInputElement>('#onlySaved')?.checked || !!card.querySelector('[data-favorite].saved'));
     card.hidden = !show; if (show) visible++;

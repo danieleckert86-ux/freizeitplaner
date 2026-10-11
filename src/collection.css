@@ -5,3 +5,21 @@
 .collection-mode #personalPlanner > :not(.planner-tools):not(.planner-message){display:none!important}
 
 @media(max-width:420px){.main-nav{grid-template-columns:repeat(2,minmax(0,1fr));}}
+
+/* Compact, grouped library of familiar activities. */
+#personalPlanner .known-categories{display:grid;gap:8px;margin:12px 0}
+#personalPlanner .known-category{border:1px solid #e0e8e2;border-radius:10px;background:#fff;overflow:visible}
+#personalPlanner .known-category>summary{display:flex;align-items:center;gap:10px;cursor:pointer;padding:13px 12px;min-height:44px;box-sizing:border-box;font-size:14px;font-weight:600;list-style:none}
+#personalPlanner .known-category>summary::-webkit-details-marker{display:none}
+#personalPlanner .known-count{margin-left:auto;color:#627469;font-size:12px;font-weight:400}
+#personalPlanner .known-category>summary:after{content:'＋';color:#627469}
+#personalPlanner .known-category[open]>summary:after{content:'−'}
+#personalPlanner .known-list{padding:0 10px 6px}
+#personalPlanner .known-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px;padding:7px 0;border-top:1px solid #edf1ee;min-height:44px;box-sizing:border-box}
+#personalPlanner .known-row h3{font-size:13px;line-height:1.35;font-weight:500;margin:0;overflow-wrap:anywhere}
+#personalPlanner .known-duration{font-size:11px;color:#627469;white-space:nowrap}
+#personalPlanner .known-more{position:relative}
+#personalPlanner .known-more>summary{font-size:12px;cursor:pointer;list-style:none;min-height:44px;display:flex;align-items:center;padding:0 6px;color:#315b43}
+#personalPlanner .known-more>summary::-webkit-details-marker{display:none}
+#personalPlanner .known-more .routine-actions{position:absolute;z-index:4;right:0;top:100%;display:grid;grid-template-columns:1fr;gap:4px;background:#fff;border:1px solid #dce5de;box-shadow:0 4px 14px #17392b18;border-radius:9px;padding:6px;width:130px;margin:0!important}
+#personalPlanner .known-more .routine-actions button{min-height:44px;font-size:12px}

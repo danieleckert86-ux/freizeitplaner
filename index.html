@@ -33,7 +33,7 @@
       <button class="section-nav-btn active" type="button" data-main-view="ideas" data-view="ideas">Unsere Ideen</button>
       <button class="section-nav-btn" type="button" data-main-view="current" data-view="current">Aktuell</button>
     </nav>
-    <div class="finder-toolbar"><label><input id="onlySaved" type="checkbox"> Nur gemerkt</label><label id="currentKindLabel" hidden>Aktuelle Angebote<select id="currentKind"><option value="events">Veranstaltungen</option><option value="cinema">Kino</option><option value="stream">Streaming</option></select></label></div>
+    <div class="finder-toolbar"><label><input id="onlySaved" type="checkbox"> Nur vorgemerkt</label><label id="currentKindLabel" hidden>Aktuelle Angebote<select id="currentKind"><option value="events">Veranstaltungen</option><option value="cinema">Kino</option><option value="stream">Streaming</option></select></label></div>
     <nav class="idea-nav" hidden aria-label="Weitere Bereiche"></nav>
     <p id="stockCopyStatus" class="planner-small" role="status" aria-live="polite"></p>
     <details id="collectionEvidence" class="collection-source-status"><summary>Recherchestand</summary></details>
@@ -191,12 +191,12 @@
       <div class="favorites-head">
         <div>
           <p class="section-kicker">Merkliste</p>
-          <h2 id="favoritesHeading">Weitere gemerkte Vorschläge</h2>
+          <h2 id="favoritesHeading">Weitere vorgemerkte Vorschläge</h2>
           <p class="favorites-note">Auch ältere Funde bleiben gespeichert. Termine und Verfügbarkeit im Original prüfen.</p>
         </div>
       </div>
       <div id="favoritesMessage" class="favorites-message" aria-live="polite"></div>
-      <div id="favoritesEmpty" class="favorites-empty">Noch nichts gemerkt.</div>
+      <div id="favoritesEmpty" class="favorites-empty">Noch nichts vorgemerkt.</div>
       <div id="favoritesList" class="favorites-list"></div>
     </section>
   </main>
@@ -215,7 +215,7 @@
         <div class="dialog-facts" id="detailFacts"></div>
         <div class="dialog-actions">
           <a class="info-link" id="detailSource" href="#" target="_blank" rel="noopener noreferrer">Originalquelle</a>
-          <button class="favorite-btn" id="detailFavorite" type="button">Merken</button>
+          <button class="favorite-btn" id="detailFavorite" type="button">Vormerken</button>
         </div>
       </div>
     </div>

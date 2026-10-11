@@ -137,3 +137,6 @@ Touren und Gastronomie zeigen Titel, Ort, Passung und Tour-Eckdaten sowie Haupta
 
 ## Kompakte Events · 11.10.2026
 Unter Aktuell bleiben Titel, Datum/Uhrzeit, Ort und Passung sichtbar. Die vollständige Beschreibung steht unter Mehr → Details. Belegte Buchungsfristen bleiben in der Übersicht sichtbar. Automatische gleiche Rasterhöhen und Anfahrt sind aus der Eventübersicht entfernt; Inhalte, Merkliste und Bewertungen unverändert.
+
+## Verständliche Vormerk-Aktion · 11.10.2026
+Favoriten heißen im UI Vormerken/Vorgemerkt; der Filter heißt Nur vorgemerkte. Speicherung und Verhalten unverändert. Die dauerhafte Übernahme in Orte & Touren bleibt eigenständig.

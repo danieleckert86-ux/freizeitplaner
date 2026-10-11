@@ -71,7 +71,7 @@ function favoriteMarkup(item: Recommendation, compact = false) {
     'data-id="' + dataEscape(f.id) + '" data-title="' + dataEscape(f.title) + '" ' +
     'data-event-start="' + dataEscape(/^([01]\d|2[0-3]):[0-5]\d(?: Uhr)?$/.test(item.time || '') ? (item.time || '').slice(0,5) : '') + '" ' +
     'data-day-label="' + dataEscape(f.dayLabel) + '" data-category-label="' + dataEscape(f.categoryLabel) + '" ' +
-    'data-description="' + dataEscape(f.description) + '" data-url="' + dataEscape(f.url) + '">Merken</button>';
+    'data-description="' + dataEscape(f.description) + '" data-url="' + dataEscape(f.url) + '">Vormerken</button>';
 }
 
 function sourceMarkup(item: Recommendation) {
@@ -90,7 +90,7 @@ function lifestyleFavoriteMarkup(item: LifestyleRecommendation, section: 'restau
   return '<button class="favorite-btn compact" type="button" data-favorite ' +
     'data-id="' + dataEscape('lifestyle-' + item.id) + '" data-title="' + dataEscape(item.title) + '" ' +
     'data-day-label="" data-category-label="' + category + '" data-description="' + dataEscape(neutralDescription(item.description)) + '" ' +
-    'data-url="' + dataEscape(item.url) + '">Merken</button>';
+    'data-url="' + dataEscape(item.url) + '">Vormerken</button>';
 }
 
 function tourAttributes(item: Recommendation) {
@@ -698,7 +698,7 @@ function syncDetailFavorite() {
   if (!detailFavorite || !detailFavoriteSource) return;
   const suggestionId = detailFavoriteSource.dataset.id ?? '';
   const saved = favorites.some(item => item.suggestionId === suggestionId);
-  detailFavorite.textContent = saved ? 'Gemerkt' : 'Merken';
+  detailFavorite.textContent = saved ? 'Vorgemerkt' : 'Vormerken';
   detailFavorite.classList.toggle('saved', saved);
   detailFavorite.setAttribute('aria-pressed', String(saved));
 }
@@ -710,13 +710,13 @@ function updateFavoriteButtons() {
   document.querySelectorAll<HTMLButtonElement>('[data-favorite]').forEach(button => {
     const saved = savedIds.has(button.dataset.id ?? '');
     button.classList.toggle('saved', saved);
-    button.textContent = saved ? 'Gemerkt' : 'Merken';
+    button.textContent = saved ? 'Vorgemerkt' : 'Vormerken';
     button.setAttribute('aria-pressed', String(saved));
     button.setAttribute(
       'aria-label',
       saved
-        ? (button.dataset.title ?? 'Vorschlag') + ' ist gemerkt'
-        : (button.dataset.title ?? 'Vorschlag') + ' merken'
+        ? (button.dataset.title ?? 'Vorschlag') + ' ist vorgemerkt'
+        : (button.dataset.title ?? 'Vorschlag') + ' vormerken'
     );
   });
 
@@ -752,7 +752,7 @@ function renderFavorites() {
   const filtered = favorites.filter(item => favoriteArea(item.category,savedEventDates.get(item.suggestionId)) === finderView && !renderedIds.has(item.suggestionId) && (finderView==='ideas'||currentKind.value==='events'&&!/kino|stream/i.test(item.category)||currentKind.value==='cinema'&&/kino/i.test(item.category)||currentKind.value==='stream'&&/stream/i.test(item.category)));
 
   favoritesEmpty.hidden = filtered.length > 0;
-  favoritesEmpty.textContent = 'Hier sind noch keine weiteren Vorschläge gemerkt.';
+  favoritesEmpty.textContent = 'Hier sind noch keine weiteren Vorschläge vorgemerkt.';
 
   filtered.forEach(item => {
     const row = document.createElement('article');
@@ -822,7 +822,7 @@ async function loadFavorites() {
     showFavoriteMessage('');
   } catch {
     if (favoritesEmpty && favorites.length === 0) favoritesEmpty.textContent = 'Gespeicherte Einträge gerade nicht erreichbar.';
-    showFavoriteMessage('Merkliste konnte nicht geladen werden. Öffne „Gemerkt“ erneut, um es noch einmal zu versuchen.');
+    showFavoriteMessage('Merkliste konnte nicht geladen werden. Lade die Seite erneut, um es noch einmal zu versuchen.');
   } finally {
     favoritesLoading = false;
   }
@@ -835,7 +835,7 @@ favoriteButtons.forEach(button => {
 
     const existing = favorites.find(item => item.suggestionId === suggestionId);
     if (existing) {
-      showFavoriteMessage('Dieser Vorschlag ist bereits gemerkt.');
+      showFavoriteMessage('Dieser Vorschlag ist bereits vorgemerkt.');
       return;
     }
 

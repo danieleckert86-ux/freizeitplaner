@@ -36,7 +36,7 @@
 .collection-mode .card-more-panel>*{grid-area:auto!important;margin:0!important}
 .collection-mode .card-more-panel .details-btn,.collection-mode .card-more-panel [data-hide-card]{width:auto!important;min-height:40px!important;padding:8px 12px!important;font-size:12px!important;border:1px solid #d9e3dd!important;border-radius:8px!important;background:white!important;color:#536b60!important}
 .collection-mode .card-more-panel .info-link{padding:8px 12px!important;font-size:12px!important;min-height:40px!important;display:inline-flex!important;align-items:center!important}
-.collection-mode .card-more-panel .rating-actions{display:flex!important;gap:6px!important;margin-left:auto!important}
+.collection-mode .card-more-panel .rating-actions{display:block!important;flex:0 0 100%!important;min-width:0!important;gap:6px!important;margin-left:0!important}
 .collection-mode .card-more-panel .rating-btn{min-width:40px!important;min-height:40px!important}
 
 /* Compact previews; complete descriptions and checks remain in the details dialog. */

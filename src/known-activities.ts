@@ -1,5 +1,5 @@
 import {categoryOf,legacyMood, type ActivityCategory, type ActivitySetting} from './activity-properties.ts';
-export type KnownActivity = { id:string; title:string; minutes:number; energy:string; mood:string; effort:string; outdoor:boolean; next:string; activityCategory?:ActivityCategory; setting?:ActivitySetting };
+export type KnownActivity = { id:string; title:string; minutes:number; energy:string; mood:string; effort:string; outdoor:boolean; next:string; activityCategory?:ActivityCategory; setting?:ActivitySetting; favorite?:boolean };
 const groups: [string,boolean,number,string[]][] = [
  ['outdoor',true,45,[
   'Spaziergang am Lech','Runde durch den Siebentischwald','Spaziergang zum Hochablass','Kleine Runde durch die Altstadt','Neues Augsburger Viertel zu Fuß erkunden','Spaziergang mit Kaffee oder Eis','Picknick im Grünen','Mit einem Buch draußen sitzen','Sonnenuntergang am Wasser anschauen','Spaziergang an einem See'

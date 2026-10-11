@@ -238,3 +238,5 @@ body:has(.planning-dialog[open]){overflow:hidden}
 #activityStock .stock-dialog-actions{display:flex;gap:8px;flex-wrap:wrap}
 #activityStock .stock-dialog-actions button{min-height:44px;padding:8px 12px}
 @media(max-width:560px){#activityStock .stock-dialog .planner-form{grid-template-columns:1fr}}
+
+.known-row{grid-template-columns:minmax(0,1fr) auto auto!important}

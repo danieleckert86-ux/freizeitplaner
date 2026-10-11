@@ -1,4 +1,5 @@
 import {publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
+import { favoriteArea } from './finder-navigation';
 import { initPlanner } from './planner';
 import { neutralDescription } from './wording';
 import { categoryIcon } from './category-icons';
@@ -108,6 +109,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
     evidence.innerHTML=states.length?'<summary>Quellen geprüft: '+states.filter(c=>c.state==='checked').length+'/'+states.length+'</summary><p>Speicherstand der Sammlung und tatsächliche Quellenprüfung sind getrennt. Importierte Ideen sind noch nicht verifiziert.</p><ul>'+states.map(c=>'<li>'+dataEscape(c.id)+' · '+dataEscape(c.label)+(c.checkedAt?' · letzte erfolgreiche Prüfung: '+dataEscape(c.checkedAt.slice(0,10)):'')+'</li>').join('')+'</ul>'+(rechecks.length?'<p>Einzelprüfungen: '+rechecks.filter(c=>c.status==='checked').length+' erfolgreich, '+rechecks.filter(c=>c.status!=='checked').length+' fehlgeschlagen. Eine Einzelprüfung ersetzt keinen vollständigen Quellenlauf.</p>':''):'<summary>Recherchestand</summary><p>Vorhandene Ideensammlung. Einzelne Quellenprüfungen sind für diesen Datenstand noch nicht dokumentiert.</p>';
   }
 
+  for(const item of [...data.top,...data.ideas,...data.discoveries])if(/^\d{4}-\d{2}-\d{2}$/.test(item.date))savedEventDates.set(item.favorite.id,item.date);
   const state = document.querySelector<HTMLElement>('.data-state');
   if (state) state.textContent = 'Sammlung gespeichert: ' + (data.dataUpdated.includes('T')?new Intl.DateTimeFormat('de-DE').format(new Date(data.dataUpdated)):data.dataUpdated);
 
@@ -232,6 +234,7 @@ async function loadHiddenRecommendationIds() {
   return new Set((data ?? []).map(row => row.suggestion_id as string));
 }
 
+const savedEventDates = new Map<string,string>();
 async function loadRecommendationData() {
   publishStockDecisions(new Set(),new Map(),false);
   let data: RecommendationData | undefined;
@@ -279,28 +282,41 @@ type Favorite = {
 async function bootstrap() {
   initPlanner(supabase);
 
-  const viewButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-view]'));
-  const viewSections = Array.from(document.querySelectorAll<HTMLElement>('[data-app-view]'));
-  document.body.classList.add('collection-mode');
-  const setAppView = (view: string) => {
-    if (view === 'favorites') void loadFavorites();
-    const isIdea = view==='collection';
-    document.querySelector<HTMLElement>('.idea-nav')!.hidden = !isIdea;
-    document.querySelectorAll<HTMLButtonElement>('[data-main-view]').forEach(button => {
-      const active = button.dataset.mainView === view;
-      button.classList.toggle('active', active); button.setAttribute('aria-current', active ? 'page' : 'false');
+  let finderView: 'ideas' | 'current' = 'ideas';
+  const onlySaved = document.querySelector<HTMLInputElement>('#onlySaved')!;
+  const currentKind = document.querySelector<HTMLSelectElement>('#currentKind')!;
+  const refreshFinder = () => {
+    const current = finderView === 'current';
+    document.querySelector<HTMLElement>('#currentKindLabel')!.hidden = !current;
+    document.querySelector<HTMLElement>('#collectionEvidence')!.hidden = !current;
+    document.querySelectorAll<HTMLButtonElement>('[data-main-view]').forEach(b => {
+      const active = b.dataset.mainView === finderView;
+      b.classList.toggle('active', active); b.setAttribute('aria-current', active ? 'page' : 'false');
     });
-    viewButtons.filter(button => !button.hasAttribute('data-main-view')).forEach(button => {const active = button.dataset.view === view; button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active));});
-    viewSections.forEach(section => {
-      const active = section.dataset.appView === view || (view==='known'&&section.dataset.appView==='planning') || (view==='collection'&&['outdoor','restaurants','movies'].includes(section.dataset.appView||''));
-      section.hidden = !active;
+    document.querySelectorAll<HTMLElement>('[data-app-view]').forEach(section => {
+      const kind=section.dataset.appView;
+      section.hidden = !(current ? kind==='events' && currentKind.value==='events' || kind==='movies' && currentKind.value!=='events' : ['planning','stock','outdoor','restaurants'].includes(kind||''));
+      if(kind==='favorites')section.hidden=!onlySaved.checked;
     });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.querySelectorAll<HTMLButtonElement>('[data-media-tab]').forEach(b=>b.classList.toggle('active',b.dataset.mediaTab===currentKind.value));
+    document.querySelectorAll<HTMLElement>('[data-media-panel]').forEach(panel=>{panel.hidden=panel.dataset.mediaPanel!==currentKind.value;panel.classList.toggle('active',!panel.hidden);});
+    document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));
+    document.querySelectorAll<HTMLElement>('.tour-card,.lifestyle-card').forEach(card=>{card.hidden=onlySaved.checked&&!card.querySelector('[data-favorite].saved');});
+    document.dispatchEvent(new CustomEvent('finder-saved-filter',{detail:onlySaved.checked}));
   };
-  viewButtons.forEach(button => button.addEventListener('click', () => setAppView(button.dataset.view ?? 'weekend')));
-  setAppView(location.hash==='#bekanntes'?'known':location.hash==='#touren'?'collection':location.hash==='#gemerkt'?'favorites':'events');
+  const setAppView = (view: string) => {
+    finderView=['current','events','movies'].includes(view)?'current':'ideas';
+    refreshFinder();
+    renderFavorites();
+    history.replaceState(null,'',finderView==='ideas'?'#ideen':'#aktuell');
+    window.scrollTo({top:0,behavior:'smooth'});
+  };
+  document.body.classList.add('collection-mode');
+  document.querySelectorAll<HTMLButtonElement>('[data-view]').forEach(b=>b.addEventListener('click',()=>setAppView(b.dataset.view||'ideas')));
+  document.addEventListener('finder-current',()=>setAppView('current'));
+  onlySaved.addEventListener('change',()=>{refreshFinder();renderFavorites();});
+  currentKind.addEventListener('change',()=>{refreshFinder();renderFavorites();});
 
-const favoriteCategoryButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.favorite-category-filter'));
 const favoritesList = document.querySelector<HTMLElement>('#favoritesList');
 const favoritesEmpty = document.querySelector<HTMLElement>('#favoritesEmpty');
 const favoritesMessage = document.querySelector<HTMLElement>('#favoritesMessage');
@@ -320,12 +336,12 @@ const weatherGrid = document.querySelector<HTMLElement>('.weather-grid');
 
 let activeDay = 'all';
 let activeCategory = 'all';
-let activeFavoriteCategory = 'all';
 let favorites: Favorite[] = [];
 let detailFavoriteSource: HTMLButtonElement | null = null;
 
 let favoritesLoading = false;
 if (favoritesEmpty) favoritesEmpty.textContent = 'Merkliste wird geladen …';
+setAppView(location.hash==='#aktuell'?'current':'ideas');
 void loadFavorites();
 
   try { await loadRecommendationData(); } catch {
@@ -383,6 +399,7 @@ const statusText = document.querySelector<HTMLElement>('#statusText');
 const resultCount = document.querySelector<HTMLElement>('#resultCount');
 const resetFilters = document.querySelector<HTMLButtonElement>('#resetFilters');
 
+refreshFinder();renderFavorites();
 const favoriteButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-favorite]'));
 function berlinDateIso(date = new Date()) {
   const parts = new Intl.DateTimeFormat('en-GB', {
@@ -700,6 +717,7 @@ function updateFavoriteButtons() {
   });
 
   syncDetailFavorite();
+  refreshFinder();
 }
 
 function escapeHtml(value: string) {
@@ -726,34 +744,11 @@ function renderFavorites() {
   if (!favoritesList || !favoritesEmpty) return;
   favoritesList.innerHTML = '';
 
-  const filtered = favorites.filter(item =>
-    activeFavoriteCategory === 'all' ||
-    categoryMatches(item.category, activeFavoriteCategory)
-  );
+  const renderedIds=new Set(Array.from(document.querySelectorAll<HTMLButtonElement>('[data-favorite]')).filter(b=>!!b.closest<HTMLElement>('.view-section:not([hidden])')).map(b=>b.dataset.id));
+  const filtered = favorites.filter(item => favoriteArea(item.category,savedEventDates.get(item.suggestionId)) === finderView && !renderedIds.has(item.suggestionId) && (finderView==='ideas'||currentKind.value==='events'&&!/kino|stream/i.test(item.category)||currentKind.value==='cinema'&&/kino/i.test(item.category)||currentKind.value==='stream'&&/stream/i.test(item.category)));
 
   favoritesEmpty.hidden = filtered.length > 0;
-  favoritesEmpty.textContent =
-    favorites.length === 0
-      ? 'Noch nichts gemerkt. Nutze bei einer Empfehlung „Merken“.'
-      : 'Keine gemerkten Vorschläge in dieser Kategorie.';
-
-  const filterNav = document.querySelector('.favorite-category-filters');
-  for (const item of favorites) {
-    const category = broadCategory(item.category);
-    if (!category || favoriteCategoryButtons.some(button => button.dataset.favoriteCategory === category)) continue;
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'favorite-category-filter';
-    button.dataset.favoriteCategory = category;
-    button.textContent = category === 'wildcard' ? 'Sonstiges' : item.category;
-    filterNav?.appendChild(button);
-    favoriteCategoryButtons.push(button);
-  }
-  favoriteCategoryButtons.forEach(button => {
-    const active = button.dataset.favoriteCategory === activeFavoriteCategory;
-    button.classList.toggle('active', active);
-    button.setAttribute('aria-pressed', String(active));
-  });
+  favoritesEmpty.textContent = 'Hier sind noch keine weiteren Vorschläge gemerkt.';
 
   filtered.forEach(item => {
     const row = document.createElement('article');
@@ -761,7 +756,7 @@ function renderFavorites() {
     row.innerHTML =
       '<div class="favorite-copy">' +
       '<div class="favorite-meta">' + categoryIcon(item.category) + escapeHtml(['wandern', 'fahrrad'].includes(normalizeCategory(item.category)) ? item.category : [item.day, item.category].filter(Boolean).join(' · ')) + '</div>' +
-      '<h3>' + escapeHtml(item.title) + '</h3>' + placeMarkup(item, normalizeCategory(item.category) === 'streaming' ? 'stream' : '') +
+      '<h3>' + escapeHtml(item.title) + '</h3>' + (savedEventDates.get(item.suggestionId)?'<p class="planner-small">'+(savedEventDates.get(item.suggestionId)!<new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date())?'Vergangen · ':'Termin · ')+escapeHtml(savedEventDates.get(item.suggestionId)!)+'</p>':'') + placeMarkup(item, normalizeCategory(item.category) === 'streaming' ? 'stream' : '') +
       '<p>' + escapeHtml(neutralDescription(item.description)) + '</p>' +
       '</div>' +
       '<div class="favorite-actions">' +
@@ -899,13 +894,6 @@ categoryButtons.forEach(button => {
   });
 });
 
-document.querySelector('.favorite-category-filters')?.addEventListener('click', event => {
-  const button = (event.target as Element).closest<HTMLButtonElement>('[data-favorite-category]');
-  if (!button) return;
-  activeFavoriteCategory = button.dataset.favoriteCategory ?? 'all';
-  renderFavorites();
-});
-
 resetFilters?.addEventListener('click', () => {
   activeDay = 'all';
   activeCategory = 'all';
@@ -1025,7 +1013,7 @@ document.querySelector<HTMLSelectElement>('#eventPeriod')?.addEventListener('cha
   let visible = 0;
   document.querySelectorAll<HTMLElement>('.discovery-item').forEach(card => {
     const date = card.dataset.date || '';
-    const show = eventInPeriod(date,today,period);
+    const show = eventInPeriod(date,today,period) && (!document.querySelector<HTMLInputElement>('#onlySaved')?.checked || !!card.querySelector('[data-favorite].saved'));
     card.hidden = !show; if (show) visible++;
   });
   document.querySelector<HTMLElement>('#eventsEmpty')!.hidden = visible > 0;

@@ -111,3 +111,11 @@ Die App dient Events finden, Bekanntes speichern und Auswählen. Einplanen entf�
 Freizeitvorrat nutzt kompakte zugeklappte Kategorien und Zeilen wie Bekanntes: Name, Dauer, Ort, gegebenenfalls geschlossen. Mehr öffnet ein natives modales Detailfenster; Bearbeiten/Ergänzen erfolgt ebenfalls im Fenster. Öffnen, Abbrechen und Escape schreiben nichts. Kategorien bleiben bei Dialogwechseln geöffnet. Anfahrt erscheint weder in Übersicht noch Formular und ist keine Voraussetzung mehr für Auswahl; Aktivitätsdauer ist die Zeitgrenze. Bereits gespeicherte Anfahrtsfelder bleiben erhalten, ohne als Auswahl- oder Verfügbarkeitsnachweis genutzt zu werden. Unbekannte Aktivitätsdauer bleibt weiterhin unbekannt. Keine Mail-, Recherche-, Budget- oder Kalenderbrückenänderung.
 
 Validierung: 38 Tests, TypeScript und Produktionsbuild erfolgreich. Historische Planungsfelder bleiben lesbar und bei ausdrücklicher Speicherung erhalten; keine neuen Planungsaktionen in der Oberfläche.
+
+## Zwei Bereiche nach Beständigkeit · 11.10.2026
+
+Unsere Ideen: editierbare Standardaktivitäten, konkrete Orte/Touren, dauerhafte Recherchetouren und Gastronomie. Aktuell: Veranstaltungen mit Zeitraum sowie Kino und Streaming, über ein einziges Auswahlfeld statt mehrerer Kategorienleisten. Startseite ist Unsere Ideen; bestehende Favoriten bleiben in ihrem passenden Bereich, auch ältere Funde. Bekannte vergangene Veranstaltungstermine werden gekennzeichnet; ohne gespeicherten Termin wird keine Aktualität behauptet. Keine Recherche oder Änderung an Quellenprüfzeiten.
+
+Nur gemerkt filtert jeden Bereich. Sterne an eigenen Standardaktivitäten und Vorratsorten werden optional im bestehenden privaten Payload gespeichert. Keine Migration, keine Rücksetzung. Die Auswahlhilfe nutzt weiterhin die vorhandenen Aktivitäts-/Vorratsregeln; Aktuelle Angebote ansehen führt von ihrem Ergebnis zum aktuellen Angebot. Für aktuelle Events werden keine unbekannten Dauer-, Zeit- oder Machbarkeitsangaben erfunden.
+
+Validierung: 40 Tests, TypeScript und Produktionsbuild erfolgreich. Zwei-Bereiche-Navigation, Filter, echte Kategorien und Dialoge werden zusätzlich auf der veröffentlichten Oberfläche geprüft. Keine Recherche, Mail oder Rücksetzung.

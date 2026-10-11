@@ -107,3 +107,17 @@ test('unknown travel no longer blocks a concrete selection',()=>{
  const a=activity('Spaziergang');const place=idea('no-travel',{minutes:60,travelMinutes:null});
  assert.equal(matchingStock(a,[place],{...emptyGuideAnswers(),minutes:60},decisions())[0].id,'no-travel');
 });
+
+// Nature of the suggestion controls its home, independent of its saved state.
+import {favoriteArea} from '../src/finder-navigation.ts';
+test('permanent places and routes stay distinct from time-bound programs',()=>{
+ for(const kind of ['Wandern','Fahrrad','Restaurant','Café','Wellness'])assert.equal(favoriteArea(kind),'ideas');
+ for(const kind of ['Kino','Streaming','Musik','Kultur'])assert.equal(favoriteArea(kind),'current');
+ assert.equal(favoriteArea('Essen','2026-10-20'),'current');
+});
+test('saved stock filter preserves the collection and selects explicit stars only',()=>{
+ const rows=[idea('yes',{title:'Lieblingscafé',favorite:true}),idea('no',{title:'Anderes Café'})];
+ const before=JSON.stringify(rows);const html=stockMarkup(rows,null,true,false,'',null,true);
+ assert.ok(html.includes('Lieblingscafé'));assert.ok(!html.includes('Anderes Café'));assert.equal(JSON.stringify(rows),before);
+ assert.equal(withMapsStock({stockMapsVersion:1,activityStock:rows}).activityStock[0].favorite,true);
+});

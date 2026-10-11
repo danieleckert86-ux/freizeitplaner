@@ -28,16 +28,16 @@
         <span id="savedCount" hidden>0</span>
       </div>
     </header>
-    <div class="collection-intro"><h1>Gute Ideen bleiben.</h1><p>Events entdecken. Bekanntes behalten. Eine gute Idee auswählen.</p></div>
+    <div class="collection-intro"><h1>Was machen wir?</h1><p>Bewährte Ideen und aktuelle Angebote für eure Freizeit.</p></div>
     <nav class="section-nav main-nav" aria-label="Hauptbereiche">
-      <button class="section-nav-btn active" type="button" data-main-view="events" data-view="events">Events</button>
-      <button class="section-nav-btn" type="button" data-main-view="collection" data-view="collection">Touren &amp; Ideen</button>
-      <button class="section-nav-btn" type="button" data-main-view="favorites" data-view="favorites">Gemerkt</button>
-      <button class="section-nav-btn" type="button" data-main-view="known" data-view="known">Bekanntes</button>
+      <button class="section-nav-btn active" type="button" data-main-view="ideas" data-view="ideas">Unsere Ideen</button>
+      <button class="section-nav-btn" type="button" data-main-view="current" data-view="current">Aktuell</button>
     </nav>
+    <div class="finder-toolbar"><label><input id="onlySaved" type="checkbox"> Nur gemerkt</label><label id="currentKindLabel" hidden>Aktuelle Angebote<select id="currentKind"><option value="events">Veranstaltungen</option><option value="cinema">Kino</option><option value="stream">Streaming</option></select></label></div>
     <nav class="idea-nav" hidden aria-label="Weitere Bereiche"></nav>
     <details id="collectionEvidence" class="collection-source-status"><summary>Recherchestand</summary></details>
     <section id="personalPlanner" class="view-section" data-app-view="planning" hidden aria-label="Bekanntes und Auswahlhilfe"></section>
+    <section id="activityStock" class="planner-box view-section" data-app-view="stock" hidden aria-label="Unsere Orte und Touren"></section>
 
     <section class="weekend-overview view-section" data-app-view="weekend" aria-labelledby="weekendTitle">
       <div class="overview-copy">
@@ -190,22 +190,10 @@
       <div class="favorites-head">
         <div>
           <p class="section-kicker">Merkliste</p>
-          <h2 id="favoritesHeading">Für später behalten</h2>
-          <p class="favorites-note">Gemerkte Vorschläge bleiben erhalten, wenn die Wochenendtipps aktualisiert werden.</p>
+          <h2 id="favoritesHeading">Weitere gemerkte Vorschläge</h2>
+          <p class="favorites-note">Auch ältere Funde bleiben gespeichert. Termine und Verfügbarkeit im Original prüfen.</p>
         </div>
       </div>
-      <nav class="category-filters favorite-category-filters" aria-label="Merkliste nach Kategorie filtern">
-        <button class="favorite-category-filter active" type="button" data-favorite-category="all">Alle</button>
-        <button class="favorite-category-filter" type="button" data-favorite-category="outdoor">Draußen</button>
-        <button class="favorite-category-filter" type="button" data-favorite-category="kultur">Kultur</button>
-        <button class="favorite-category-filter" type="button" data-favorite-category="musik">Musik</button>
-        <button class="favorite-category-filter" type="button" data-favorite-category="essen">Essen &amp; Trinken</button>
-        <button class="favorite-category-filter" type="button" data-favorite-category="wellness">Wellness</button>
-        <button class="favorite-category-filter" type="button" data-favorite-category="kino">Kino</button>
-        <button class="favorite-category-filter" type="button" data-favorite-category="streaming">Streaming</button>
-      </nav>
-      <section id="activityStock" class="planner-box" aria-label="Freizeitvorrat"></section>
-      <h2>Deine Merkliste</h2>
       <div id="favoritesMessage" class="favorites-message" aria-live="polite"></div>
       <div id="favoritesEmpty" class="favorites-empty">Noch nichts gemerkt.</div>
       <div id="favoritesList" class="favorites-list"></div>

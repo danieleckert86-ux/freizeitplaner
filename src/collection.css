@@ -62,3 +62,6 @@
 .collection-mode .discovery-item .card-place small{display:none!important}
 .collection-mode .discovery-item .item-actions[data-quiet]{margin-top:10px!important;padding-top:10px!important}
 .stock-rating{padding:12px 0;border-bottom:1px solid #e0e8e2;margin-bottom:12px}.stock-rating h3{font-size:15px;margin:0}.stock-rating p{font-size:13px;margin:6px 0}.stock-rating-buttons{display:flex;gap:6px}.stock-rating-buttons button{min-width:44px;min-height:44px;font-size:26px;color:#987222;border:1px solid #d9e3dd;border-radius:9px;background:#fff}.stock-rating-buttons button[aria-pressed=true]{background:#f8f0d9;border-color:#b99844}
+/* Permanent collection rows need only their title and details action. */
+.collection-mode .stock-row,.collection-mode #personalPlanner .known-row{grid-template-columns:minmax(0,1fr) auto!important}
+.finder-toolbar label[hidden]{display:none!important}

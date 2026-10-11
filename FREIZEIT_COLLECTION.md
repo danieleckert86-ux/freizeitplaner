@@ -143,3 +143,6 @@ Favoriten heißen im UI Vormerken/Vorgemerkt; der Filter heißt Nur vorgemerkte.
 
 ## Persönliche Sternebewertung · 11.10.2026
 Orte & Touren haben optional `rating: 1..5` im bestehenden privaten Sammlungspayload. Bewertung und Entfernen erfolgen unter Mehr im Detaildialog; Vormerk-Stern und bisherige Quellenbewertungen bleiben eigenständig erhalten. Speicherung nutzt die bestehende revisionsgeschützte Cloudaktualisierung mit Rücknahme bei Fehlern, keine Migration. Die Auswahlhilfe bevorzugt persönlich gut bewertete passende konkrete Ideen; unbewertet entspricht neutralen drei Sternen. Harte Zeit-/Ort-/Energie-/Aufwandsfilter, Ausblendungen und geschlossene Orte bleiben wirksam. Bei Schwimmbädern/Gastronomie verwendet die Auswahl die Dauer der Standardaktivität, ohne eine Ortsdauer zu erfinden. Tourdauer bleibt individuell erforderlich. Keine KI-Aufrufe oder automatisches Lernen ähnlicher Orte, keine Änderung an der Morgenmailbewertung.
+
+## Vormerken nur für aktuelle Angebote · 11.10.2026
+Orte & Touren und Standardaktivitäten zeigen keinen Vormerk-Stern mehr; der Vormerkfilter erscheint nur unter Aktuell. Gespeicherte frühere Favorite-Felder bleiben erhalten, filtern die dauerhafte Sammlung aber nicht. Die persönliche Bewertung mit 1–5 Sternen im Details-Popup bleibt unverändert.

@@ -115,10 +115,10 @@ test('permanent places and routes stay distinct from time-bound programs',()=>{
  for(const kind of ['Kino','Streaming','Musik','Kultur'])assert.equal(favoriteArea(kind),'current');
  assert.equal(favoriteArea('Essen','2026-10-20'),'current');
 });
-test('saved stock filter preserves the collection and selects explicit stars only',()=>{
+test('stock collection stays visible independently of legacy favorite flags',()=>{
  const rows=[idea('yes',{title:'Lieblingscafé',favorite:true}),idea('no',{title:'Anderes Café'})];
  const before=JSON.stringify(rows);const html=stockMarkup(rows,null,true,false,'',null,true);
- assert.ok(html.includes('Lieblingscafé'));assert.ok(!html.includes('Anderes Café'));assert.equal(JSON.stringify(rows),before);
+ assert.ok(html.includes('Lieblingscafé'));assert.ok(html.includes('Anderes Café'));assert.ok(!html.includes('data-stock-action="favorite"'));assert.equal(JSON.stringify(rows),before);
  assert.equal(withMapsStock({stockMapsVersion:1,activityStock:rows}).activityStock[0].favorite,true);
 });
 

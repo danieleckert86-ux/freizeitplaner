@@ -290,6 +290,7 @@ async function bootstrap() {
   const currentKind = document.querySelector<HTMLSelectElement>('#currentKind')!;
   const refreshFinder = () => {
     const current = finderView === 'current';
+    onlySaved.closest<HTMLElement>('label')!.hidden = !current;
     document.querySelector<HTMLElement>('#currentKindLabel')!.hidden = !current;
     document.querySelector<HTMLElement>('#collectionEvidence')!.hidden = !current;
     document.querySelectorAll<HTMLButtonElement>('[data-main-view]').forEach(b => {
@@ -299,13 +300,13 @@ async function bootstrap() {
     document.querySelectorAll<HTMLElement>('[data-app-view]').forEach(section => {
       const kind=section.dataset.appView;
       section.hidden = !(current ? kind==='events' && currentKind.value==='events' || kind==='movies' && currentKind.value!=='events' : ['planning','stock','outdoor','restaurants'].includes(kind||''));
-      if(kind==='favorites')section.hidden=!onlySaved.checked;
+      if(kind==='favorites')section.hidden=!current||!onlySaved.checked;
     });
     document.querySelectorAll<HTMLButtonElement>('[data-media-tab]').forEach(b=>b.classList.toggle('active',b.dataset.mediaTab===currentKind.value));
     document.querySelectorAll<HTMLElement>('[data-media-panel]').forEach(panel=>{panel.hidden=panel.dataset.mediaPanel!==currentKind.value;panel.classList.toggle('active',!panel.hidden);});
     document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));
-    document.querySelectorAll<HTMLElement>('.tour-card,.lifestyle-card').forEach(card=>{card.hidden=onlySaved.checked&&!card.querySelector('[data-favorite].saved');});
-    document.dispatchEvent(new CustomEvent('finder-saved-filter',{detail:onlySaved.checked}));
+    document.querySelectorAll<HTMLElement>('.tour-card,.lifestyle-card').forEach(card=>{card.hidden=current&&onlySaved.checked&&!card.querySelector('[data-favorite].saved');});
+    document.dispatchEvent(new CustomEvent('finder-saved-filter',{detail:current&&onlySaved.checked}));
   };
   const setAppView = (view: string) => {
     finderView=['current','events','movies'].includes(view)?'current':'ideas';

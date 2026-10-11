@@ -1,3 +1,4 @@
+import {stockMarkup,stockSources,stockKinds,validStockItem,draftFromFavorite,usableStock, type StockItem} from './activity-stock';
 import './planner.css';
 import {withKnownActivities, type KnownActivity} from './known-activities';
 import {activityCategories,activitySettings,categoryOf,settingOf,matchesSetting,legacyMood,validActivityProperties,energyLabels,effortLabels, type ActivityCategory, type ActivitySetting} from './activity-properties';
@@ -12,7 +13,7 @@ type Slot = { id: string; date: string; start: string; end: string; energy: stri
 type Entry = { id: string; title: string; url: string; date: string; start: string; end: string; slotId: string; status: string; createdAt: string; proposedAt: string; organizedAt: string; doneAt: string; note: string; next: string; routineId?: string; source?: string };
 type Routine = KnownActivity;
 type Dinner = {id:string;date:string;recipeId:string;title:string};
-type State = { knownActivitiesVersion?:number; dinners?: Dinner[]; routines?: Routine[]; version: 1; appointments: Appointment[]; slots: Slot[]; entries: Entry[]; checks: string[]; googleDeleteSeries?: string[]; googleSync?: { lastSuccess: string; error?: string } };
+type State = { activityStock?:StockItem[]; knownActivitiesVersion?:number; dinners?: Dinner[]; routines?: Routine[]; version: 1; appointments: Appointment[]; slots: Slot[]; entries: Entry[]; checks: string[]; googleDeleteSeries?: string[]; googleSync?: { lastSuccess: string; error?: string } };
 type Idea = { title: string; url: string; next: string; outdoor: boolean; minutes?: number; source?: string; routineId?: string; date?: string; start?: string; tourKind?: string; flexible?: boolean };
 const defaultRoutines = (): Routine[] => [
   {id:'walk',title:'Spazieren durch die Stadt',minutes:45,energy:'low',mood:'outdoor',effort:'spontaneous',outdoor:true,next:'Eine gemeinsame Runde zu Beginn des Zeitfensters vorschlagen.'},
@@ -45,6 +46,7 @@ function validState(v: unknown): v is State {
   const strings = (x: unknown, keys: string[]) => !!x && typeof x === 'object' && keys.every(k => typeof (x as Record<string, unknown>)[k] === 'string');
   return (s.knownActivitiesVersion === undefined || s.knownActivitiesVersion === 1) && s.version === 1 && Array.isArray(s.appointments) && Array.isArray(s.slots) && Array.isArray(s.entries) && Array.isArray(s.checks)
     && (s.routines === undefined || Array.isArray(s.routines) && s.routines.every(r => strings(r,['id','title','energy','mood','effort','next']) && Number.isInteger(r.minutes) && r.minutes >= 5 && r.minutes <= 1440 && typeof r.outdoor === 'boolean' && ['low','medium','high'].includes(r.energy) && ['outdoor','movement','food','culture'].includes(r.mood) && ['spontaneous','prepare','trip'].includes(r.effort) && validActivityProperties(r)))
+    && (s.activityStock===undefined||Array.isArray(s.activityStock)&&s.activityStock.length<=500&&s.activityStock.every(validStockItem)&&new Set(s.activityStock.map(x=>x.id)).size===s.activityStock.length)
     && (s.googleDeleteSeries === undefined || Array.isArray(s.googleDeleteSeries) && s.googleDeleteSeries.every(id => typeof id === 'string'))
     && (s.googleSync === undefined || !!s.googleSync && typeof s.googleSync.lastSuccess === 'string' && (!s.googleSync.lastSuccess || !isNaN(Date.parse(s.googleSync.lastSuccess))) && (s.googleSync.error === undefined || typeof s.googleSync.error === 'string'))
     && (s.dinners === undefined || Array.isArray(s.dinners) && s.dinners.every(d=>strings(d,['id','date','recipeId','title']) && validDate(d.date) && !!d.id && !!d.recipeId && !!d.title) && new Set(s.dinners.map(d=>d.date)).size===s.dinners.length && new Set(s.dinners.map(d=>d.id)).size===s.dinners.length)
@@ -71,7 +73,10 @@ export function initPlanner(database: SupabaseClient) {
     if (error || !data || !validState(data.payload) || !Number.isSafeInteger(Number(data.revision))) throw Error('Cloud data unavailable');
     return { state: withKnownActivities({ ...data.payload, routines: data.payload.routines ?? defaultRoutines() } as State), revision: Number(data.revision) };
   }
-  const isEditing = () => !!dinnerDate || !!calendarEdit || !!dragging || !!draft || !!pendingIdea || host?.contains(document.activeElement) && ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName || '');
+  const stockHost=document.querySelector<HTMLElement>('#activityStock');
+  let stockDraft: StockItem|null=null;
+  let stockMessage='';
+  const isEditing = () => !!stockDraft || !!dinnerDate || !!calendarEdit || !!dragging || !!draft || !!pendingIdea || host?.contains(document.activeElement) && ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName || '');
   const actionDate = (stamp: string) => stamp ? new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin' }).format(new Date(stamp)) : '';
   let week = day(today()).getUTCDay() === 0 ? addDays(monday(today()),7) : monday(today());
   let selectedSlot = '';
@@ -135,6 +140,7 @@ export function initPlanner(database: SupabaseClient) {
       const a = el.dataset.action;
       el.disabled = saving || (!loaded && !['prev','next','current','refresh'].includes(a || ''));
     });
+    stockHost?.querySelectorAll<HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement|HTMLButtonElement>('input,select,textarea,button').forEach(el=>{el.disabled=saving||!loaded;});
     document.querySelectorAll<HTMLButtonElement>('[data-personal-action]').forEach(el => { el.disabled = !loaded || saving; });
   }
   async function refreshCloud(manual = false) {
@@ -370,7 +376,7 @@ export function initPlanner(database: SupabaseClient) {
       const icon=({explore:'🌿',relaxation:'🧘',movement:'🚲',food:'☕',culture:'🎭'} as Record<string,string>)[key]||'💡';
       return `<details class="known-category" data-category="${e(key)}" ${openCategories.has(key)?'open':''}><summary><span>${icon} ${e(title)}</span><span class="known-count">${items.length}</span></summary><div class="known-list">${items.map(x=>`<article class="known-row"><div class="known-copy"><h3>${e(x.title)}</h3><p class="known-properties">${x.minutes} Min. · Energie ${e(energyLabels[x.energy]||x.energy)} · ${e(effortLabels[x.effort]||x.effort)} · ${e(activitySettings.find(([id])=>id===settingOf(x))![1])}</p></div><details class="known-more"><summary aria-label="Mehr zu ${e(x.title)}">Mehr</summary><div class="routine-actions">${button('routinePlan','Einplanen',x.id)}${button('editRoutine','Bearbeiten',x.id)}${button('deleteRoutine','Löschen',x.id)}</div></details></article>`).join('')}</div></details>`;
     }).join('');
-    return `<section class="planner-box routines-box"><details id="routineLibrary" open><summary>${toolSummary('Bekanntes','',`${allRoutines.length} Ideen`)}</summary>${activityGuide.markup(allRoutines)}<label class="known-setting-filter">Ort filtern<select id="routineSettingFilter">${options([['unknown','Alle Orte'],['inside','Drinnen möglich'],['outside','Draußen möglich']],routineSettingFilter)}</select></label><div class="known-categories">${categories||(allRoutines.length?'<p>Keine Aktivität passt zu diesem Ortsfilter.</p>':'<p>Ergänze deine erste Aktivität.</p>')}</div><details id="routineSection" ${r || routineFormOpen?'open':''}><summary>${r?`„${e(r.title)}“ bearbeiten`:'+ Neue Aktivität ergänzen'}</summary><h3>${r?'Standardaktivität bearbeiten':'Eine Standardaktivität ergänzen'}</h3><form id="routineForm" class="planner-form"><label>Aktivität<input name="title" required maxlength="200" value="${e(r?.title||'')}" placeholder="Zum Beispiel: Am Lech spazieren"></label><label>Dauer in Minuten<input name="minutes" type="number" min="5" max="1440" required value="${r?.minutes||45}"></label><label>Kategorie<select name="activityCategory">${options(activityCategories,r?categoryOf(r):'movement')}</select></label><label>Benötigte Energie<select name="energy">${options([['low','Niedrig'],['medium','Mittel'],['high','Hoch']],r?.energy||'medium')}</select></label><label>Organisationsaufwand<select name="effort">${options([['spontaneous','Direkt loslegen'],['prepare','Ein bisschen vorbereiten'],['trip','Auch etwas planen']],r?.effort||'prepare')}</select></label><label>Ort<select name="setting">${options(activitySettings,r?settingOf(r):'outside')}</select></label><label class="routine-next">Vorbereitung / nächster Schritt<input name="next" maxlength="500" value="${e(neutralDescription(r?.next||''))}" placeholder="Was musst du vorher klären?"></label><button class="planner-submit">${r?'Änderungen speichern':'Aktivität ergänzen'}</button>${button('cancelRoutine','Abbrechen')}</form></details></details></section>`;
+    return `<section class="planner-box routines-box"><details id="routineLibrary" open><summary>${toolSummary('Bekanntes','',`${allRoutines.length} Ideen`)}</summary>${activityGuide.markup(allRoutines,state.activityStock??[])}<label class="known-setting-filter">Ort filtern<select id="routineSettingFilter">${options([['unknown','Alle Orte'],['inside','Drinnen möglich'],['outside','Draußen möglich']],routineSettingFilter)}</select></label><div class="known-categories">${categories||(allRoutines.length?'<p>Keine Aktivität passt zu diesem Ortsfilter.</p>':'<p>Ergänze deine erste Aktivität.</p>')}</div><details id="routineSection" ${r || routineFormOpen?'open':''}><summary>${r?`„${e(r.title)}“ bearbeiten`:'+ Neue Aktivität ergänzen'}</summary><h3>${r?'Standardaktivität bearbeiten':'Eine Standardaktivität ergänzen'}</h3><form id="routineForm" class="planner-form"><label>Aktivität<input name="title" required maxlength="200" value="${e(r?.title||'')}" placeholder="Zum Beispiel: Am Lech spazieren"></label><label>Dauer in Minuten<input name="minutes" type="number" min="5" max="1440" required value="${r?.minutes||45}"></label><label>Kategorie<select name="activityCategory">${options(activityCategories,r?categoryOf(r):'movement')}</select></label><label>Benötigte Energie<select name="energy">${options([['low','Niedrig'],['medium','Mittel'],['high','Hoch']],r?.energy||'medium')}</select></label><label>Organisationsaufwand<select name="effort">${options([['spontaneous','Direkt loslegen'],['prepare','Ein bisschen vorbereiten'],['trip','Auch etwas planen']],r?.effort||'prepare')}</select></label><label>Ort<select name="setting">${options(activitySettings,r?settingOf(r):'outside')}</select></label><label class="routine-next">Vorbereitung / nächster Schritt<input name="next" maxlength="500" value="${e(neutralDescription(r?.next||''))}" placeholder="Was musst du vorher klären?"></label><button class="planner-submit">${r?'Änderungen speichern':'Aktivität ergänzen'}</button>${button('cancelRoutine','Abbrechen')}</form></details></details></section>`;
   }
   function weeklyCheckMarkup() {
     if (!weeklyCheck) return '';
@@ -397,7 +403,7 @@ export function initPlanner(database: SupabaseClient) {
       <section class="planner-box"><details class="planner-history"><summary>${toolSummary('Vorschläge & Rückmeldungen','Ideen merken und festhalten, was du vorgeschlagen hast.',`${state.entries.length} Einträge`)}</summary><div class="planner-stats"><span><strong>${proposed}</strong> vorgeschlagen</span><span><strong>${done}</strong> gemacht</span></div><p class="planner-small">Nach dem Datum der Handlung in dieser Woche.</p><form id="entryForm" class="planner-form"><label>Idee / früherer Vorschlag<input name="title" required maxlength="200" placeholder="Was möchtest du festhalten?"></label><label>Datum der Aktivität<input name="date" type="date" value="${activeDate}"></label><label>Eintragen als<select name="status">${options([['Idee gespeichert','Gemerkt'],['Vorgeschlagen','Vorgeschlagen']])}</select></label><button class="planner-submit">Im Protokoll speichern</button></form>${state.entries.map(entryMarkup).join('')||'<p>Noch keine Einträge.</p>'}</details></section></div></section></div><section class="tool-group planner-settings" aria-label="Verbindung und Sicherung"><details id="plannerSettings" ${settingsOpen || backup?'open':''}><summary>${toolSummary('Verbindung & Sicherung','Google-Abgleich und Datensicherung bei Bedarf öffnen.')}</summary><div class="settings-refresh">${button('refresh','Stand aktualisieren')}</div><div class="tool-group-grid">
       <section class="planner-box"><details class="planner-setup"><summary>${toolSummary('Google Kalender',state.googleSync?.lastSuccess?`Freizeitplaner · letzter Abgleich ${new Date(state.googleSync.lastSuccess).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}`:'Kalender „Freizeitplaner“ verbinden und automatisch abgleichen.',state.googleSync?.error?'Abgleich prüfen':state.googleSync?.lastSuccess?'Eingerichtet':'Einrichten')}</summary><p>${state.googleSync?.lastSuccess ? `Letzte Synchronisierung: ${e(new Date(state.googleSync.lastSuccess).toLocaleString('de-DE'))}. Änderungen werden etwa alle fünf Minuten abgeglichen.` : 'Noch nicht aktiviert. Die Verbindung benötigt einmalig deine Freigabe in Google.'}</p>${state.googleSync?.lastSuccess && Date.now()-Date.parse(state.googleSync.lastSuccess)>15*60*1000?'<p role="status">Seit mehr als 15 Minuten kein erfolgreicher Abgleich. Bitte das Google-Script und seinen Zeit-Trigger prüfen.</p>':''}${state.googleSync?.error?'<p role="alert">Der letzte Abgleich ist fehlgeschlagen. Bitte die Ausführungen im Google-Script prüfen.</p>':''}<p>Es wird ausschließlich der Google-Kalender „Freizeitplaner“ synchronisiert. Geplante Aktivitäten und feste Termine werden übertragen; gespeicherte Ideen ohne vollständigen Zeitpunkt bleiben im Planer. Google-Termine erscheinen als feste Termine. Bei gleichzeitigen Änderungen an Titel oder Zeitpunkt hat Google Vorrang; dein Vorschlagsprotokoll bleibt erhalten.</p><p>Aus Google werden die vergangenen 30 Tage und die kommenden zwölf Monate geladen. Ganztägige und mehrtägige Termine erscheinen pro Tag. Serien kannst du im Kalender einzeln oder vollständig löschen; Einzelne Termine kannst du hier verschieben. Serienregeln und mehrtägige Google-Termine bearbeitest du in Google.</p><ol><li><a href="https://script.google.com/home/start" target="_blank" rel="noopener noreferrer">Google Apps Script öffnen</a> und ein neues Projekt erstellen.</li><li><a href="/google-calendar/Code.gs" download>Verbindungscode herunterladen</a>, öffnen und vollständig in „Code.gs“ einsetzen.</li><li>Links unter „Dienste“ auf + klicken und „Google Calendar API“ hinzufügen.</li><li>Oben die Funktion <strong>install</strong> auswählen, ausführen und den Zugriff freigeben. Sie startet den ersten Abgleich und richtet den Fünf-Minuten-Takt ein.</li></ol><p class="planner-small">Kein Web-App-Deployment erforderlich. Die Verbindung läuft in deinem Google-Konto. Zum Beenden dort die Funktion „uninstall“ ausführen. Bitte nur ein Script-Projekt installieren.</p></details></section>
       <section class="planner-box"><details class="planner-storage"><summary>${toolSummary('Planung sichern','Eine Sicherung herunterladen oder einen gespeicherten Stand importieren.')}</summary><p>Die Planung wird gemeinsam online gespeichert. Jeder mit Zugriff auf die App kann sie lesen und bearbeiten.</p>${button('export','Sicherung exportieren')}<label>Sicherung importieren<input id="plannerImport" type="file" accept="application/json,.json"></label>${backup?`<p>Sicherung mit ${backup.entries.length} Einträgen. Die Übernahme ersetzt die Planung auf allen Geräten.</p>${button('confirmImport','Diese Sicherung übernehmen')}${button('cancelImport','Abbrechen')}`:''}</details></section></div></details></section>`;
-    wire();setBusy();
+    renderStock();wire();setBusy();
     const content=host.querySelector<HTMLElement>('#dinnerPicker,#calendarEditor,#dayComposer,#ideaScheduler');
     if(content){
       const dialog=document.createElement('dialog');dialog.className='planning-dialog';dialog.setAttribute('aria-label',dinnerDate?'Abendessen planen':calendarEdit?'Termin ändern':'Aktivität planen');
@@ -513,6 +519,7 @@ export function initPlanner(database: SupabaseClient) {
     })));
     host.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(b=>b.addEventListener('click',async ()=>{
       const action=b.dataset.action,id=b.dataset.id;
+      if(action==='stockPlan'){const x=usableStock(state.activityStock??[],stockSources().decisions).find(a=>a.id===id);if(x)planStock(x);return;}
       if(activityGuide.handle(action||'',id)){render();host.querySelector<HTMLElement>('[data-guide-focus]')?.focus();return;}
       if(action==='chooseDinner'){openDinner(id!);return;}
       if(action==='moveCurrentDinner'){await moveDinner(id!,dinnerDate);return;}
@@ -602,6 +609,38 @@ export function initPlanner(database: SupabaseClient) {
     download(folded,entry?'freizeit-aktivitaet.ics':'freizeit-planungserinnerungen.ics','text/calendar');
     message=entry?'Kalenderdatei erstellt. Bitte in deinen Kalender importieren.':'Kalenderdatei erstellt: Sonntag und Mittwoch um 18 Uhr, jeweils mit Erinnerung. Bitte importieren; erst danach erinnert dich dein Kalender.';render();
   }
+  function planStock(x:StockItem){
+    beginPlanning({title:x.title,url:x.url,next:x.note+' Öffnung, Wetter und gegebenenfalls Route/Sperren prüfen.',outdoor:x.setting!=='inside',minutes:x.minutes===null||x.travelMinutes===null?undefined:x.minutes+x.travelMinutes,source:'stock',flexible:true});
+  }
+  function renderStock(){
+    if(!stockHost)return;
+    stockHost.innerHTML=stockMarkup(state.activityStock??[],stockDraft,loaded,saving,stockMessage);
+    stockHost.querySelector<HTMLFormElement>('#stockForm')?.addEventListener('submit',async ev=>{
+      ev.preventDefault();if(!stockDraft||!loaded||saving)return;
+      const d=new FormData(ev.currentTarget as HTMLFormElement);
+      const number=(key:string)=>String(d.get(key)||'').trim()===''?null:Number(d.get(key));
+      const row={...stockDraft,title:String(d.get('title')).trim(),kind:String(d.get('kind')),url:String(d.get('url')).trim(),minutes:number('minutes'),travelMinutes:number('travelMinutes'),distanceKm:number('distanceKm'),elevationM:number('elevationM'),setting:String(d.get('setting')),energy:String(d.get('energy')),effort:String(d.get('effort')),note:String(d.get('note')).trim()};
+      if(!validStockItem(row)){stockMessage='Bitte gültige Angaben eingeben. Unbekannte Werte dürfen leer bleiben.';stockHost.querySelector<HTMLElement>('[role=status]')!.textContent=stockMessage;return;}
+      stockDraft=row;
+      if(await mutate(()=>{const list=state.activityStock??[];const i=list.findIndex(a=>a.id===row.id);if(i<0)list.push(row);else list[i]=row;state.activityStock=list;},'Vorratsidee gespeichert.')){stockDraft=null;stockMessage='Vorratsidee gespeichert. Auf allen Geräten verfügbar.';}
+      else stockMessage=message;
+      render();
+    });
+  }
+  stockHost?.addEventListener('click',async ev=>{
+    const b=(ev.target as Element).closest<HTMLButtonElement>('[data-stock-action]');if(!b||b.disabled)return;
+    const action=b.dataset.stockAction,id=b.dataset.stockId;
+    if(action==='cancel'){stockDraft=null;stockMessage='';renderStock();return;}
+    if(!loaded||saving)return;
+    if(action==='new')stockDraft={id:crypto.randomUUID(),title:'',kind:stockKinds.find(([kind])=>kind===b.dataset.stockKind)?.[0]??'walk',url:'',minutes:null,travelMinutes:null,distanceKm:null,elevationM:null,setting:'outside',energy:'low',effort:'spontaneous',note:''};
+    if(action==='import'){const sources=stockSources();const a=sources.decisions.ready?sources.favorites.find(x=>x.suggestionId===id&&!sources.decisions.hidden.has(x.suggestionId)&&(sources.decisions.ratings.get(x.suggestionId)??0)>=0):null;if(a)stockDraft=draftFromFavorite(a,crypto.randomUUID());}
+    const row=(state.activityStock??[]).find(x=>x.id===id);
+    if(action==='edit'&&row)stockDraft={...row};
+    if(action==='plan'&&row&&usableStock([row],stockSources().decisions).length){planStock(row);return;}
+    if(action==='remove'&&row){if(!confirm('Nur diese Vorratsidee entfernen? Merkliste und geplante Vorhaben bleiben erhalten.'))return;if(await mutate(()=>{state.activityStock=state.activityStock?.filter(x=>x.id!==id);}))stockMessage='Aus dem Vorrat entfernt.';else stockMessage=message;}
+    renderStock();stockHost.querySelector<HTMLInputElement>('input[name=title]')?.focus();
+  });
+  document.addEventListener('activity-stock-sources',()=>{if(!stockDraft){renderStock();if(!isEditing())render();}});
   // Preserve the existing recommendation and favorites flows. Add personal actions separately.
   const enhance=()=>document.querySelectorAll<HTMLButtonElement>('[data-favorite],[data-plan-favorite]').forEach(b=>{
     const saved=b.hasAttribute('data-plan-favorite');
@@ -624,6 +663,7 @@ export function initPlanner(database: SupabaseClient) {
   const params=new URLSearchParams({latitude:'48.3705',longitude:'10.8978',daily:'precipitation_probability_max',timezone:'Europe/Berlin',forecast_days:'14'});
   fetch('https://api.open-meteo.com/v1/forecast?'+params).then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{if(data.daily?.time)rain=Object.fromEntries(data.daily.time.map((d:string,i:number)=>[d,data.daily.precipitation_probability_max[i]]));if(!host.contains(document.activeElement))render();}).catch(()=>{});
 }
+
 
 
 

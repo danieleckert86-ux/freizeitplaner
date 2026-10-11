@@ -1,0 +1,93 @@
+import {categoryOf,matchesSetting, type ActivitySetting} from './activity-properties.ts';
+import type {KnownActivity} from './known-activities';
+import type {GuideAnswers} from './activity-guide';
+
+export const stockKinds = [['bike-short','Fahrradtour kurz'],['bike-long','Fahrradtour lang'],['hike-short','Wanderung kurz'],['hike-long','Wanderung lang'],['walk','Spaziergang'],['swim','Schwimmen'],['cafe','Café'],['restaurant','Restaurant'],['beer-garden','Biergarten']] as const;
+export type StockKind = typeof stockKinds[number][0];
+// User-provided source lists, not imported or verified places. No automatic fetch.
+export const stockLists:Partial<Record<StockKind,string>>={restaurant:'https://maps.app.goo.gl/WfdLtvt9Mdo6UJor5',swim:'https://maps.app.goo.gl/8e3gtYTg9j1BvQw98',cafe:'https://maps.app.goo.gl/MFDfsD7oW6aF68Yy6','beer-garden':'https://maps.app.goo.gl/S9TPz1PT38783Roq8'};
+export type StockItem = {id:string;title:string;kind:StockKind;url:string;minutes:number|null;travelMinutes:number|null;distanceKm:number|null;elevationM:number|null;setting:ActivitySetting;energy:string;effort:string;note:string;sourceId?:string};
+export type StockFavorite = {suggestionId:string;title:string;category:string;description:string;url:string};
+export type StockDecisions = {ready:boolean;hidden:ReadonlySet<string>;ratings:ReadonlyMap<string,number>};
+const bounded=(v:unknown,max:number)=>v===null||typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=max;
+export const safeStockUrl=(s:string)=>{try{const u=new URL(s);return ['http:','https:'].includes(u.protocol)&&!u.username&&!u.password?u.href:'';}catch{return '';}};
+export function validStockItem(v:unknown):v is StockItem {
+ if(!v||typeof v!=='object')return false;const a=v as StockItem;
+ return typeof a.id==='string'&&a.id.length>0&&a.id.length<=100&&typeof a.title==='string'&&a.title.trim().length>0&&a.title.length<=200
+  && stockKinds.some(([id])=>id===a.kind)&&typeof a.url==='string'&&a.url.length<=2000&&(!a.url||!!safeStockUrl(a.url))
+  && bounded(a.minutes,1440)&&(a.minutes===null||Number.isInteger(a.minutes)&&a.minutes>=5)&&bounded(a.travelMinutes,1440)&&(a.travelMinutes===null||Number.isInteger(a.travelMinutes))
+  && bounded(a.distanceKm,1000)&&bounded(a.elevationM,10000)&&['inside','outside','both'].includes(a.setting)&&['low','medium','high'].includes(a.energy)&&['spontaneous','prepare','trip'].includes(a.effort)
+  && typeof a.note==='string'&&a.note.length<=2000&&(a.sourceId===undefined||typeof a.sourceId==='string'&&a.sourceId.length<=200);
+}
+export function kindForActivity(a:KnownActivity):StockKind|null {
+ if(categoryOf(a)==='movement'){
+  if(/schwimm/i.test(a.title))return 'swim';
+  if(/rad|fahrrad/i.test(a.title))return /groß|gross|lang/i.test(a.title)||a.minutes>180?'bike-long':'bike-short';
+  if(/wander/i.test(a.title))return /groß|gross|lang/i.test(a.title)||a.minutes>240?'hike-long':'hike-short';
+  if(/spazier|spazieren|zu fuß|kleine runde/i.test(a.title))return 'walk';
+ }
+ if(categoryOf(a)==='food'){
+  if(/biergarten/i.test(a.title))return 'beer-garden';
+  if(/café|cafe|kaffee|kuchen/i.test(a.title))return 'cafe';
+  if(/restaurant|essen gehen|essen.*besuch/i.test(a.title))return 'restaurant';
+ }
+ return null;
+}
+export function kindForFavorite(a:StockFavorite):StockKind|null {
+ const c=a.category.toLocaleLowerCase('de');
+ if(/schwimm/.test(c))return 'swim';
+ if(/biergarten/.test(c)||/restaurant|gastronomie|essen/.test(c)&&/biergarten/i.test(a.title))return 'beer-garden';
+ if(/fahrrad|radtour/.test(c))return 'bike-short';
+ if(/wander/.test(c))return 'hike-short';
+ if(/spazier/.test(c))return 'walk';
+ if(/café|cafe/.test(c)||/restaurant|gastronomie|essen/.test(c)&&/café|cafe/i.test(a.title))return 'cafe';
+ if(/restaurant|gastronomie|essen/.test(c))return 'restaurant';
+ return null;
+}
+export function draftFromFavorite(a:StockFavorite,id:string):StockItem|null {
+ const kind=kindForFavorite(a);if(!kind)return null;
+ return {id,title:a.title.slice(0,200),kind,url:safeStockUrl(a.url),minutes:null,travelMinutes:null,distanceKm:null,elevationM:null,setting:['cafe','restaurant'].includes(kind)?'inside':'outside',energy:kind.startsWith('bike')||kind.startsWith('hike')?'medium':'low',effort:'prepare',note:a.description.slice(0,2000),sourceId:a.suggestionId};
+}
+export function usableStock(items:readonly StockItem[],decisions:StockDecisions):StockItem[]{
+ return items.filter(a=>!a.sourceId||decisions.ready&&!decisions.hidden.has(a.sourceId)&&(decisions.ratings.get(a.sourceId)??0)>=0);
+}
+export function matchingStock(a:KnownActivity,items:readonly StockItem[],answers:GuideAnswers,decisions:StockDecisions):StockItem[]{
+ const kind=kindForActivity(a);if(!kind)return [];
+ return usableStock(items,decisions).filter(x=>x.kind===kind&&x.minutes!==null&&x.travelMinutes!==null
+  && (answers.minutes===null||x.minutes+x.travelMinutes<=answers.minutes)
+  && matchesSetting({...a,setting:x.setting,outdoor:x.setting!=='inside'},answers.place)
+  && (answers.need!=='rest'||x.energy==='low'&&x.effort==='spontaneous')
+  && (answers.energy!=='low'||x.energy==='low')&&(answers.energy!=='medium'||x.energy!=='high')
+  && (answers.effort!=='spontaneous'||x.effort==='spontaneous')&&(answers.effort!=='prepare'||x.effort!=='trip'))
+  .sort((x,y)=>(Number(y.energy===answers.energy)-Number(x.energy===answers.energy))*10+(decisions.ratings.get(y.sourceId||'')??0)-(decisions.ratings.get(x.sourceId||'')??0)||(x.minutes!+x.travelMinutes!)-(y.minutes!+y.travelMinutes!)||x.id.localeCompare(y.id)).slice(0,1);
+}
+
+// Private in-memory bridge, never sent to the public catalogue or a research provider.
+let favorites:StockFavorite[]=[];
+let decisions:StockDecisions={ready:false,hidden:new Set(),ratings:new Map()};
+export const stockSources=()=>({favorites,decisions});
+const notify=()=>{if(typeof document!=='undefined')document.dispatchEvent(new Event('activity-stock-sources'));};
+export function publishStockFavorites(value:StockFavorite[]){favorites=value.map(x=>({...x}));notify();}
+export function publishStockDecisions(hidden:Set<string>,ratings:Map<string,number>,ready:boolean){decisions={ready,hidden:new Set(hidden),ratings:new Map(ratings)};notify();}
+export function blockStockSource(id:string){decisions={...decisions,hidden:new Set([...decisions.hidden,id])};notify();}
+export function publishStockRatings(ratings:Map<string,number>){decisions={...decisions,ratings:new Map(ratings)};notify();}
+
+const e=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
+const choices=(pairs:readonly (readonly [string,string])[],selected:string)=>pairs.map(([id,label])=>`<option value="${id}" ${id===selected?'selected':''}>${label}</option>`).join('');
+export function stockMarkup(items:readonly StockItem[],draft:StockItem|null,loaded:boolean,saving:boolean,message:string):string {
+ const {favorites,decisions}=stockSources();const active=usableStock(items,decisions);
+ const disabled=!loaded||saving?'disabled':'';
+ const candidates=decisions.ready?favorites.filter(a=>!decisions.hidden.has(a.suggestionId)&&(decisions.ratings.get(a.suggestionId)??0)>=0&&kindForFavorite(a)&&!items.some(x=>x.sourceId===a.suggestionId)):[];
+ return `<h2>Dein Freizeitvorrat</h2><p>Konkrete Touren und Orte für Bekanntes. Drei bis fünf gute Möglichkeiten je Art reichen als Ziel. Gespeichert bedeutet noch nicht aktuell geprüft.</p><p role="status">${e(message||(!loaded?'Gemeinsamer Vorrat wird geladen …':''))}</p><button type="button" data-stock-action="new" ${disabled}>Tour oder Ort ergänzen</button>
+ ${draft?`<form id="stockForm" class="planner-form"><label>Name<input name="title" required maxlength="200" value="${e(draft.title)}"></label><label>Art<select name="kind">${choices(stockKinds,draft.kind)}</select></label><label>Original-Link<input name="url" type="url" maxlength="2000" value="${e(draft.url)}"></label><label>Aktivität in Minuten<input name="minutes" type="number" min="5" max="1440" value="${draft.minutes??''}" placeholder="Unbekannt"></label><label>Anfahrt hin und zurück, insgesamt Minuten<input name="travelMinutes" type="number" min="0" max="1440" value="${draft.travelMinutes??''}" placeholder="Unbekannt; 0 nur ohne Anfahrt"></label><label>Strecke in km<input name="distanceKm" type="number" min="0" max="1000" step="0.1" value="${draft.distanceKm??''}" placeholder="Unbekannt"></label><label>Höhenmeter<input name="elevationM" type="number" min="0" max="10000" value="${draft.elevationM??''}" placeholder="Unbekannt"></label><label>Ort<select name="setting">${choices([['inside','Drinnen'],['outside','Draußen'],['both','Beides']],draft.setting)}</select></label><label>Energie<select name="energy">${choices([['low','Niedrig'],['medium','Mittel'],['high','Hoch']],draft.energy)}</select></label><label>Aufwand<select name="effort">${choices([['spontaneous','Direkt loslegen'],['prepare','Etwas vorbereiten'],['trip','Auch planen']],draft.effort)}</select></label><label>Ort, Anforderungen und Vorbereitung<textarea name="note" maxlength="2000">${e(draft.note)}</textarea></label><p class="planner-small">Deine Planungsangaben, keine verifizierte Quellenprüfung. Bei Touren Route, Sperren und Wetter; bei Orten Öffnung prüfen.</p><button type="submit" ${disabled}>Im Vorrat speichern</button><button type="button" data-stock-action="cancel" ${saving?'disabled':''}>Abbrechen</button></form>`:''}
+ <div class="stock-groups">${stockKinds.map(([kind,label])=>{const rows=active.filter(a=>a.kind===kind);return `<details><summary>${label} · ${rows.length} gespeichert${rows.length<3?' · Vorrat ergänzen':''}</summary>${stockLists[kind]?`<p><a href="${e(stockLists[kind]!)}" target="_blank" rel="noopener noreferrer">Deine Maps-Liste öffnen</a> · Einzelne Orte daraus mit ihren Planungsangaben ergänzen. Die Liste ist kein geprüfter Vorrat.</p>`:''}<button type="button" data-stock-action="new" data-stock-kind="${kind}" ${disabled}>${label} ergänzen</button>${rows.map(a=>`<article class="stock-row"><h3>${e(a.title)}</h3><p>${a.minutes===null?'Dauer unbekannt':`${a.minutes} Min.`} · ${a.travelMinutes===null?'Anfahrt unbekannt':`Anfahrt gesamt ${a.travelMinutes} Min.`}${a.distanceKm===null?'':` · ${a.distanceKm} km`}${a.elevationM===null?'':` · ${a.elevationM} hm`} · Energie ${e(({low:'niedrig',medium:'mittel',high:'hoch'} as Record<string,string>)[a.energy])} · ${e(({spontaneous:'direkt loslegen',prepare:'etwas vorbereiten',trip:'auch planen'} as Record<string,string>)[a.effort])} · ${e(({inside:'drinnen',outside:'draußen',both:'beides'} as Record<string,string>)[a.setting])}</p><p>${e(a.note)}</p><p class="planner-small">Aktuelle Bedingungen ungeprüft.</p>${safeStockUrl(a.url)?`<a href="${e(a.url)}" target="_blank" rel="noopener noreferrer">Originalquelle</a>`:''}<button type="button" data-stock-action="plan" data-stock-id="${e(a.id)}" ${disabled}>Einplanen</button><button type="button" data-stock-action="edit" data-stock-id="${e(a.id)}" ${disabled}>Bearbeiten</button><button type="button" data-stock-action="remove" data-stock-id="${e(a.id)}" ${disabled}>Aus Vorrat entfernen</button></article>`).join('')||'<p>Noch keine konkrete Idee. Hier wird nichts erfunden.</p>'}</details>`;}).join('')}</div>
+ ${!decisions.ready?'<p>Merkliste-Ausschlüsse und Bewertungen gerade nicht vollständig geladen. Verknüpfte Ideen werden bis dahin nicht vorgeschlagen.</p>':''}
+ ${candidates.length?`<details><summary>Aus deiner Merkliste übernehmen · ${candidates.length}</summary><p>Art und Planungsangaben beim Übernehmen prüfen. Kurze/lange Tour ist zunächst nur eine vorläufige Zuordnung.</p>${candidates.map(a=>`<div class="stock-candidate"><span>${e(a.title)}</span><button type="button" data-stock-action="import" data-stock-id="${e(a.suggestionId)}" ${disabled}>Angaben ergänzen</button></div>`).join('')}</details>`:''}`;
+}
+
+export function stockIdeaMarkup(a:KnownActivity,items:readonly StockItem[],answers:GuideAnswers,decisions:StockDecisions):string {
+ const kind=kindForActivity(a);if(!kind)return '';
+ const matches=matchingStock(a,items,answers,decisions);
+ if(!matches.length)return '<p class="planner-small">Noch keine konkrete Vorratsidee mit passenden Angaben. Ergänze unter Gemerkt deinen Vorrat oder Dauer und Anfahrt.</p>';
+ const x=matches[0];return `<div class="stock-guide-match"><strong>Konkrete Idee: ${e(x.title)}</strong><p>${x.minutes} Min. + ${x.travelMinutes} Min. Anfahrt gesamt. ${e(x.note)}</p><p class="planner-small">Planungsangaben aus deinem Vorrat. Aktuelle Öffnung, Wetter und gegebenenfalls Route/Sperren vor Durchführung prüfen.</p><button type="button" data-action="stockPlan" data-id="${e(x.id)}">Diese Idee einplanen</button></div>`;
+}

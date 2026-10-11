@@ -1,3 +1,4 @@
+import {stockIdeaMarkup,stockSources, type StockItem} from './activity-stock.ts';
 import {categoryOf,matchesSetting,settingOf} from './activity-properties.ts';
 import type { KnownActivity } from './known-activities';
 
@@ -55,13 +56,14 @@ export class ActivityGuide {
     this.step++;
     return true;
   }
-  markup(activities: readonly KnownActivity[]): string {
+  markup(activities: readonly KnownActivity[], stock: readonly StockItem[] = []): string {
     if (!this.open) return '<div class="activity-guide-start"><button type="button" data-action="guideStart">Hilf mir entscheiden</button><p class="planner-small">Fünf kurze Fragen. Du musst deine Wünsche nicht genau kennen.</p></div>';
     const question=questions[this.step];
     const navigation=`<div class="planner-actions">${this.step?'<button type="button" data-action="guideBack">Zurück</button>':''}<button type="button" data-action="guideClose">Schließen</button></div>`;
     if (question) return `<section class="activity-guide" aria-label="Entscheidungshilfe"><p class="section-kicker">Frage ${this.step+1} von ${questions.length}</p><h3 tabindex="-1" data-guide-focus>${question.title}</h3><div class="activity-guide-options">${question.options.map(([value,label])=>`<button type="button" data-action="guideAnswer" data-id="${value}">${label}</button>`).join('')}</div>${navigation}</section>`;
     const picks=chooseActivities(activities,this.answers);
-    return `<section class="activity-guide" aria-label="Dein Vorschlag"><h3 tabindex="-1" data-guide-focus>${picks.length?'Ein guter Anfang':'Noch kein passender Vorschlag'}</h3>${picks.map((a,i)=>`<article class="activity-guide-pick"><span class="section-kicker">${i?'Eine Alternative':'Mein Vorschlag'}</span><h4>${escape(a.title)}</h4><p>Richtdauer aus deiner Sammlung: ${a.minutes} Minuten. ${settingOf(a)==='outside'||settingOf(a)==='both'&&this.answers.place!=='inside'?'Wetter und Bedingungen vor Ort prüfen.':'Öffnungszeiten oder Verfügbarkeit bei Bedarf prüfen.'}</p><p>${escape(a.next)}</p><button type="button" data-action="routinePlan" data-id="${escape(a.id)}">Einplanen</button></article>`).join('')||'<p>Deine gespeicherten Aktivitäten passen nicht zu diesen Antworten. Geh zurück und ändere Zeit, Energie, Ort oder Aufwand, oder ergänze eine eigene kurze Aktivität.</p>'}${picks.length?'<p class="planner-small">Die Richtdauer ist geschätzt; Anfahrt und Vorbereitung können dazukommen. Du musst dich nicht festlegen: Wenn die Aktivität es erlaubt, probiere sie kurz aus und höre wieder auf. Hinterher reicht: Hat es mir gutgetan?</p>':''}${navigation}<button type="button" data-action="guideStart">Neu beginnen</button></section>`;
+    return `<section class="activity-guide" aria-label="Dein Vorschlag"><h3 tabindex="-1" data-guide-focus>${picks.length?'Ein guter Anfang':'Noch kein passender Vorschlag'}</h3>${picks.map((a,i)=>`<article class="activity-guide-pick"><span class="section-kicker">${i?'Eine Alternative':'Mein Vorschlag'}</span><h4>${escape(a.title)}</h4><p>Richtdauer aus deiner Sammlung: ${a.minutes} Minuten. ${settingOf(a)==='outside'||settingOf(a)==='both'&&this.answers.place!=='inside'?'Wetter und Bedingungen vor Ort prüfen.':'Öffnungszeiten oder Verfügbarkeit bei Bedarf prüfen.'}</p><p>${escape(a.next)}</p>${stockIdeaMarkup(a,stock,this.answers,stockSources().decisions)}<button type="button" data-action="routinePlan" data-id="${escape(a.id)}">Einplanen</button></article>`).join('')||'<p>Deine gespeicherten Aktivitäten passen nicht zu diesen Antworten. Geh zurück und ändere Zeit, Energie, Ort oder Aufwand, oder ergänze eine eigene kurze Aktivität.</p>'}${picks.length?'<p class="planner-small">Die Richtdauer ist geschätzt; Anfahrt und Vorbereitung können dazukommen. Du musst dich nicht festlegen: Wenn die Aktivität es erlaubt, probiere sie kurz aus und höre wieder auf. Hinterher reicht: Hat es mir gutgetan?</p>':''}${navigation}<button type="button" data-action="guideStart">Neu beginnen</button></section>`;
   }
 }
+
 

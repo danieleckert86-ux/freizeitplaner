@@ -1,3 +1,4 @@
+import {publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
 import { initPlanner } from './planner';
 import { neutralDescription } from './wording';
 import { categoryIcon } from './category-icons';
@@ -186,9 +187,11 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   }), 'stream');
 }
 
+let stockRatingsAvailable=false;
 async function loadRecommendationRatings() {
   const { data, error } = await supabase.from('recommendation_ratings').select('suggestion_id,rating');
-  if (error) return new Map<string, number>();
+  if (error) {stockRatingsAvailable=false;return new Map<string, number>();}
+  stockRatingsAvailable=true;
   return new Map((data ?? []).map(row => [row.suggestion_id as string, row.rating as number]));
 }
 
@@ -212,6 +215,7 @@ function wireRatingButtons(ratings: Map<string, number>) {
         });
         if (!error) ratings.set(id, value);
       }
+      publishStockRatings(ratings);
       document.querySelectorAll<HTMLButtonElement>('[data-rate][data-id="' + CSS.escape(id) + '"]').forEach(b =>
         b.classList.toggle('active', ratings.get(id) === Number(b.dataset.rate))
       );
@@ -229,6 +233,7 @@ async function loadHiddenRecommendationIds() {
 }
 
 async function loadRecommendationData() {
+  publishStockDecisions(new Set(),new Map(),false);
   let data: RecommendationData | undefined;
   try {
     const native=await fetch(import.meta.env.VITE_MORNING_CATALOG_URL || 'https://fahrrad-zur-arbei.vercel.app/api/leisure/catalog', {cache:'no-store'});
@@ -254,6 +259,7 @@ async function loadRecommendationData() {
 
   if (data.schemaVersion !== 2) throw new Error('Unsupported recommendation schema');
   const [hiddenIds, ratings] = await Promise.all([loadHiddenRecommendationIds(), loadRecommendationRatings()]);
+  publishStockDecisions(hiddenIds,ratings,stockRatingsAvailable);
   renderRecommendationData(data, hiddenIds);
   wireRatingButtons(ratings);
   document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));
@@ -716,6 +722,7 @@ function showFavoriteMessage(text: string) {
 }
 
 function renderFavorites() {
+  publishStockFavorites(favorites);
   if (!favoritesList || !favoritesEmpty) return;
   favoritesList.innerHTML = '';
 
@@ -774,6 +781,7 @@ function renderFavorites() {
       try {
         const { error } = await supabase.from('favorites').delete().eq('id', id);
         if (error) throw error;
+      blockStockSource(id);
 
         favorites = favorites.filter(item => item.id !== id);
         renderFavorites();
@@ -1024,4 +1032,5 @@ document.querySelector<HTMLSelectElement>('#eventPeriod')?.addEventListener('cha
   document.querySelector<HTMLElement>('#eventsEmpty')!.hidden = visible > 0;
 });
 void bootstrap();
+
 

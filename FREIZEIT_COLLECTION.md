@@ -119,3 +119,5 @@ Unsere Ideen: editierbare Standardaktivitäten, konkrete Orte/Touren, dauerhafte
 Nur gemerkt filtert jeden Bereich. Sterne an eigenen Standardaktivitäten und Vorratsorten werden optional im bestehenden privaten Payload gespeichert. Keine Migration, keine Rücksetzung. Die Auswahlhilfe nutzt weiterhin die vorhandenen Aktivitäts-/Vorratsregeln; Aktuelle Angebote ansehen führt von ihrem Ergebnis zum aktuellen Angebot. Für aktuelle Events werden keine unbekannten Dauer-, Zeit- oder Machbarkeitsangaben erfunden.
 
 Validierung: 40 Tests, TypeScript und Produktionsbuild erfolgreich. Zwei-Bereiche-Navigation, Filter, echte Kategorien und Dialoge werden zusätzlich auf der veröffentlichten Oberfläche geprüft. Keine Recherche, Mail oder Rücksetzung.
+
+Liveprüfung: beide Reiter, Veranstaltungs-/Kino-/Streamingauswahl, Nur gemerkt, Erhalt der vier bisherigen Favoriten, Detailfenster und Abbrechen erfolgreich. Keine produktive Sternänderung oder Speicherung zum Test. Leere Sternkategorien entfallen im Filter; gespeichertes Kinoprogramm wird ausdrücklich als gespeicherter Stand bezeichnet.

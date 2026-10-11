@@ -155,7 +155,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       '<article' + tourAttributes(item) + ' class="tour-card filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '">' +
       '<div class="tour-top"><span class="tour-category">' + categoryIcon(item.category, item.label || item.title) + dataEscape(item.label) + '</span><span class="meta-label">' + dataEscape(item.metaLabel) + '</span></div>' +
       '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div><h4>' + dataEscape(item.title) + '</h4>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' +
-      '<p class="collection-condition">' + dataEscape(item.conditionsStatus||'Vor dem Ausflug Wetter, Sperrungen und Routenverlauf prüfen. Keine aktuelle Freigabe.') + '</p><div class="tour-meta">' + (item.meta ?? []).map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +
+      '<p class="collection-condition">' + dataEscape(item.conditionsStatus||'Vor dem Ausflug Wetter, Sperrungen und Routenverlauf prüfen. Keine aktuelle Freigabe.') + '</p><div class="tour-meta">' + (item.meta ?? []).map(v => '<span' + (/Anfahrt/i.test(v)?' class="travel-detail"':'') + '>' + dataEscape(v) + '</span>').join('') + '</div>' +
       '<div class="item-actions">' + sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, item.category) + stockCopyMarkup({id:item.favorite.id,title:item.title,category:item.favorite.categoryLabel,description:item.description,url:item.favorite.url},item.meta??[],item) + '</div></article>'
     ).join('');
   };
@@ -932,7 +932,7 @@ function openDetails(item: HTMLElement) {
   detailBadge.textContent = badge;
   detailMeta.textContent = day;
   detailDescription.textContent = neutralDescription(description);
-  detailFacts.innerHTML = factsSource ? factsSource.outerHTML : '';
+  detailFacts.innerHTML = (item.querySelector<HTMLElement>('.card-place')?.outerHTML ?? '') + (factsSource ? factsSource.outerHTML : '') + (item.querySelector<HTMLElement>('.collection-condition')?.outerHTML ?? '');
 
   if (source) {
     detailSource.href = source.href;

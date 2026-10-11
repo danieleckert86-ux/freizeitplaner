@@ -131,3 +131,6 @@ Validierung: 42 Tests einschließlich Original-Snapshot, sicherer Links im Dialo
 
 ## Einheitliche Kartenaktionen · 11.10.2026
 Touren, Restaurants/Cafés und Events zeigen eine Hauptaktion plus Mehr in einer stabilen Zeile. Quelle, Details, Ausblenden und Bewertungen stehen gemeinsam im Mehr-Menü. Verschieben der vorhandenen Bedienelemente erhält deren Listener; keine Änderung an Speicher-, Bewertungs- oder Importfunktion. Schmale Ansichten dürfen den Hauptaktionstext innerhalb des Buttons umbrechen.
+
+## Kompakte Vorschaukarten · 11.10.2026
+Touren und Gastronomie zeigen Titel, Ort, Passung und Tour-Eckdaten sowie Hauptaktion/Mehr. Beschreibungen und ausführliche Prüfhinweise bleiben im Details-Popup erhalten. Anfahrt entfällt in der Übersicht. Automatisch gleich hohe Rasterzeilen sind entfernt, damit lange Karten keine Leerflächen in anderen Zeilen erzeugen. Gespeicherte Originaldaten und Übernahme bleiben unverändert.

@@ -38,3 +38,16 @@
 .collection-mode .card-more-panel .info-link{padding:8px 12px!important;font-size:12px!important;min-height:40px!important;display:inline-flex!important;align-items:center!important}
 .collection-mode .card-more-panel .rating-actions{display:flex!important;gap:6px!important;margin-left:auto!important}
 .collection-mode .card-more-panel .rating-btn{min-width:40px!important;min-height:40px!important}
+
+/* Compact previews; complete descriptions and checks remain in the details dialog. */
+.collection-mode .tour-list,.collection-mode .lifestyle-grid{grid-auto-rows:auto!important;align-items:start!important}
+.collection-mode .tour-card,.collection-mode .lifestyle-card{height:auto!important;min-height:0!important;padding:14px!important}
+.collection-mode .tour-card>p,.collection-mode .lifestyle-card>p{display:none!important}
+.collection-mode .tour-card .card-place small,.collection-mode .tour-card .tour-meta .travel-detail{display:none!important}
+.collection-mode #restaurantList .lifestyle-meta{display:none!important}
+.collection-mode .tour-card h4,.collection-mode .lifestyle-card h3{font-size:17px!important;line-height:1.3!important;margin:6px 0!important}
+.collection-mode .tour-top,.collection-mode .lifestyle-top{margin-bottom:6px!important}
+.collection-mode .tour-card .collection-fit{align-self:flex-start;margin:0 0 4px;padding:3px 8px;font-size:10px}
+.collection-mode .tour-card .tour-meta{margin:4px 0 0!important;gap:6px!important}
+.collection-mode .tour-card .item-actions[data-quiet],.collection-mode .lifestyle-card .lifestyle-actions[data-quiet]{margin-top:10px!important;padding-top:10px!important}
+@media(max-width:680px){.collection-mode .tour-list,.collection-mode .lifestyle-grid{gap:10px!important}.collection-mode .tour-card,.collection-mode .lifestyle-card{border-radius:14px!important}}

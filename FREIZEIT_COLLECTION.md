@@ -128,3 +128,6 @@ Wander-, Fahrrad- und Restaurant-/Café-Recherchekarten bieten In Orte & Touren 
 Nutzerpräzisierung: Übernehmen ersetzt Merken auf Touren/Gastronomie-Karten. Merken bleibt für zeitabhängige Angebote. Vollständiger öffentlicher Vorschlag wird als privater Quellen-Snapshot erhalten; Beschreibung, Metadaten, Bedingungen und sicherer Original-Link sind im Detaildialog sichtbar, die Listenzeile bleibt kurz. Bei gleichnamigem vorhandenem Ort werden eigene Angaben erhalten, nur unbekannte Werte ergänzt und die Originalinformationen zusätzlich gespeichert. Keine Datenbankmigration.
 
 Validierung: 42 Tests einschließlich Original-Snapshot, sicherer Links im Dialog, expliziter Tourdaten und Duplikaterkennung; TypeScript und Produktionsbuild erfolgreich. Keine produktiven Schreibtests oder Recherche.
+
+## Einheitliche Kartenaktionen · 11.10.2026
+Touren, Restaurants/Cafés und Events zeigen eine Hauptaktion plus Mehr in einer stabilen Zeile. Quelle, Details, Ausblenden und Bewertungen stehen gemeinsam im Mehr-Menü. Verschieben der vorhandenen Bedienelemente erhält deren Listener; keine Änderung an Speicher-, Bewertungs- oder Importfunktion. Schmale Ansichten dürfen den Hauptaktionstext innerhalb des Buttons umbrechen.

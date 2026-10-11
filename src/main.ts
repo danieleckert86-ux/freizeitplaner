@@ -924,7 +924,7 @@ function openDetails(item: HTMLElement) {
   const day =
     item.querySelector<HTMLElement>('.day, .idea-meta, time')?.textContent?.trim() ?? '';
 
-  const factsSource = item.querySelector<HTMLElement>('.facts, .stats, .tour-meta');
+  const factsSource = item.querySelector<HTMLElement>('.facts, .stats, .tour-meta, .lifestyle-meta');
   const source = item.querySelector<HTMLAnchorElement>('a.info-link');
   const favorite = item.querySelector<HTMLButtonElement>('[data-favorite]');
 
@@ -951,8 +951,8 @@ function openDetails(item: HTMLElement) {
 }
 
 function enhanceDetails() {
-  document.querySelectorAll<HTMLElement>('.card, .idea-card, .tour-card, .discovery-item').forEach(item => {
-    const actions = item.querySelector<HTMLElement>('.item-actions');
+  document.querySelectorAll<HTMLElement>('.card, .idea-card, .tour-card, .discovery-item, .lifestyle-card').forEach(item => {
+    const actions = item.querySelector<HTMLElement>('.item-actions,.lifestyle-actions');
     if (!actions || actions.querySelector('[data-details]')) return;
 
     const button = document.createElement('button');
@@ -995,19 +995,19 @@ void loadWeather();
 
 function quietCardActions() {
   document.querySelectorAll<HTMLElement>('.item-actions,.lifestyle-actions').forEach(actions => {
-    if (actions.dataset.quiet) return;
-    const favorite = actions.querySelector('[data-favorite]');
-    const plan = actions.querySelector('[data-personal-action]');
-    if (!favorite) return;
-    actions.dataset.quiet = 'true';
-    const more = document.createElement('details'); more.className = 'card-more';
-    const summary = document.createElement('summary'); summary.textContent = 'Mehr';
-    summary.setAttribute('aria-label','Weitere Aktionen für ' + (favorite.getAttribute('data-title') || 'diese Idee'));
-    const panel = document.createElement('div'); panel.className = 'card-more-panel';
-    more.append(summary, panel);
-    Array.from(actions.children).forEach(child => {if (child !== favorite && child !== plan) panel.append(child);});
-    if(plan)plan.remove();
-    actions.append(favorite, more);
+    const primary=actions.querySelector<HTMLElement>('[data-stock-copy],[data-favorite]');
+    if(!primary)return;
+    let more=actions.querySelector<HTMLDetailsElement>(':scope > .card-more');
+    if(!more){
+      more=document.createElement('details');more.className='card-more';
+      const summary=document.createElement('summary');summary.textContent='Mehr';
+      summary.setAttribute('aria-label','Weitere Aktionen für '+(primary.dataset.title||'diese Idee'));
+      const panel=document.createElement('div');panel.className='card-more-panel';more.append(summary,panel);
+    }
+    const panel=more.querySelector<HTMLElement>('.card-more-panel')!;
+    actions.querySelectorAll<HTMLElement>('.info-link,.rating-actions,[data-hide-card],[data-details]').forEach(child=>{if(child.parentElement!==panel)panel.append(child);});
+    if(actions.children.length!==2||actions.children[0]!==primary||actions.children[1]!==more)actions.replaceChildren(primary,more);
+    actions.dataset.quiet='true';
   });
 }
 new MutationObserver(quietCardActions).observe(document.querySelector('#app')!, {childList:true,subtree:true});

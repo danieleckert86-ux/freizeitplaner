@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --experimental-strip-types --test tests/collection.test.mjs"
+    "test": "node --experimental-strip-types --test tests/collection.test.mjs tests/known-activities.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4"

@@ -286,13 +286,13 @@ async function bootstrap() {
     });
     viewButtons.filter(button => !button.hasAttribute('data-main-view')).forEach(button => {const active = button.dataset.view === view; button.classList.toggle('active', active); button.setAttribute('aria-pressed', String(active));});
     viewSections.forEach(section => {
-      const active = section.dataset.appView === view || (view==='collection'&&['outdoor','restaurants','movies','planning'].includes(section.dataset.appView||''));
+      const active = section.dataset.appView === view || (view==='known'&&section.dataset.appView==='planning') || (view==='collection'&&['outdoor','restaurants','movies'].includes(section.dataset.appView||''));
       section.hidden = !active;
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   viewButtons.forEach(button => button.addEventListener('click', () => setAppView(button.dataset.view ?? 'weekend')));
-  setAppView(location.hash==='#touren'?'collection':location.hash==='#gemerkt'?'favorites':'events');
+  setAppView(location.hash==='#bekanntes'?'known':location.hash==='#touren'?'collection':location.hash==='#gemerkt'?'favorites':'events');
 
 const favoriteCategoryButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.favorite-category-filter'));
 const favoritesList = document.querySelector<HTMLElement>('#favoritesList');

@@ -9,8 +9,8 @@ const activity=(title,changes={})=>({id:'routine',title,minutes:60,energy:'low',
 const decisions=(changes={})=>({ready:true,hidden:new Set(),ratings:new Map(),...changes});
 
 test('stock kinds link short/long edited routines and everyday places without treating all movement as a tour',()=>{
- assert.equal(stockKinds.length,9);
- for(const [title,minutes,kind] of [['Eine kleine Radtour',90,'bike-short'],['Eine Große Radtour',400,'bike-long'],['Wanderung kurz',240,'hike-short'],['Eine große Wanderung',400,'hike-long'],['Spaziergang',45,'walk'],['Café besuchen',60,'cafe'],['Essen gehen',90,'restaurant']])assert.equal(kindForActivity(activity(title,{minutes,mood:kind==='cafe'||kind==='restaurant'?'food':'movement'})),kind);
+ assert.equal(stockKinds.length,7);
+ for(const [title,minutes,kind] of [['Eine kleine Radtour',90,'bike'],['Eine Große Radtour',400,'bike'],['Wanderung kurz',240,'hike'],['Eine große Wanderung',400,'hike'],['Spaziergang',45,'walk'],['Café besuchen',60,'cafe'],['Essen gehen',90,'restaurant']])assert.equal(kindForActivity(activity(title,{minutes,mood:kind==='cafe'||kind==='restaurant'?'food':'movement'})),kind);
  assert.equal(kindForActivity(activity('Schwimmen')),'swim');
  assert.equal(kindForActivity(activity('Biergarten besuchen',{mood:'food'})),'beer-garden');
  assert.equal(kindForActivity(activity('Radtour',{activityCategory:'culture'})),null);
@@ -18,7 +18,7 @@ test('stock kinds link short/long edited routines and everyday places without tr
 test('favorite imports are explicit drafts with unknown timings and no verification; concerts are not stock',()=>{
  const f={suggestionId:'saved',title:'Meine Tour',category:'Wandern',description:'Gespeicherte Beschreibung',url:'https://example.org/source'};
  const before=JSON.stringify(f),draft=draftFromFavorite(f,'new-id');
- assert.equal(draft.kind,'hike-short');assert.equal(draft.minutes,null);assert.equal(draft.travelMinutes,null);assert.equal(draft.sourceId,'saved');assert.ok(validStockItem(draft));
+ assert.equal(draft.kind,'hike');assert.equal(draft.minutes,null);assert.equal(draft.travelMinutes,null);assert.equal(draft.sourceId,'saved');assert.ok(validStockItem(draft));
  assert.equal(JSON.stringify(f),before);assert.ok(!('verifiedAt' in draft));
  assert.equal(kindForFavorite({...f,category:'Musik'}),null);assert.equal(draftFromFavorite({...f,category:'Musik'},'ignored'),null);
  assert.equal(kindForFavorite({...f,title:'Café Flora',category:'Restaurants'}),'cafe');
@@ -69,7 +69,7 @@ test('stock groups no longer display Maps-list links',()=>{
  const html=stockMarkup([],null,true,false,'');
  assert.ok(!html.includes('Deine Maps-Liste öffnen'));
  for(const url of Object.values(stockLists))assert.ok(!html.includes(url));
- assert.equal((html.match(/class="stock-count">0/g)||[]).length,9);
+ assert.equal((html.match(/class="stock-count">0/g)||[]).length,7);
 });
 
 test('Maps imports contain 108 distinct editable places with unknown timings and no visible links',()=>{
@@ -171,4 +171,19 @@ test('ratings are only editable inside details and do not replace favorite state
  assert.equal((dialog.match(/data-stock-action="rate"/g)||[]).length,6);
  assert.match(dialog,/4 von 5 Sternen/);assert.match(dialog,/Bewertung gespeichert/);
  assert.equal(row.favorite,true);
+});
+
+test('short and long legacy tours share one category without changing stored details',()=>{
+ const rows=[idea('short',{kind:'hike-short',minutes:90,rating:4}),idea('long',{kind:'hike-long',minutes:300,note:'Historische Notiz'})];
+ const before=JSON.stringify(rows);assert.ok(rows.every(validStockItem));const html=stockMarkup(rows,null,true,false,'');
+ assert.equal((html.match(/data-stock-category="hike"/g)||[]).length,1);assert.match(html,/Wanderungen/);assert.ok(!html.includes('Wanderung kurz')&&!html.includes('Wanderung lang'));assert.equal(JSON.stringify(rows),before);
+ assert.equal(matchingStock(activity('Wanderung'),rows,{...emptyGuideAnswers(),minutes:180},decisions())[0].id,'short');
+});
+test('permanent places show no individual duration while routes retain it and old values survive',()=>{
+ const pool=idea('pool',{kind:'swim',minutes:90}),tour=idea('tour',{kind:'bike',minutes:120});
+ assert.ok(!stockMarkup([pool],null,true,false,'').includes('90 Min.'));
+ assert.ok(!stockMarkup([pool],null,true,false,'',pool.id).includes('90 Min.'));
+ assert.match(stockMarkup([pool],pool,true,false,''),/data-stock-duration hidden/);
+ assert.match(stockMarkup([tour],null,true,false,''),/120 Min\./);
+ assert.equal(pool.minutes,90);
 });

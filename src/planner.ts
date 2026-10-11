@@ -1,5 +1,5 @@
 import {withMapsStock} from './maps-stock';
-import {withStockRating,stockFromSuggestion,existingStockSuggestion,type StockFavorite,stockMarkup,stockSources,stockKinds,validStockItem,draftFromFavorite, type StockItem} from './activity-stock';
+import {placeOnlyKind,withStockRating,stockFromSuggestion,existingStockSuggestion,type StockFavorite,stockMarkup,stockSources,stockKinds,validStockItem,draftFromFavorite, type StockItem} from './activity-stock';
 import './planner.css';
 import {withKnownActivities, type KnownActivity} from './known-activities';
 import {activityCategories,activitySettings,categoryOf,settingOf,matchesSetting,legacyMood,validActivityProperties,energyLabels,effortLabels, type ActivityCategory, type ActivitySetting} from './activity-properties';
@@ -559,11 +559,13 @@ export function initPlanner(database: SupabaseClient) {
     stockHost.querySelectorAll<HTMLDetailsElement>('.stock-category').forEach(x=>{x.open=openGroups.has(x.dataset.stockCategory);});
     const dialog=stockHost.querySelector<HTMLDialogElement>('#stockDialog');
     if(dialog){dialog.showModal();dialog.addEventListener('cancel',ev=>{ev.preventDefault();if(saving)return;stockDraft=null;stockView=null;renderStock();});}
+    const kindSelect=stockHost.querySelector<HTMLSelectElement>('#stockForm select[name=kind]');
+    kindSelect?.addEventListener('change',()=>{const durationLabel=stockHost.querySelector<HTMLElement>('[data-stock-duration]');if(durationLabel)durationLabel.hidden=placeOnlyKind(kindSelect.value);});
     stockHost.querySelector<HTMLFormElement>('#stockForm')?.addEventListener('submit',async ev=>{
       ev.preventDefault();if(!stockDraft||!loaded||saving)return;
       const d=new FormData(ev.currentTarget as HTMLFormElement);
       const number=(key:string)=>String(d.get(key)||'').trim()===''?null:Number(d.get(key));
-      const row={...stockDraft,unavailable:d.has('unavailable'),title:String(d.get('title')).trim(),kind:String(d.get('kind')),url:String(d.get('url')).trim(),minutes:number('minutes'),distanceKm:number('distanceKm'),elevationM:number('elevationM'),setting:String(d.get('setting')),energy:String(d.get('energy')),effort:String(d.get('effort')),note:String(d.get('note')).trim()};
+      const row={...stockDraft,unavailable:d.has('unavailable'),title:String(d.get('title')).trim(),kind:String(d.get('kind')),url:String(d.get('url')).trim(),minutes:placeOnlyKind(String(d.get('kind')))?stockDraft.minutes:number('minutes'),distanceKm:number('distanceKm'),elevationM:number('elevationM'),setting:String(d.get('setting')),energy:String(d.get('energy')),effort:String(d.get('effort')),note:String(d.get('note')).trim()};
       if(!validStockItem(row)){stockMessage='Bitte gültige Angaben eingeben. Unbekannte Werte dürfen leer bleiben.';stockHost.querySelector<HTMLElement>('.stock-form-message')!.textContent=stockMessage;return;}
       stockDraft=row;
       if(await mutate(()=>{const list=state.activityStock??[];const i=list.findIndex(a=>a.id===row.id);if(i<0)list.push(row);else list[i]=row;state.activityStock=list;},'Vorratsidee gespeichert.')){stockDraft=null;stockMessage='Vorratsidee gespeichert. Auf allen Geräten verfügbar.';}

@@ -146,3 +146,6 @@ Orte & Touren haben optional `rating: 1..5` im bestehenden privaten Sammlungspay
 
 ## Vormerken nur für aktuelle Angebote · 11.10.2026
 Orte & Touren und Standardaktivitäten zeigen keinen Vormerk-Stern mehr; der Vormerkfilter erscheint nur unter Aktuell. Gespeicherte frühere Favorite-Felder bleiben erhalten, filtern die dauerhafte Sammlung aber nicht. Die persönliche Bewertung mit 1–5 Sternen im Details-Popup bleibt unverändert.
+
+## Gemeinsame Tourkategorien und Dauer · 11.10.2026
+Wanderungen und Fahrradtouren haben jeweils eine gemeinsame Kategorie. Alte Kurz-/Lang-Kennungen werden beim Lesen derselben Gruppe zugeordnet und bleiben gültig, ohne Daten umzuschreiben. Jede Tour behält Dauer, Details und Sterne. Schwimmbäder, Cafés, Restaurants und Biergärten zeigen keine Ortsdauer und kein Dauerfeld im Bearbeiten; frühere Werte bleiben erhalten. Die Auswahl verwendet hier die gepflegte Dauer der Standardaktivität. Individuelle Tourdauer bleibt ein Auswahlkriterium.

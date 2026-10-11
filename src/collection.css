@@ -65,3 +65,4 @@
 /* Permanent collection rows need only their title and details action. */
 .collection-mode .stock-row,.collection-mode #personalPlanner .known-row{grid-template-columns:minmax(0,1fr) auto!important}
 .finder-toolbar label[hidden]{display:none!important}
+.stock-dialog [data-stock-duration][hidden]{display:none!important}

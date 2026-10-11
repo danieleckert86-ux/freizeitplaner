@@ -140,3 +140,35 @@ test('import retains the original recommendation and exposes safe links only ins
  const detail=stockMarkup([row],null,true,false,'',row.id);assert.ok(detail.includes('Vollständige Beschreibung'));assert.ok(detail.includes('Sperren ungeprüft'));assert.ok(detail.includes('href="https://example.com/tour"'));
  const edit=JSON.parse(JSON.stringify({...row,title:'Mein Titel',note:'Eigene Notiz'}));assert.equal(edit.sourceDetails[0].otherConfirmedFact,'bleibt erhalten');
 });
+
+import {withStockRating} from '../src/activity-stock.ts';
+test('star ratings validate 1–5, clear explicitly and preserve complete imported data',()=>{
+ const original=idea('rated',{favorite:true,sourceDetails:[{description:'Beleg',checkedAt:'2026-10-10'}],importedSourceIds:['old'],note:'Eigene Notiz'});
+ const before=JSON.stringify(original);
+ for(let n=1;n<=5;n++){const rated=withStockRating(original,n);assert.ok(validStockItem(rated));assert.equal(JSON.parse(JSON.stringify(rated)).rating,n);assert.deepEqual(withStockRating(rated,0),original);}
+ for(const rating of [-1,6,2.5,NaN])assert.throws(()=>withStockRating(original,rating));
+ for(const rating of [null,0,6,'5',2.5])assert.equal(validStockItem({...original,rating}),false);
+ assert.equal(JSON.stringify(original),before);
+});
+test('personal stars prefer matching places while unrated and three stars remain neutral',()=>{
+ const a=activity('Spaziergang');const answers={...emptyGuideAnswers(),minutes:60};
+ assert.equal(matchingStock(a,[idea('a'),idea('z',{rating:5})],answers,decisions())[0].id,'z');
+ assert.equal(matchingStock(a,[idea('a'),idea('z',{rating:3})],answers,decisions())[0].id,'a');
+ assert.equal(matchingStock(a,[idea('a',{rating:1}),idea('z')],answers,decisions())[0].id,'z');
+ const tooLong=idea('long',{rating:5,minutes:61}),closed=idea('closed',{rating:5,unavailable:true}),hidden=idea('hidden',{rating:5,sourceId:'hidden'});
+ assert.equal(matchingStock(a,[tooLong,closed,hidden,idea('okay')],answers,decisions({hidden:new Set(['hidden'])}))[0].id,'okay');
+});
+test('rated pools use the standard swim duration without inventing a duration for the place',()=>{
+ const a=activity('Schwimmen',{minutes:90,outdoor:false});const place=idea('pool',{kind:'swim',minutes:null,setting:'inside',rating:5});
+ assert.equal(matchingStock(a,[place],{...emptyGuideAnswers(),minutes:180,place:'inside'},decisions())[0].id,'pool');
+ assert.deepEqual(matchingStock(a,[place],{...emptyGuideAnswers(),minutes:60},decisions()),[]);
+ assert.equal(place.minutes,null);
+});
+test('ratings are only editable inside details and do not replace favorite state',()=>{
+ const row=idea('rated',{rating:4,favorite:true});
+ assert.ok(!stockMarkup([row],null,true,false,'').includes('data-stock-action="rate"'));
+ const dialog=stockMarkup([row],null,true,false,'Bewertung gespeichert.',row.id);
+ assert.equal((dialog.match(/data-stock-action="rate"/g)||[]).length,6);
+ assert.match(dialog,/4 von 5 Sternen/);assert.match(dialog,/Bewertung gespeichert/);
+ assert.equal(row.favorite,true);
+});

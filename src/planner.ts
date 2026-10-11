@@ -1,5 +1,5 @@
 import {withMapsStock} from './maps-stock';
-import {stockFromSuggestion,existingStockSuggestion,type StockFavorite,stockMarkup,stockSources,stockKinds,validStockItem,draftFromFavorite, type StockItem} from './activity-stock';
+import {withStockRating,stockFromSuggestion,existingStockSuggestion,type StockFavorite,stockMarkup,stockSources,stockKinds,validStockItem,draftFromFavorite, type StockItem} from './activity-stock';
 import './planner.css';
 import {withKnownActivities, type KnownActivity} from './known-activities';
 import {activityCategories,activitySettings,categoryOf,settingOf,matchesSetting,legacyMood,validActivityProperties,energyLabels,effortLabels, type ActivityCategory, type ActivitySetting} from './activity-properties';
@@ -580,6 +580,7 @@ export function initPlanner(database: SupabaseClient) {
     if(action==='new')stockDraft={id:crypto.randomUUID(),title:'',kind:stockKinds.find(([kind])=>kind===b.dataset.stockKind)?.[0]??'walk',url:'',minutes:null,travelMinutes:null,distanceKm:null,elevationM:null,setting:'outside',energy:'low',effort:'spontaneous',note:''};
     if(action==='import'){const sources=stockSources();const a=sources.decisions.ready?sources.favorites.find(x=>x.suggestionId===id&&!sources.decisions.hidden.has(x.suggestionId)&&(sources.decisions.ratings.get(x.suggestionId)??0)>=0):null;if(a)stockDraft=draftFromFavorite(a,crypto.randomUUID());}
     const row=(state.activityStock??[]).find(x=>x.id===id);
+    if(action==='rate'&&row){const rating=Number(b.dataset.stockRating);if(!Number.isInteger(rating)||rating<0||rating>5)return;const ok=await mutate(()=>{state.activityStock=state.activityStock?.map(x=>x.id===id?withStockRating(x,rating):x);},rating?'Bewertung gespeichert. Auf allen Geräten verfügbar.':'Bewertung entfernt.');stockMessage=message;if(ok)stockView=id??null;renderStock();return;}
     if(action==='favorite'&&row){await mutate(()=>{row.favorite=!row.favorite;});return;}
     if(action==='details'&&row){stockDraft=null;stockView=row.id;}
     if(action==='edit'&&row){stockView=null;stockDraft={...row};}

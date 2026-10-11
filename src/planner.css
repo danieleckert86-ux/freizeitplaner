@@ -201,3 +201,9 @@ body:has(.planning-dialog[open]){overflow:hidden}
 .activity-guide-pick { padding: .8rem 0; border-bottom: 1px solid #cbd5e1; }
 .activity-guide-pick h4 { font-size: 1.1rem; margin: .5rem 0; }
 .activity-guide button:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+
+
+#personalPlanner .known-row { grid-template-columns: minmax(0,1fr) auto; }
+#personalPlanner .known-properties { margin: 3px 0 0; font-size: 11px; color: #627469; line-height: 1.5; overflow-wrap: anywhere; }
+.known-setting-filter { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin: .8rem 0; }
+.known-setting-filter select { max-width: 100%; }

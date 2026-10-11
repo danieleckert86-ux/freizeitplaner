@@ -4,6 +4,16 @@ import {chooseActivities,emptyGuideAnswers,ActivityGuide} from '../src/activity-
 import {knownActivities} from '../src/known-activities.ts';
 const activity=(id,overrides={})=>({id,title:id,minutes:30,energy:'low',mood:'culture',effort:'spontaneous',outdoor:false,next:'Selbst prüfen',...overrides});
 
+test('manual category overrides keywords and both is usable indoors in bad weather',()=>{
+ const yoga=activity('yoga',{title:'Yoga',mood:'movement',activityCategory:'movement',setting:'both',outdoor:true});
+ const outside=activity('walk',{title:'Spaziergang',outdoor:true,setting:'outside'});
+ const answers={...emptyGuideAnswers(),need:'move',place:'inside',minutes:60};
+ assert.deepEqual(chooseActivities([yoga,outside],answers).map(a=>a.id),['yoga']);
+ assert.deepEqual(chooseActivities([{...yoga,activityCategory:'culture'}],answers),[]);
+ const relaxation=activity('custom',{title:'Meine Pause',activityCategory:'relaxation',setting:'inside'});
+ assert.equal(chooseActivities([relaxation],{...answers,need:'rest'})[0].id,'custom');
+});
+
 test('organization is a hard maximum independent of energy and respects manual edits',()=>{
  const list=[activity('walk',{title:'Spaziergang',outdoor:true}),activity('kayak',{mood:'movement',energy:'high',outdoor:true,effort:'prepare',minutes:120}),activity('hike',{mood:'movement',energy:'high',outdoor:true,effort:'trip',minutes:240})];
  const answers={...emptyGuideAnswers(),need:'move',minutes:1440,place:'outside',energy:'high',effort:'spontaneous'};
@@ -87,3 +97,4 @@ test('five steps accept unknown, validate input, support back/reset, escape user
  guide.handle('guideStart');assert.match(guide.markup([]),/Frage 1 von 5/);
  guide.handle('guideClose');assert.match(guide.markup([]),/Hilf mir entscheiden/);
 });
+

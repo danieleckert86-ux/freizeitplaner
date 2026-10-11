@@ -1,5 +1,6 @@
 import './planner.css';
-import {withKnownActivities} from './known-activities';
+import {withKnownActivities, type KnownActivity} from './known-activities';
+import {activityCategories,activitySettings,categoryOf,settingOf,matchesSetting,legacyMood,validActivityProperties,energyLabels,effortLabels, type ActivityCategory, type ActivitySetting} from './activity-properties';
 import {ActivityGuide} from './activity-guide';
 import { neutralDescription } from './wording';
 import { categoryIcon } from './category-icons';
@@ -9,7 +10,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 type Appointment = { id: string; title: string; date: string; start: string; end: string; owner: string; uncertain: boolean; repeat: boolean; excludedDates?: string[]; googleEventId?: string; googleSeriesId?: string; googleAllDay?: boolean };
 type Slot = { id: string; date: string; start: string; end: string; energy: string; mood: string; effort: string };
 type Entry = { id: string; title: string; url: string; date: string; start: string; end: string; slotId: string; status: string; createdAt: string; proposedAt: string; organizedAt: string; doneAt: string; note: string; next: string; routineId?: string; source?: string };
-type Routine = { id: string; title: string; minutes: number; energy: string; mood: string; effort: string; outdoor: boolean; next: string };
+type Routine = KnownActivity;
 type Dinner = {id:string;date:string;recipeId:string;title:string};
 type State = { knownActivitiesVersion?:number; dinners?: Dinner[]; routines?: Routine[]; version: 1; appointments: Appointment[]; slots: Slot[]; entries: Entry[]; checks: string[]; googleDeleteSeries?: string[]; googleSync?: { lastSuccess: string; error?: string } };
 type Idea = { title: string; url: string; next: string; outdoor: boolean; minutes?: number; source?: string; routineId?: string; date?: string; start?: string; tourKind?: string; flexible?: boolean };
@@ -43,7 +44,7 @@ function validState(v: unknown): v is State {
   const s = v as State;
   const strings = (x: unknown, keys: string[]) => !!x && typeof x === 'object' && keys.every(k => typeof (x as Record<string, unknown>)[k] === 'string');
   return (s.knownActivitiesVersion === undefined || s.knownActivitiesVersion === 1) && s.version === 1 && Array.isArray(s.appointments) && Array.isArray(s.slots) && Array.isArray(s.entries) && Array.isArray(s.checks)
-    && (s.routines === undefined || Array.isArray(s.routines) && s.routines.every(r => strings(r,['id','title','energy','mood','effort','next']) && Number.isInteger(r.minutes) && r.minutes >= 5 && r.minutes <= 1440 && typeof r.outdoor === 'boolean' && ['low','medium','high'].includes(r.energy) && ['outdoor','movement','food','culture'].includes(r.mood) && ['spontaneous','prepare','trip'].includes(r.effort)))
+    && (s.routines === undefined || Array.isArray(s.routines) && s.routines.every(r => strings(r,['id','title','energy','mood','effort','next']) && Number.isInteger(r.minutes) && r.minutes >= 5 && r.minutes <= 1440 && typeof r.outdoor === 'boolean' && ['low','medium','high'].includes(r.energy) && ['outdoor','movement','food','culture'].includes(r.mood) && ['spontaneous','prepare','trip'].includes(r.effort) && validActivityProperties(r)))
     && (s.googleDeleteSeries === undefined || Array.isArray(s.googleDeleteSeries) && s.googleDeleteSeries.every(id => typeof id === 'string'))
     && (s.googleSync === undefined || !!s.googleSync && typeof s.googleSync.lastSuccess === 'string' && (!s.googleSync.lastSuccess || !isNaN(Date.parse(s.googleSync.lastSuccess))) && (s.googleSync.error === undefined || typeof s.googleSync.error === 'string'))
     && (s.dinners === undefined || Array.isArray(s.dinners) && s.dinners.every(d=>strings(d,['id','date','recipeId','title']) && validDate(d.date) && !!d.id && !!d.recipeId && !!d.title) && new Set(s.dinners.map(d=>d.date)).size===s.dinners.length && new Set(s.dinners.map(d=>d.id)).size===s.dinners.length)
@@ -80,6 +81,7 @@ export function initPlanner(database: SupabaseClient) {
   const activityGuide = new ActivityGuide();
   let editingRoutine = '';
   let routineFormOpen = false;
+  let routineSettingFilter: ActivitySetting | 'unknown' = 'unknown';
   let pendingIdea: Idea | null = null;
   let scheduleSlot = '';
   let calendarEdit: {kind:'entry'|'appointment'|'slot';id:string;date:string} | null = null;
@@ -359,16 +361,16 @@ export function initPlanner(database: SupabaseClient) {
   }
   const toolSummary = (title: string, _help: string, badge = '') => `<span class="tool-summary-copy"><strong>${e(title)}</strong></span>${badge?`<span class="tool-summary-badge">${e(badge)}</span>`:''}<span class="tool-summary-toggle" aria-hidden="true">+</span>`;
   function routinesMarkup() {
-    const routines=state.routines??[];const r=routines.find(x=>x.id===editingRoutine);
+    const allRoutines=state.routines??[];const routines=allRoutines.filter(a=>matchesSetting(a,routineSettingFilter));const r=allRoutines.find(x=>x.id===editingRoutine);
     const openCategories=new Set(Array.from(host?.querySelectorAll<HTMLDetailsElement>('.known-category[open]')??[]).map(x=>x.dataset.category));
-    const groups=[...moodOptions,...(routines.some(x=>!moodOptions.some(o=>o[0]===x.mood))?[['other','Weitere Ideen'] as [string,string]]:[])];
+    const groups=activityCategories;
     const categories=groups.map(([key,title])=>{
-      const items=routines.filter(x=>key==='other'?!moodOptions.some(o=>o[0]===x.mood):x.mood===key);
+      const items=routines.filter(x=>categoryOf(x)===key);
       if(!items.length)return '';
-      const icon=({outdoor:'🌿',movement:'🚲',food:'☕',culture:'🎭'} as Record<string,string>)[key]||'💡';
-      return `<details class="known-category" data-category="${e(key)}" ${openCategories.has(key)?'open':''}><summary><span>${icon} ${e(title)}</span><span class="known-count">${items.length}</span></summary><div class="known-list">${items.map(x=>`<article class="known-row"><h3>${e(x.title)}</h3><span class="known-duration">${x.minutes} Min.</span><details class="known-more"><summary aria-label="Mehr zu ${e(x.title)}">Mehr</summary><div class="routine-actions">${button('routinePlan','Einplanen',x.id)}${button('editRoutine','Bearbeiten',x.id)}${button('deleteRoutine','Löschen',x.id)}</div></details></article>`).join('')}</div></details>`;
+      const icon=({explore:'🌿',relaxation:'🧘',movement:'🚲',food:'☕',culture:'🎭'} as Record<string,string>)[key]||'💡';
+      return `<details class="known-category" data-category="${e(key)}" ${openCategories.has(key)?'open':''}><summary><span>${icon} ${e(title)}</span><span class="known-count">${items.length}</span></summary><div class="known-list">${items.map(x=>`<article class="known-row"><div class="known-copy"><h3>${e(x.title)}</h3><p class="known-properties">${x.minutes} Min. · Energie ${e(energyLabels[x.energy]||x.energy)} · ${e(effortLabels[x.effort]||x.effort)} · ${e(activitySettings.find(([id])=>id===settingOf(x))![1])}</p></div><details class="known-more"><summary aria-label="Mehr zu ${e(x.title)}">Mehr</summary><div class="routine-actions">${button('routinePlan','Einplanen',x.id)}${button('editRoutine','Bearbeiten',x.id)}${button('deleteRoutine','Löschen',x.id)}</div></details></article>`).join('')}</div></details>`;
     }).join('');
-    return `<section class="planner-box routines-box"><details id="routineLibrary" open><summary>${toolSummary('Bekanntes','',`${routines.length} Ideen`)}</summary>${activityGuide.markup(routines)}<div class="known-categories">${categories||'<p>Ergänze deine erste Aktivität.</p>'}</div><details id="routineSection" ${r || routineFormOpen?'open':''}><summary>${r?`„${e(r.title)}“ bearbeiten`:'+ Neue Aktivität ergänzen'}</summary><h3>${r?'Standardaktivität bearbeiten':'Eine Standardaktivität ergänzen'}</h3><form id="routineForm" class="planner-form"><label>Aktivität<input name="title" required maxlength="200" value="${e(r?.title||'')}" placeholder="Zum Beispiel: Am Lech spazieren"></label><label>Dauer in Minuten<input name="minutes" type="number" min="5" max="1440" required value="${r?.minutes||45}"></label><label>Kategorie<select name="mood">${options(moodOptions,r?.mood||'outdoor')}</select></label><label>Benötigte Energie<select name="energy">${options([['low','Niedrig'],['medium','Mittel'],['high','Hoch']],r?.energy||'medium')}</select></label><label>Organisationsaufwand<select name="effort">${options([['spontaneous','Direkt loslegen'],['prepare','Ein bisschen vorbereiten'],['trip','Auch etwas planen']],r?.effort||'prepare')}</select></label><label class="planner-check"><input name="outdoor" type="checkbox" ${r?.outdoor?'checked':''}>Draußen</label><label class="routine-next">Vorbereitung / nächster Schritt<input name="next" maxlength="500" value="${e(neutralDescription(r?.next||''))}" placeholder="Was musst du vorher klären?"></label><button class="planner-submit">${r?'Änderungen speichern':'Aktivität ergänzen'}</button>${button('cancelRoutine','Abbrechen')}</form></details></details></section>`;
+    return `<section class="planner-box routines-box"><details id="routineLibrary" open><summary>${toolSummary('Bekanntes','',`${allRoutines.length} Ideen`)}</summary>${activityGuide.markup(allRoutines)}<label class="known-setting-filter">Ort filtern<select id="routineSettingFilter">${options([['unknown','Alle Orte'],['inside','Drinnen möglich'],['outside','Draußen möglich']],routineSettingFilter)}</select></label><div class="known-categories">${categories||(allRoutines.length?'<p>Keine Aktivität passt zu diesem Ortsfilter.</p>':'<p>Ergänze deine erste Aktivität.</p>')}</div><details id="routineSection" ${r || routineFormOpen?'open':''}><summary>${r?`„${e(r.title)}“ bearbeiten`:'+ Neue Aktivität ergänzen'}</summary><h3>${r?'Standardaktivität bearbeiten':'Eine Standardaktivität ergänzen'}</h3><form id="routineForm" class="planner-form"><label>Aktivität<input name="title" required maxlength="200" value="${e(r?.title||'')}" placeholder="Zum Beispiel: Am Lech spazieren"></label><label>Dauer in Minuten<input name="minutes" type="number" min="5" max="1440" required value="${r?.minutes||45}"></label><label>Kategorie<select name="activityCategory">${options(activityCategories,r?categoryOf(r):'movement')}</select></label><label>Benötigte Energie<select name="energy">${options([['low','Niedrig'],['medium','Mittel'],['high','Hoch']],r?.energy||'medium')}</select></label><label>Organisationsaufwand<select name="effort">${options([['spontaneous','Direkt loslegen'],['prepare','Ein bisschen vorbereiten'],['trip','Auch etwas planen']],r?.effort||'prepare')}</select></label><label>Ort<select name="setting">${options(activitySettings,r?settingOf(r):'outside')}</select></label><label class="routine-next">Vorbereitung / nächster Schritt<input name="next" maxlength="500" value="${e(neutralDescription(r?.next||''))}" placeholder="Was musst du vorher klären?"></label><button class="planner-submit">${r?'Änderungen speichern':'Aktivität ergänzen'}</button>${button('cancelRoutine','Abbrechen')}</form></details></details></section>`;
   }
   function weeklyCheckMarkup() {
     if (!weeklyCheck) return '';
@@ -472,9 +474,10 @@ export function initPlanner(database: SupabaseClient) {
         state.entries.unshift({id:crypto.randomUUID(),title:idea.title,url:safeUrl(idea.url),date:candidate.date,start:candidate.start,end:candidate.end,slotId:candidate.id,status:'Idee gespeichert',createdAt:now,proposedAt:'',organizedAt:'',doneAt:'',note:'',next:idea.next,routineId:idea.routineId,source:idea.source});
       },'In deine Woche eingeplant. Nächster Schritt: konkret vorschlagen.')){pendingIdea=null;draft=null;draftReady=false;render();host.querySelector('.week-board')?.scrollIntoView({behavior:'smooth',block:'start'});}
     });
+    host.querySelector<HTMLSelectElement>('#routineSettingFilter')?.addEventListener('change',ev=>{routineSettingFilter=(ev.currentTarget as HTMLSelectElement).value as ActivitySetting|'unknown';render();host.querySelector<HTMLSelectElement>('#routineSettingFilter')?.focus();});
     host.querySelector<HTMLFormElement>('#routineForm')?.addEventListener('submit',async ev=>{
       ev.preventDefault();const d=new FormData(ev.currentTarget as HTMLFormElement);
-      const r:Routine={id:editingRoutine||crypto.randomUUID(),title:String(d.get('title')).trim(),minutes:Number(d.get('minutes')),energy:String(d.get('energy')),mood:String(d.get('mood')),effort:String(d.get('effort')),outdoor:d.has('outdoor'),next:String(d.get('next')).trim()||'Einen konkreten Zeitpunkt vorschlagen.'};
+      const r:Routine={id:editingRoutine||crypto.randomUUID(),title:String(d.get('title')).trim(),minutes:Number(d.get('minutes')),energy:String(d.get('energy')),activityCategory:String(d.get('activityCategory')) as ActivityCategory,setting:String(d.get('setting')) as ActivitySetting,mood:legacyMood(String(d.get('activityCategory')) as ActivityCategory),effort:String(d.get('effort')),outdoor:d.get('setting')!=='inside',next:String(d.get('next')).trim()||'Einen konkreten Zeitpunkt vorschlagen.'};
       if(!r.title)return;openSection='routines';
       if(await mutate(()=>{const routines=state.routines??[];const i=routines.findIndex(x=>x.id===r.id);if(i<0)routines.push(r);else routines[i]=r;state.routines=routines;},'Standardaktivität gespeichert. Auf allen Geräten verfügbar.')){editingRoutine='';routineFormOpen=false;}render();
     });
@@ -621,5 +624,6 @@ export function initPlanner(database: SupabaseClient) {
   const params=new URLSearchParams({latitude:'48.3705',longitude:'10.8978',daily:'precipitation_probability_max',timezone:'Europe/Berlin',forecast_days:'14'});
   fetch('https://api.open-meteo.com/v1/forecast?'+params).then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{if(data.daily?.time)rain=Object.fromEntries(data.daily.time.map((d:string,i:number)=>[d,data.daily.precipitation_probability_max[i]]));if(!host.contains(document.activeElement))render();}).catch(()=>{});
 }
+
 
 

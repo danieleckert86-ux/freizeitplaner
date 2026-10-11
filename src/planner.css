@@ -207,3 +207,6 @@ body:has(.planning-dialog[open]){overflow:hidden}
 #personalPlanner .known-properties { margin: 3px 0 0; font-size: 11px; color: #627469; line-height: 1.5; overflow-wrap: anywhere; }
 .known-setting-filter { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin: .8rem 0; }
 .known-setting-filter select { max-width: 100%; }
+
+
+.stock-groups details{margin:.6rem 0;border:1px solid #dce3ee;border-radius:10px;padding:.7rem}.stock-row{padding:.7rem 0;border-top:1px solid #dce3ee}.stock-row h3{font-size:1rem;margin:.3rem 0}.stock-row p{font-size:.85rem;overflow-wrap:anywhere}.stock-row button,.stock-candidate button{margin:.3rem;min-height:40px}.stock-candidate{display:flex;justify-content:space-between;align-items:center;gap:.6rem}.stock-guide-match{padding:.6rem;border:1px solid #cbd5e1;border-radius:8px;margin:.6rem 0}#activityStock .planner-form{display:flex;flex-wrap:wrap;gap:.7rem;margin:1rem 0}#activityStock label{display:flex;flex-direction:column;gap:.3rem}#activityStock input,#activityStock select,#activityStock textarea{max-width:100%;min-height:40px}#activityStock textarea{min-width:min(300px,100%)}

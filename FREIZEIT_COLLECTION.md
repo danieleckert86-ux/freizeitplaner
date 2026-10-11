@@ -35,33 +35,58 @@ Validierung: 11/11 Tests, npx tsc --noEmit und npm run build bestanden. Tests pr
 Bekanntes wird kompakt nach Draußen, Bewegung, Genuss und Kultur gruppiert. Kategorien sind zunächst zugeklappt; pro Idee stehen Titel, Richtdauer und Mehr-Menü in einer Zeile. Bearbeiten und Löschen verwenden unverändert die gemeinsame Speicherung.
 
 
-## Geführte Entscheidungshilfe (Modul 04, 11.10.2026)
 
-Im Reiter **Bekanntes** öffnet „Hilf mir entscheiden“ fünf kurze Fragen: Ruhe/Bewegung/etwas Schönes/offen, Zeitrahmen (genau bis 1 Stunde, bis 3 Stunden oder ganzer Tag), Energie niedrig/mittel/hoch/offen drinnen/draußen/offen und Organisationsaufwand. „Weiß ich nicht“ ist bei Bedürfnis, Energie, Ort und Aufwand möglich. Das Ergebnis zeigt einen Hauptvorschlag und höchstens eine andere Alternative, mit Zurück, Schließen und Neustart. Keine neue Recherche und kein KI-Aufruf.
+## Freizeitvorrat für Standardaktivitäten (11.10.2026, PR-Stand)
 
-`src/activity-guide.ts` verwendet ausschließlich die aktuell geladenen, bearbeitbaren Standardaktivitäten. Keine erneute Aussaat im Fragebogen: gelöschte Aktivitäten bleiben entfernt; geänderte Dauer und Draußen-Markierung werden berücksichtigt. Zeit und Ort sind harte Filter; niedrige Energie erlaubt nur Aktivitäten mit niedrigem gespeicherten Energiebedarf, mittlere Energie schließt hohen Bedarf aus. Passender Energiebedarf wird stärker gewichtet als wenig Vorbereitungsaufwand; hohe Energie bevorzugt zum Beispiel ein als hoch eingetragenes Kajak vor einem Spaziergang. Der Energiebedarf ist beim Ergänzen/Bearbeiten einer Aktivität einstellbar und eine subjektive Einordnung, keine aktuelle Sicherheitsprüfung.  Bewegung nutzt Kategorie/Bewegungsbegriffe, Ruhe nur niedrige Energie, spontane Vorbereitung und erkennbare ruhige Tätigkeiten. Innerhalb der passenden Menge bevorzugt die Auswahl wenig Aufwand; bei Gleichstand kurze Richtdauer und stabile ID. Die Alternative kommt möglichst aus einer anderen Kategorie. Dies ist eine einfache Entscheidungshilfe, keine medizinische Einschätzung und kein zusätzlicher Geschmacks- oder Eventscore. Bei fehlender passender Aktivität werden Antworten nicht stillschweigend ignoriert.
+Der erste Schritt des neuen Fokus ergänzt **Gemerkt** um einen konkreten,
+manuell pflegbaren Vorrat. Ziel sind drei bis fünf brauchbare Orte/Touren je
+Art, keine automatisch gefüllte oder als geprüft ausgegebene Sammlung.
+Arten: Fahrradtour kurz/lang, Wanderung kurz/lang, Spaziergang, Schwimmen,
+Café, Restaurant, Biergarten. Bestehende Merkliste und Events bleiben erhalten.
 
-Antworten bleiben im Speicher dieser geöffneten App; keine Speicherung von Befinden, Bewertungen oder Historie. Der Fragebogen schreibt keine Planung. „Einplanen“ nutzt den vorhandenen Routine-Dialog und dessen ausdrückliche Speicherung . Der Fragebogen greift nicht auf Kalenderdaten zu. Der bestehende Einplanungsdialog bleibt erhalten. Richtdauer, Öffnung, Anfahrt, Wetter und Bedingungen sind keine neuen verifizierten Tatsachen; Hinweise fordern gegebenenfalls die Prüfung vor der Durchführung. Ein kurzes unverbindliches Ausprobieren wird nur vorgeschlagen, soweit die Aktivität es erlaubt.
+`src/activity-stock.ts` enthält Validierung, Zuordnung und Auswahl.
+`personal_planning.payload.activityStock` ist ein optionales privates JSON-Feld
+(maximal 500 Einträge). Bestehende Zeilen, Routine-IDs, Kalender, Bewertungen,
+Ausschlüsse und Historien werden weder migriert noch zurückgesetzt. Schreiben
+nutzt den bestehenden Revisionsvergleich für `id=shared`; bei Konflikt wird der
+neue Cloudstand geladen. Kein neues Schema, keine neue RLS-Regel, kein neuer
+öffentlicher Endpunkt. Ältere Clients erhalten unbekannte Payload-Felder über
+den bestehenden Zustand; bei parallelen Bearbeitungen greift der Revisionsschutz.
 
-Die bestehende kompakte Kategorienliste, Sammlung, Vormerkungen, Bewertungen und Kalenderfunktionen bleiben erhalten. Kein Schema, Endpunkt, Budget, ModuleResult oder Morgenmail-Verhalten geändert.
+Jede Idee speichert Name, Art, Link, Dauer, gesamte Anfahrt hin/zurück, optional
+Strecke/Höhenmeter sowie Ort, Energie, Aufwand und Notizen. Unbekannte Zahlen
+bleiben `null`; Anfahrt wird nicht als null Minuten erfunden. Angaben sind
+manuelle Planungsschätzungen, keine Quellenprüfung. Kein `verifiedAt` und kein
+künstlich erneuerter Prüfzeitpunkt. Übernahme aus der bestehenden Merkliste
+öffnet ausdrücklich erst ein Formular. Kurze/lange Tour und Eigenschaften
+müssen dort geprüft werden. Konzerte werden nicht automatisch zu Vorratsideen.
 
-Validierung: 19/19 Tests (`npm test`), `npx tsc --noEmit` und `npm run build` erfolgreich. Acht neue Tests prüfen Grenzen und Änderungen, ruhige Auswahl, unklare Antworten, gelöschte Ideen, unveränderte Eingaben, den Fünf-Schritt-Ablauf, Neustart/Zurück und HTML-Escaping. Ein vollständiger Browser-Klicktest ist hier nicht erfolgt (kein installiertes Browser-Binary); vor Aktivierung in der Preview fünf Fragen → Ergebnis → Einplanen/Abbrechen auf Mobil/Desktop prüfen. Keine produktiven privaten Daten oder Testmail verwendet.
+Der bestehende Fünf-Fragen-Assistent ergänzt je passender Standardaktivität
+höchstens eine konkrete Idee: gleiche Art, Dauer **einschließlich Anfahrt**,
+Ort, Energie und Aufwand müssen passen. Ohne bekannte Dauer/Anfahrt keine
+automatische konkrete Auswahl. Verknüpfte Ideen werden bei fehlenden
+Ausschlüssen/Bewertungen, Ausblendung oder negativer Bewertung unterdrückt.
+Eigene manuell gespeicherte Ideen bleiben verfügbar. Vorschläge sind als
+ungeprüfte Planungsoption gekennzeichnet; Öffnung, Wetter, Route und Sperren
+sind vor Durchführung zu prüfen. Der Assistent führt keine Kalenderabfrage aus;
+das explizite Einplanen verwendet den bestehenden Planungsdialog.
 
-Der Organisationsaufwand ist die fünfte Frage: **Direkt loslegen**, **Ein bisschen vorbereiten**, **Auch etwas planen** oder **Weiß ich nicht**. Er setzt eine harte Obergrenze unabhängig von körperlicher Energie: direkt erlaubt nur `spontaneous`, ein bisschen Vorbereitung erlaubt `spontaneous`/`prepare`, planen oder unbekannt erlaubt auch `trip`. Die Auswahl bevorzugt weiterhin wenig Aufwand innerhalb der zulässigen Menge; mehr Bereitschaft erzwingt keinen aufwendigen Ausflug. `effort` ist beim Ergänzen und Bearbeiten manuell einstellbar und nutzt das vorhandene validierte Feld; bestehende Werte werden nicht umgeschrieben. Hohe Energie plus keine Organisation kann damit einen Spaziergang statt Kajak ergeben. Tests prüfen Obergrenzen, fehlende Treffer, manuelle Änderungen und die Korrektur der fünften Antwort über Zurück.
+Vier vom Nutzer gelieferte Google-Maps-Listen sind in den betreffenden Gruppen
+verlinkt. Kostenloser Browserabruf am 11.10.2026: Restaurants 58 Orte,
+Schwimmen 18, Cafés 29, Biergarten 7. Lesbar waren beispielsweise Drei
+Königinnen, Altes Stadtbad, Café Flora und Kulperhütte. Das ist kein vollständiger
+Import und keine Einzelortprüfung. Die Listen enthalten auch geschlossene,
+falsch kategorisierte oder außerhalb der Region liegende Orte; daher kein
+pauschaler Import in die Auswahl. Namen, Original-Ortlink und Planungsangaben
+werden beim konkreten Ergänzen erfasst. Kein automatischer Maps-Scraper und
+keine laufenden Recherchekosten durch diese Verlinkung.
 
-
-## Einordnung, Ortsfilter und allgemeine Standards · Fachänderung 11.10.2026
-
-Basis main `2f7889af6c78300733c0e3c00bcf3bb9d12e47ea` mit integriertem Fünf-Fragen-Guide. Kategorien in Bekanntes sind nun **Bewegung**, **Entspannung**, **Genuss**, **Kultur & Kreatives**, **Ausflüge & Entdecken**. Der Ort ist unabhängig davon **drinnen**, **draußen** oder **drinnen oder draußen**. Jede kompakte Zeile zeigt Richtdauer, Energiebedarf, Organisationsaufwand und Ort, ohne das Mehr-Menü zu öffnen. Alle Eigenschaften bleiben im Ergänzen-/Bearbeiten-Formular einstellbar.
-
-Der Ortsfilter **Alle Orte / Drinnen möglich / Draußen möglich** schreibt keine Daten. Beide möglichen Orte erfüllen beide Filter. Auch der Fragebogen verwendet die manuelle Aktivitätsart und diese Ortslogik, statt die Kategorie Draußen mit Bewegung zu vermischen; explizite Kategorie überschreibt Titel-Heuristiken. Die fünf Fragen und höchstens zwei Ergebnisse bleiben. Kein Wetterabruf oder Kalenderzugriff im Filter/Guide; bei schlechtem Wetter wählt der Nutzer Drinnen möglich.
-
-Kompatibilität: optionale JSON-Felder `activityCategory` und `setting` im bestehenden privaten Routine-Datensatz. Vorhandene `mood`, `outdoor`, IDs, Dauer, Energie und Aufwand bleiben vom alten Adapter lesbar. Das Formular schreibt einen kompatiblen mood-Wert; beide Orte werden in `outdoor` konservativ als true gespeichert. Die zentrale Mail erhält dadurch keine neue Wetter-/Sicherheitsfreigabe und nutzt weiterhin ihre bisherigen Prüfungen. Ohne neue Felder wird die bisherige Ortsangabe aus outdoor gelesen und die Aktivitätsart vorsichtig aus altem mood/Titel abgeleitet. Neue Felder werden validiert; setting muss zum kompatiblen outdoor-Wert passen. Keine DB-Migration, kein neuer Endpunkt, keine öffentlichen Routinen und keine Änderung von ModuleResult v1.
-
-Neue Standardbasis: **53 allgemeine Ideen** statt 74 Ziel-/Formulierungsvarianten, z. B. Spaziergang, Stadt erkunden, Radtour, Wanderung, Kochen, Café besuchen, Gärtnern und Konzert besuchen. Stabile IDs stammen aus den ursprünglichen Seeds. Die alte Tabelle bleibt nur als Erkennung bereits vorhandener unveränderter Standards, nicht als zweite aktive Liste.
-
-Bestehende Listen: nur exakt unveränderte alte Standards werden im Arbeitsspeicher verallgemeinert und zusammengefasst. Bereits vorhandene Bewegungsaktivitäten werden nicht automatisch umbenannt, da Daniel diese selbst überarbeitet hat. Änderungen an Titel, Richtdauer, Energie, Aufwand, Ort, Vorbereitung oder expliziter Kategorie schützen den Eintrag vor automatischem Zusammenfassen. Eigene IDs und doppelte eigene Einträge bleiben erhalten. Unveränderte frühere walk/shortwalk-, Café-, Essen-, Garten-, Film- und Tee-Defaults werden ebenfalls allgemein benannt und mit passenden Seed-Dubletten zusammengeführt; erhaltene IDs, Richtdauer und Vorbereitung bleiben bestehen. Eigene Bewegungseinordnungen haben Vorrang. Vorhandene allgemeine eigene Titel werden gegenüber Seed-Dubletten bevorzugt. Die tatsächliche Anzahl einer bestehenden Sammlung hängt deshalb von ihren Bearbeitungen ab.
-
-Bloßes Lesen schreibt nichts. Erst die nächste ausdrückliche Speicheraktion übernimmt die Ansicht mit der bestehenden Revisionsprüfung. knownActivitiesVersion bleibt 1; gelöschte Seeds werden nicht neu ausgesät. Historische und geplante Vorhaben, deren Titel und routineId, Termine, Checks, Favoriten, versteckte Ideen, Bewertungen und Profilhistorien werden nicht umgeschrieben. Keine produktiven Schreib-/Rücksetzungsaktionen im Fachchat.
-
-Validierung: **24/24 Tests**, `npx tsc --noEmit` und `npm run build` bestanden. Isolierte Daten prüfen unabhängige Kategorie/Ort, beide Orte in beiden Filtern, manuelle Kategorien für den Guide, konservative Legacy-Felder, gültige/ungültige Zusatzfelder, allgemeine Seeds, sichere Zusammenfassung, Erhalt eigener Änderungen/Bewegung/Historien, Idempotenz und dauerhaftes Löschen. Kein kostenpflichtiger Aufruf und keine Testmail. Ein Browser-Klicktest ist hier nicht erfolgt; 00 prüft Preview auf Mobil/Desktop, Ortsfilter, Bearbeiten/Speichern/Reload und bestehenden Kalenderdialog, integriert beide PRs und aktiviert per Deployment. Keine direkte produktive Migration erforderlich.
+Validierung: 33 Tests, TypeScript und Vite-Build. Ein isoliertes JSONB-SELECT
+(nur Literal-Testdaten, keine Tabellen) bestätigt die additive Speicherung von
+`activityStock` und vorhandenen `entries`; kein produktiver Schreibtest.
+Offen für Chat 00: Preview/Deployment, manuelles Speichern/Neuladen mit dem
+bestehenden Cloudzugang und Konflikttest auf zwei Geräten. Browser-UI und RLS
+wurden in diesem Schritt nicht end-to-end live geprüft. Die neue Priorisierung
+spezieller Events und die Morgenmail sind ausdrücklich nicht Teil dieses ersten
+Vorrats-Schritts; ModuleResult v1, Quellenprüfungen und Recherchebudget bleiben
+unverändert. Keine KI-Recherche, keine Mail, keine Produktionsdatenänderung.

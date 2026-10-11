@@ -93,7 +93,7 @@ test('five steps accept unknown, validate input, support back/reset, escape user
  assert.match(guide.markup([]),/Noch kein passender Vorschlag/);
  const html=guide.markup([activity('unsafe"',{title:'<img onerror=alert(1)>',next:'<script>bad</script>'})]);
  assert.ok(!html.includes('<img')&&!html.includes('<script>'));assert.match(html,/data-id="unsafe&quot;"/);
- assert.match(html,/data-action="routinePlan"/);assert.ok(!html.includes('Frage 6'));
+ assert.ok(!html.includes('routinePlan')&&!html.includes('Einplanen'));assert.ok(!html.includes('Frage 6'));
  guide.handle('guideStart');assert.match(guide.markup([]),/Frage 1 von 5/);
  guide.handle('guideClose');assert.match(guide.markup([]),/Hilf mir entscheiden/);
 });

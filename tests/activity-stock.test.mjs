@@ -30,10 +30,10 @@ test('missing exclusion data fails closed for linked stock, hidden and negative 
  assert.deepEqual(usableStock(list,decisions({ratings:new Map([['source',-1]])})).map(x=>x.id),['own']);
  assert.equal(usableStock(list,decisions()).length,2);
 });
-test('concrete matching requires duration plus return travel and respects place, energy, effort and user ratings',()=>{
+test('concrete matching uses activity duration without requiring travel and respects place, energy, effort and user ratings',()=>{
  const walk=activity('Spaziergang'),answers={...emptyGuideAnswers(),minutes:60,place:'inside',energy:'low',effort:'spontaneous'};
  assert.equal(matchingStock(walk,[idea('both',{setting:'both'})],answers,decisions())[0].id,'both');
- for(const changes of [{minutes:null},{travelMinutes:null},{minutes:60,travelMinutes:1},{energy:'high'},{effort:'prepare'},{setting:'outside'}])assert.deepEqual(matchingStock(walk,[idea('rejected',{setting:'inside',...changes})],answers,decisions()),[]);
+ for(const changes of [{minutes:null},{minutes:61},{energy:'high'},{effort:'prepare'},{setting:'outside'}])assert.deepEqual(matchingStock(walk,[idea('rejected',{setting:'inside',...changes})],answers,decisions()),[]);
  const a=idea('a',{setting:'inside',sourceId:'a'}),b=idea('b',{setting:'inside',sourceId:'b'});
  assert.equal(matchingStock(walk,[a,b],answers,decisions({ratings:new Map([['b',1]])}))[0].id,'b');
  assert.deepEqual(matchingStock(walk,[{...a,energy:'high'}],{...answers,need:'rest',energy:'unknown'},decisions()),[]);
@@ -50,18 +50,18 @@ test('JSON roundtrip and known-activity normalization keep stock, calendar, chec
 });
 test('markup exposes empty coverage, escapes input and never claims source or safety verification',()=>{
  publishStockFavorites([]);publishStockDecisions(new Set(),new Map(),true);
- const html=stockMarkup([idea('unsafe"',{title:'<img onerror=evil>',note:'<script>evil</script>'})],null,true,false,'');
+ const html=stockMarkup([idea('unsafe"',{title:'<img onerror=evil>',note:'<script>evil</script>'})],null,true,false,'','unsafe"');
  assert.ok(!html.includes('<img')&&!html.includes('<script>'));assert.match(html,/data-stock-id="unsafe&quot;"/);
- assert.match(html,/Vorrat ergänzen/);assert.match(html,/Aktuelle Bedingungen ungeprüft/);
+ assert.match(html,/Tour oder Ort ergänzen/);assert.match(html,/Aktuelle Bedingungen ungeprüft/);
  assert.match(stockMarkup([],null,false,false,''),/wird geladen/);
  assert.match(stockIdeaMarkup(activity('Spaziergang'),[idea('short')],{...emptyGuideAnswers(),minutes:60},decisions()),/Konkrete Idee/);
- assert.match(stockIdeaMarkup(activity('Spaziergang'),[idea('unknown',{travelMinutes:null})],emptyGuideAnswers(),decisions()),/Noch keine konkrete Vorratsidee/);
+ assert.match(stockIdeaMarkup(activity('Spaziergang'),[idea('unknown',{minutes:null})],emptyGuideAnswers(),decisions()),/Noch keine konkrete Vorratsidee/);
 });
 test('the existing five-question result includes a concrete matching idea and keeps main and alternative bounded',()=>{
  publishStockDecisions(new Set(),new Map(),true);const guide=new ActivityGuide();guide.handle('guideStart');
  for(const answer of ['move','60','low','outside','spontaneous'])guide.handle('guideAnswer',answer);
  const html=guide.markup([activity('Spaziergang')],[idea('stock-walk')]);
- assert.match(html,/Konkrete Idee: stock-walk/);assert.match(html,/data-action="stockPlan"/);
+ assert.match(html,/Konkrete Idee: stock-walk/);assert.ok(!html.includes('stockPlan'));
  assert.equal((html.match(/Konkrete Idee:/g)||[]).length,1);
 });
 
@@ -69,7 +69,7 @@ test('stock groups no longer display Maps-list links',()=>{
  const html=stockMarkup([],null,true,false,'');
  assert.ok(!html.includes('Deine Maps-Liste öffnen'));
  for(const url of Object.values(stockLists))assert.ok(!html.includes(url));
- assert.equal((html.match(/0 gespeichert/g)||[]).length,9);
+ assert.equal((html.match(/class="stock-count">0/g)||[]).length,9);
 });
 
 test('Maps imports contain 108 distinct editable places with unknown timings and no visible links',()=>{
@@ -91,6 +91,19 @@ test('Maps seeds preserve edits, deleted rows after save and unrelated private f
 test('closed imported places stay editable but are excluded from suggestions and planning',()=>{
  const places=mapsStock();assert.equal(places.filter(x=>x.unavailable).length,10);
  const closed=places.find(x=>x.unavailable);assert.ok(!usableStock(places,decisions()).some(x=>x.id===closed.id));
- const html=stockMarkup([closed],null,true,false,'');assert.match(html,/Als geschlossen übernommen/);assert.match(html,/disabled>Einplanen/);
+ const html=stockMarkup([closed],null,true,false,'',closed.id);assert.match(html,/Als geschlossen übernommen/);assert.ok(!html.includes('Einplanen'));
  assert.ok(usableStock([{...closed,unavailable:false}],decisions()).length===1);
+});
+
+test('stock overview is compact and details plus editing live in a modal without scheduling or travel',()=>{
+ const a=idea('compact',{note:'Long private note'});const overview=stockMarkup([a],null,true,false,'');
+ assert.match(overview,/class="stock-row"/);assert.match(overview,/data-stock-action="details"/);
+ assert.ok(!overview.includes('Long private note')&&!overview.includes('Anfahrt')&&!overview.includes('Einplanen'));
+ const detail=stockMarkup([a],null,true,false,'',a.id);assert.match(detail,/<dialog id="stockDialog"/);assert.match(detail,/Long private note/);
+ const edit=stockMarkup([a],a,true,false,'');assert.match(edit,/<dialog id="stockDialog"/);assert.ok(!edit.includes('name="travelMinutes"'));
+ assert.ok(!detail.includes('Einplanen')&&!edit.includes('Einplanen'));
+});
+test('unknown travel no longer blocks a concrete selection',()=>{
+ const a=activity('Spaziergang');const place=idea('no-travel',{minutes:60,travelMinutes:null});
+ assert.equal(matchingStock(a,[place],{...emptyGuideAnswers(),minutes:60},decisions())[0].id,'no-travel');
 });

@@ -102,3 +102,12 @@ Zehn als geschlossen angezeigte Orte bleiben sichtbar und editierbar, aber vorer
 `withMapsStock` ergänzt die Basis beim Cloud-Lesen im Arbeitsspeicher und erhält alle vorhandenen privaten Felder. Erste ausdrückliche Speicherung übernimmt sie mit `stockMapsVersion:1` und bestehender Revision in die gemeinsame Planung. Danach bleiben bearbeitete oder gelöschte Basisorte auf allen Geräten erhalten bzw. gelöscht. Vorhandene gleichnamige eigene Einträge haben Vorrang. Kein Zurücksetzen, keine Migration, keine Änderung an Morgenmail oder Eventauswahl.
 
 Validierung: 36 Tests einschließlich eindeutiger IDs, sichtbarer Basisorte, geschlossener Orte, eigener Änderungen, dauerhafter Löschung und fehlender Listenlinks; TypeScript und Build. Zusätzliche tatsächliche Speicher-/Lesefunktionen mit isoliertem Provider geprüft. Keine Produktionsschreibtests oder Mail.
+
+
+## Kompakter Finder und Vorrat · Nutzerentscheidung 11.10.2026
+
+Die App dient Events finden, Bekanntes speichern und Auswählen. Einplanen entfällt aus Merkliste, Bekanntes, Auswahlhilfe und Freizeitvorrat. Wochenplan-/Kalenderoberflächen und zusätzliche Planungsaktionen werden nicht mehr gerendert; bestehende gespeicherte Kalender-/Planungsdaten und ihre Verträge bleiben erhalten. Keine automatische Kalenderänderung.
+
+Freizeitvorrat nutzt kompakte zugeklappte Kategorien und Zeilen wie Bekanntes: Name, Dauer, Ort, gegebenenfalls geschlossen. Mehr öffnet ein natives modales Detailfenster; Bearbeiten/Ergänzen erfolgt ebenfalls im Fenster. Öffnen, Abbrechen und Escape schreiben nichts. Kategorien bleiben bei Dialogwechseln geöffnet. Anfahrt erscheint weder in Übersicht noch Formular und ist keine Voraussetzung mehr für Auswahl; Aktivitätsdauer ist die Zeitgrenze. Bereits gespeicherte Anfahrtsfelder bleiben erhalten, ohne als Auswahl- oder Verfügbarkeitsnachweis genutzt zu werden. Unbekannte Aktivitätsdauer bleibt weiterhin unbekannt. Keine Mail-, Recherche-, Budget- oder Kalenderbrückenänderung.
+
+Validierung: 38 Tests, TypeScript und Produktionsbuild erfolgreich. Historische Planungsfelder bleiben lesbar und bei ausdrücklicher Speicherung erhalten; keine neuen Planungsaktionen in der Oberfläche.

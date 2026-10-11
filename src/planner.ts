@@ -1,12 +1,12 @@
 import {withMapsStock} from './maps-stock';
-import {stockMarkup,stockSources,stockKinds,validStockItem,draftFromFavorite,usableStock, type StockItem} from './activity-stock';
+import {stockMarkup,stockSources,stockKinds,validStockItem,draftFromFavorite, type StockItem} from './activity-stock';
 import './planner.css';
 import {withKnownActivities, type KnownActivity} from './known-activities';
 import {activityCategories,activitySettings,categoryOf,settingOf,matchesSetting,legacyMood,validActivityProperties,energyLabels,effortLabels, type ActivityCategory, type ActivitySetting} from './activity-properties';
 import {ActivityGuide} from './activity-guide';
 import { neutralDescription } from './wording';
 import { categoryIcon } from './category-icons';
-import { loadDinnerRecipes, recipeLink, type DinnerRecipe } from './dinner-recipes';
+import { loadDinnerRecipes, type DinnerRecipe } from './dinner-recipes';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 type Appointment = { id: string; title: string; date: string; start: string; end: string; owner: string; uncertain: boolean; repeat: boolean; excludedDates?: string[]; googleEventId?: string; googleSeriesId?: string; googleAllDay?: boolean };
@@ -65,7 +65,7 @@ export function initPlanner(database: SupabaseClient) {
   let saving = false;
   let refreshing = false;
   let revision = -1;
-  let message = 'Gemeinsame Planung wird geladen …';
+  let message = 'Gemeinsame Sammlung wird geladen …';
   let legacy: State | null = null;
   // Read the previous version once to migrate it, never persist new planning data locally.
   try { const raw = localStorage.getItem(KEY); if (raw) { const parsed: unknown = JSON.parse(raw); if (validState(parsed)) legacy = parsed; } } catch { /* Cloud data remains authoritative. */ }
@@ -77,19 +77,20 @@ export function initPlanner(database: SupabaseClient) {
   const stockHost=document.querySelector<HTMLElement>('#activityStock');
   let stockDraft: StockItem|null=null;
   let stockMessage='';
-  const isEditing = () => !!stockDraft || !!dinnerDate || !!calendarEdit || !!dragging || !!draft || !!pendingIdea || host?.contains(document.activeElement) && ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName || '');
-  const actionDate = (stamp: string) => stamp ? new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin' }).format(new Date(stamp)) : '';
+  let stockView:string|null=null;
+  const isEditing = () => !!stockDraft || !!stockView || !!dinnerDate || !!calendarEdit || !!dragging || !!draft || !!pendingIdea || host?.contains(document.activeElement) && ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName || '');
   let week = day(today()).getUTCDay() === 0 ? addDays(monday(today()),7) : monday(today());
-  let selectedSlot = '';
   let activeDate = today();
-  let openEditor = '';
   let openSection = '';
+  let openEditor = '';
+  let selectedSlot = '';
+  // Retained legacy handlers have no scheduling controls in this interface.
+  void openEditor; void selectedSlot;
   const activityGuide = new ActivityGuide();
   let editingRoutine = '';
   let routineFormOpen = false;
   let routineSettingFilter: ActivitySetting | 'unknown' = 'unknown';
   let pendingIdea: Idea | null = null;
-  let scheduleSlot = '';
   let calendarEdit: {kind:'entry'|'appointment'|'slot';id:string;date:string} | null = null;
   let dinnerDate = '';
   let dinnerEditingId = '';
@@ -103,13 +104,10 @@ export function initPlanner(database: SupabaseClient) {
   let draftReady = false;
   let moreIdeas = false;
   let weeklyCheck = false;
-  const moodOptions: [string,string][] = [['outdoor','Draußen'],['movement','Bewegung'],['food','Genuss'],['culture','Kultur']];
-  let rain: Record<string, number> = {};
   let backup: State | null = null;
-  let settingsOpen = false;
-  const routineFeedback = (text: string) => /^(Gemeinsame Planung (wird geladen|geladen)|Gemeinsamer Stand aktualisiert|Gespeichert\.|Standardaktivität gespeichert|Dieser Termin wurde gelöscht|Die gesamte Terminserie wurde gelöscht|Der Termin wurde gelöscht)/.test(text);
+  const routineFeedback = (text: string) => /^(Gemeinsame (Planung|Sammlung) (wird geladen|geladen)|Gemeinsamer Stand aktualisiert|Gespeichert\.|Standardaktivität gespeichert|Dieser Termin wurde gelöscht|Die gesamte Terminserie wurde gelöscht|Der Termin wurde gelöscht)/.test(text);
   const mutate = async (fn: () => void, feedback = 'Gespeichert. Auf allen Geräten verfügbar.') => {
-    if (!loaded || saving) { message = saving ? 'Speicherung läuft. Bitte kurz warten.' : 'Die gemeinsame Planung muss zuerst geladen werden.'; return false; }
+    if (!loaded || saving) { message = saving ? 'Speicherung läuft. Bitte kurz warten.' : 'Die gemeinsame Sammlung muss zuerst geladen werden.'; return false; }
     undoMove = null;
     const previous = JSON.stringify(state);
     saving = true;
@@ -168,10 +166,10 @@ export function initPlanner(database: SupabaseClient) {
           try { localStorage.removeItem(KEY); } catch { /* No new local data is written. */ }
         }
       } else if (changed || manual) {
-        message = manual ? 'Gemeinsamer Stand aktualisiert.' : 'Gemeinsame Planung geladen.';
+        message = manual ? 'Gemeinsamer Stand aktualisiert.' : 'Gemeinsame Sammlung geladen.';
       }
       if (changed || manual) render();
-    } catch { message = loaded ? 'Aktualisierung gerade nicht möglich. Der zuletzt geladene Stand bleibt sichtbar.' : 'Gemeinsame Planung konnte nicht geladen werden. Bitte die Verbindung prüfen und erneut laden.'; render(); }
+    } catch { message = loaded ? 'Aktualisierung gerade nicht möglich. Der zuletzt geladene Stand bleibt sichtbar.' : 'Gemeinsame Sammlung konnte nicht geladen werden. Bitte die Verbindung prüfen und erneut laden.'; render(); }
     finally { refreshing = false; }
   }
   const inWeek = (date: string) => date >= week && date < addDays(week, 7);
@@ -215,16 +213,11 @@ export function initPlanner(database: SupabaseClient) {
     },status==='Vorgeschlagen'?'Als tatsächlich vorgeschlagen protokolliert.':slot?'Eingeplant. Nächster Schritt: konkret vorschlagen.':'Idee gespeichert.');
     if(saved){dinnerDate='';calendarEdit=null;draft=null;draftReady=false;pendingIdea=null;render();host?.querySelector('.week-board')?.scrollIntoView({behavior:'smooth',block:'start'});}
   }
-  const entryLabel = (a: Entry) => a.status === 'Idee gespeichert' ? (a.date && a.start && a.end ? 'Geplant' : 'Gemerkt') : a.status;
   let dialogReturn = '';
   function startDay(date: string, slot?: Slot) {
     activeDate=date;pendingIdea=null;openEditor='';moreIdeas=false;
     draft=slot?{...slot}:{id:crypto.randomUUID(),date,start:'18:30',end:'20:00',energy:'medium',mood:'unknown',effort:'prepare'};
     draftReady=!!slot;render();host?.querySelector('#dayComposer')?.scrollIntoView({behavior:'smooth',block:'center'});
-  }
-  function composerMarkup() {
-    if(!draft||pendingIdea)return '';
-    return `<section class="planner-box day-composer" id="dayComposer" aria-label="Etwas planen"><div class="routine-heading"><div><span class="section-kicker">${draftReady?'2 · Eine Idee auswählen':'1 · Wann hast du Zeit?'}</span><h2>${label(draft.date)} · Etwas planen</h2></div>${button('cancelDraft','Schließen')}</div><form id="dayPlanForm" class="planner-form"><label>Tag<input name="date" type="date" min="${today()}" value="${draft.date}" required></label><label class="planner-time">Beginn<input name="start" type="time" value="${draft.start}" required></label><label class="planner-time">Zeit in Minuten<input name="minutes" type="number" min="5" max="1440" step="5" value="${duration(draft)}" required></label><label>Worauf hättest du Lust?<select name="mood">${options([['unknown','Noch offen'],...moodOptions],draft.mood)}</select></label><button class="planner-submit">${draftReady?'Vorschläge aktualisieren':'Passende Ideen zeigen'}</button></form><p class="planner-small">Du musst vorher kein Zeitfenster anlegen. Leere Tage gelten nicht automatisch als frei.</p>${draft.mood==='outdoor'&&(rain[draft.date]??0)>=50?'<p class="planner-warning">Regen ist möglich. Outdoor-Ideen bleiben sichtbar; prüfe das Wetter am Ziel vor dem Losfahren.</p>':''}${draftReady?clash(draft)||occupied(draft)?'<p class="planner-warning">Diese Zeit ist bereits belegt oder noch unklar. Wähle einen anderen Zeitpunkt.</p>':suggestionsMarkup(draft):''}</section>`;
   }
   function calendarRow(target = calendarEdit) {
     if (!target) return undefined;
@@ -237,14 +230,6 @@ export function initPlanner(database: SupabaseClient) {
   }
   function openCalendar(kind:'entry'|'appointment'|'slot', id:string, date:string) {
     calendarEdit={kind,id,date};draft=null;pendingIdea=null;render();
-  }
-  function editCalendarMarkup() {
-    const row=calendarRow();if(!row||!calendarEdit)return '';
-    const date=calendarEdit.date||row.date||activeDate;
-    const imported=calendarEdit.kind==='appointment' ? row as Appointment : null;
-    const multiDay=imported?.googleEventId&&state.appointments.filter(x=>x.googleEventId===imported.googleEventId).length>1;
-    return `<section class="planner-box" id="calendarEditor"><div class="routine-heading"><div><span class="section-kicker">Termin ändern</span><h2>${e('title' in row ? row.title : 'Freies Zeitfenster')}</h2></div>${button('cancelCalendar','Schließen')}</div>
-      ${multiDay?'<p>Dieser mehrtägige Google-Termin wird in Google bearbeitet.</p><a href="https://calendar.google.com/" target="_blank" rel="noopener noreferrer">Google Kalender öffnen</a>':`<form id="calendarEditForm" class="planner-form"><label>Datum<input name="date" type="date" required value="${date}"></label><div class="calendar-day-picker" role="group" aria-label="Tag auswählen">${Array.from({length:7},(_,i)=>{const d=addDays(monday(date),i);return `<button type="button" data-calendar-date="${d}" aria-pressed="${d===date}">${label(d)}</button>`;}).join('')}</div><label class="planner-time">Startzeit<input name="start" type="time" required value="${row.start||'18:00'}"></label><label>Dauer in Minuten<input name="minutes" type="number" required min="5" max="1439" value="${validTime(row.start)&&validTime(row.end)?duration(row):60}"></label><div class="calendar-time-shifts">${button('shiftEarlier','−30 Min.')}${button('shiftLater','+30 Min.')}<output id="calendarEnd"></output></div><p id="calendarCollision" role="status"></p>${imported?.repeat?'<p class="planner-small">Die Änderung gilt nur für diesen Termin. Die übrige wöchentliche Serie bleibt bestehen.</p>':''}${imported?.googleEventId?'<p class="planner-small">Der verschobene Termin ersetzt beim nächsten Google-Abgleich den ursprünglichen Termin.</p>':''}<div class="planner-actions"><button class="planner-submit">Speichern</button>${button('cancelCalendar','Abbrechen')}${calendarEdit.kind==='entry'?button('calendarDetails','Weitere Angaben',row.id):''}</div></form>`}</section>`;
   }
   async function moveCalendar(target:NonNullable<typeof calendarEdit>,date:string,start:string,minutes:number) {
     const row=calendarRow(target);if(!row)return false;
@@ -269,11 +254,6 @@ export function initPlanner(database: SupabaseClient) {
     },'Termin verschoben.');
     if(saved){undoMove={state:before,revision};calendarEdit=null;render();}return saved;
   }
-  function dinnerMarkup(date:string) {
-    const dinner=state.dinners?.find(d=>d.date===date);
-    const title=dinnerRecipes.find(r=>r.id===dinner?.recipeId)?.title||dinner?.title;
-    return `<footer class="day-dinner">${dinner?`<div class="dinner-card" data-dinner-id="${e(dinner.id)}" data-dinner-date="${date}"><span class="dinner-label">${categoryIcon('essen')}Abendessen</span><a class="dinner-title" href="${e(recipeLink(dinner.recipeId))}" target="_blank" rel="noopener noreferrer">${e(title!)}</a><div class="dinner-actions">${button('chooseDinner','Ändern',date)}${button('removeDinner','Entfernen',dinner.id)}</div></div>`:`<button type="button" class="dinner-add" data-action="chooseDinner" data-id="${date}">${categoryIcon('essen')}Abendessen planen</button>`}</footer>`;
-  }
   async function fetchDinnerRecipes() {
     if(recipesLoading)return;
     recipesLoading=true;recipesError='';render();
@@ -289,11 +269,6 @@ export function initPlanner(database: SupabaseClient) {
     if(recipesLoading)return '<p role="status">Meine Rezepte werden geladen …</p>';
     if(recipesError)return `<p role="alert">${e(recipesError)}</p>${button('retryRecipes','Erneut versuchen')}`;
     return `<p class="planner-small" role="status">${filtered.length} Rezepte</p><div class="dinner-recipes">${filtered.map(r=>`<button type="button" class="dinner-recipe" data-recipe-id="${e(r.id)}">${r.image?`<img src="${e(r.image)}" alt="" loading="lazy" decoding="async">`:`<span class="dinner-image-placeholder" aria-hidden="true">${categoryIcon('essen')}</span>`}<span><strong>${e(r.title)}</strong><small>${e([r.category,r.minutes?`${r.minutes} Min.`:''].filter(Boolean).join(' · '))}</small></span></button>`).join('')||'<p>Keine passenden Rezepte. Ändere die Suche oder ergänze ein Rezept in der Rezepte-App.</p>'}</div>`;
-  }
-  function dinnerPickerMarkup() {
-    if(!dinnerDate)return '';
-    const current=state.dinners?.find(d=>d.id===dinnerEditingId);
-    return `<section class="planner-box dinner-picker" id="dinnerPicker"><div class="routine-heading"><div><span class="section-kicker">Meine Rezepte</span><h2>Abendessen planen</h2></div>${button('cancelDinner','Schließen')}</div><label class="dinner-date-label">Tag<input id="dinnerDate" type="date" required value="${dinnerDate}"></label><p class="planner-small">Das Gericht erscheint ohne Uhrzeit am Ende des Tages.</p>${current?`<p class="dinner-current">Geplant: <a href="${e(recipeLink(current.recipeId))}" target="_blank" rel="noopener noreferrer">${e(current.title)}</a></p>${current.date!==dinnerDate?button('moveCurrentDinner','Auf diesen Tag verschieben',current.id):''}`:''}<label class="dinner-search">Rezept oder Zutat suchen<input id="dinnerSearch" type="search" value="${e(dinnerQuery)}" placeholder="Zum Beispiel: Pasta oder Spinat"></label><div id="dinnerResults">${dinnerResultsMarkup()}</div></section>`;
   }
   async function moveDinner(id:string,date:string) {
     const dinner=state.dinners?.find(d=>d.id===id);if(!dinner||dinner.date===date||!validDate(date))return;
@@ -327,44 +302,12 @@ export function initPlanner(database: SupabaseClient) {
       if(saved){dinnerDate='';render();}
     }));
   }
-  function weekMarkup() {
-    const names=['Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag','Sonntag'];
-    return `<section class="week-board" aria-label="Wochenplan Montag bis Sonntag"><div class="week-board-heading"><h2>${label(week)} – ${label(addDays(week,6))}</h2><div class="planner-week-nav">${button('prev','Vorige Woche')}${button('current','Diese Woche')}${button('next','Nächste Woche')}${button('weeklyCheck',weeklyCheck?'Wochencheck schließen':'Wochencheck')}</div></div>${weeklyCheckMarkup()}<div class="week-days">${names.map((name,i)=>{
-      const date=addDays(week,i);const entries=state.entries.filter(x=>x.date===date&&x.status!=='Abgelehnt').sort((a,b)=>a.start.localeCompare(b.start));const slots=state.slots.filter(x=>x.date===date);const events=appointmentsFor(date);
-      return `<article data-drop-date="${date}" class="week-day ${date===today()?'is-today':''} ${date===activeDate?'is-selected':''}"><header><span>${name}</span><strong>${new Intl.DateTimeFormat('de-DE',{day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(day(date))}</strong>${date===today()?'<small>Heute</small>':''}</header><div class="week-day-items">${events.map(a=>`<div data-calendar-kind="appointment" data-calendar-id="${e(a.id)}" data-calendar-occurrence="${date}" class="week-event ${a.uncertain?'is-uncertain':''}"><time>${a.googleAllDay?'Ganztägig':`${a.start}–${a.end}`}</time><button type="button" class="week-event-open" data-action="editAppointment" data-id="${e(a.id)}" data-date="${date}" aria-label="${e(a.title)}: Termin ändern"><strong>${e(a.title)}</strong></button><span>${e(a.owner)}${a.googleSeriesId?' · Serie':''}${a.repeat?' · wöchentlich':''}${a.uncertain?' · unklar':''}</span><details class="event-delete-menu"><summary aria-label="${e(a.title)} am ${label(date)} löschen">Löschen</summary><div><button type="button" data-action="deleteOccurrence" data-id="${e(a.id)}" data-date="${date}">${a.repeat||a.googleSeriesId?'Nur diesen Termin löschen':'Termin löschen'}</button>${a.repeat||a.googleSeriesId?`<button type="button" data-action="deleteSeries" data-id="${e(a.id)}">Gesamte Serie löschen</button>`:''}</div></details></div>`).join('')}${entries.map(a=>`<div class="week-plan" data-calendar-kind="entry" data-calendar-id="${e(a.id)}" data-calendar-occurrence="${date}"><button type="button" class="week-plan-open" data-action="openEntry" data-id="${e(a.id)}"><time>${a.start?`${a.start}${a.end?'–'+a.end:''}`:'Zeit noch offen'}</time><strong>${e(a.title)}</strong><span>${e(entryLabel(a))}</span></button><div class="week-quick-actions">${!a.proposedAt?button('proposed','Vorgeschlagen',a.id):''}${a.status!=='Gemacht'?button('done','Gemacht',a.id):''}</div></div>`).join('')}${slots.filter(a=>!entries.some(x=>x.slotId===a.id || x.start && x.end && x.start<=a.start && x.end>=a.end)).map(a=>`<button type="button" data-calendar-kind="slot" data-calendar-id="${e(a.id)}" data-calendar-occurrence="${date}" class="week-free ${clash(a)?'has-conflict':''}" data-action="selectSlot" data-id="${a.id}"><time>${a.start}–${a.end}</time><strong>${clash(a)?'Überschneidung prüfen':'Zeit für eine Idee'}</strong></button>`).join('')}${!events.length&&!entries.length&&!slots.length?'<p class="week-day-empty">Noch nichts eingetragen</p>':''}</div><button type="button" class="week-add" data-action="selectDay" data-id="${date}">Etwas planen</button><button type="button" class="week-fixed-add" data-action="fixedDay" data-id="${date}">Festen Termin eintragen</button>${dinnerMarkup(date)}</article>`;
-    }).join('')}</div></section>`;
-  }
   function beginPlanning(idea: Idea) {
-    pendingIdea=idea;scheduleSlot=selectedSlot;
+    pendingIdea=idea;
     if(idea.date){activeDate=idea.date;week=monday(idea.date);}
     render();
     document.querySelector<HTMLButtonElement>('[data-view="planning"]')?.click();
     host?.querySelector('#ideaScheduler')?.scrollIntoView({behavior:'smooth',block:'center'});
-  }
-  function schedulerMarkup() {
-    if(!pendingIdea)return '';
-    const idea=pendingIdea;
-    const available=state.slots.filter(s=>inWeek(s.date)&&canSchedule(s,idea)).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
-    const slot=available.find(s=>s.id===scheduleSlot);
-    const date=slot?.date || idea.date || draft?.date || (activeDate>=today()?activeDate:today());
-    const draftTime=draft&&(!idea.date||draft.date===idea.date)?draft:null;
-    const start=slot?.start||idea.start||draftTime?.start||'18:30';
-    const endMinutes=Math.min(1439,Number(start.slice(0,2))*60+Number(start.slice(3))+(idea.minutes??(draftTime?duration(draftTime):60)));
-    const end=slot?.end || (draftTime&&!idea.start?draftTime.end:'') || `${String(Math.floor(endMinutes/60)).padStart(2,'0')}:${String(endMinutes%60).padStart(2,'0')}`;
-    return `<section class="planner-box idea-scheduler" id="ideaScheduler" aria-label="Aktivität einplanen"><span class="section-kicker">${idea.source==='routine'?'Meine Standardaktivität':'Aus den Empfehlungen'}</span><h2>${e(idea.title)} einplanen</h2><p>${e(neutralDescription(idea.next))}</p>${idea.minutes?`<p class="planner-small">${idea.tourKind?`Tourzeit: etwa ${idea.minutes} Minuten. Plane Anfahrt und Pausen zusätzlich ein.`:`Plane mindestens ${idea.minutes} Minuten inklusive Vorbereitung und Anfahrt ein.`}</p>`:'<p class="planner-warning">Uhrzeit, Dauer und Verfügbarkeit bitte zuerst in der Quelle prüfen. Das Zeitfenster legst du selbst fest.</p>'}${safeUrl(idea.url)?`<a href="${e(idea.url)}" target="_blank" rel="noopener noreferrer">Quelle prüfen</a>`:''}
-      ${available.length?`<label>Freies Zeitfenster dieser Woche<select id="ideaSlot">${options([['','Neues Zeitfenster festlegen'],...available.map(s=>[s.id,`${label(s.date)} · ${s.start}–${s.end}`] as [string,string])],slot?.id||'')}</select></label>`:'<p class="planner-small">Lege einen Zeitpunkt fest, den ihr abgestimmt habt. Bereits belegte Zeiten werden beim Speichern geprüft.</p>'}
-      <form id="ideaScheduleForm" class="planner-form" data-slot-id="${slot?.id||''}"><label>Tag<input name="date" type="date" min="${today()}" required value="${date}" ${slot||idea.date?'readonly':''}></label><label class="planner-time">Von<input name="start" type="time" required value="${start}" ${slot||idea.start?'readonly':''}></label><label class="planner-time">Bis<input name="end" type="time" required value="${end}" ${slot?'readonly':''}></label><button class="planner-submit">Einplanen</button></form><div class="planner-actions">${button('cancelSchedule','Abbrechen')}${button('saveUnscheduled','Merken')}</div><p class="planner-small">Das Einplanen zählt erst als Vorschlag, wenn du es tatsächlich angesprochen hast.</p></section>`;
-  }
-  function suggestionsMarkup(slot: Slot) {
-    const pool=ideas(slot);
-    const routines=pool.filter(a=>a.source==='routine');const events=pool.filter(a=>a.source==='recommendation');
-    const longOutdoor=duration(slot)>=180&&['outdoor','movement'].includes(slot.mood);
-    const hike=longOutdoor?events.find(a=>a.tourKind==='wandern'&&a.flexible):undefined;
-    const bike=longOutdoor?events.find(a=>a.tourKind==='fahrrad'&&a.flexible):undefined;
-    const tours=[hike,bike].filter((a):a is Idea=>!!a);
-    const initial=tours.length?[...tours,...routines.slice(0,3-tours.length)]:[...routines.slice(0,events.length?2:3),...events.slice(0,1)];
-    const picks=moreIdeas?pool:initial.length<3?[...initial,...pool.filter(a=>!initial.includes(a)).slice(0,3-initial.length)]:initial;
-    return `<div class="unified-ideas"><p class="planner-small">${moreIdeas?'Passende Ideen':'Vorschläge'}</p><div class="unified-idea-grid">${picks.map(a=>`<article class="planner-idea"><span class="section-kicker">${a.source==='routine'?'Meine Aktivitäten':a.flexible?'Touridee':'Aktuelles Event'}</span><h3>${categoryIcon(a.tourKind||a.source||'',a.title)}${e(a.title)}</h3><p>${a.minutes?`${a.tourKind?'Tourzeit':'Etwa'} ${a.minutes} Minuten${a.tourKind?' · Anfahrt zusätzlich prüfen':''}`:a.tourKind?'Tourzeit und Anfahrt prüfen':'Uhrzeit und Dauer in der Quelle prüfen'}</p>${button('chooseIdea',a.source==='routine'?'Einplanen':'Einplanen',String(pool.indexOf(a)))}</article>`).join('')||'<p>Keine passende Idee gefunden. Ändere Dauer oder Wünsche, oder trage deine eigene Idee ein.</p>'}</div>${pool.length>3?button('moreIdeas',moreIdeas?'Weniger Ideen':'Weitere Ideen'):''}<details class="custom-plan"><summary>Eigene Idee einplanen</summary><form id="customPlanForm" class="planner-form"><label>Aktivität<input name="title" required maxlength="200" placeholder="Was möchtest du machen?"></label><button class="planner-submit">Einplanen</button></form></details>${state.slots.some(s=>s.id===slot.id)?button('deleteSlot','Dieses freie Zeitfenster entfernen',slot.id):''}</div>`;
   }
   const toolSummary = (title: string, _help: string, badge = '') => `<span class="tool-summary-copy"><strong>${e(title)}</strong></span>${badge?`<span class="tool-summary-badge">${e(badge)}</span>`:''}<span class="tool-summary-toggle" aria-hidden="true">+</span>`;
   function routinesMarkup() {
@@ -375,35 +318,16 @@ export function initPlanner(database: SupabaseClient) {
       const items=routines.filter(x=>categoryOf(x)===key);
       if(!items.length)return '';
       const icon=({explore:'🌿',relaxation:'🧘',movement:'🚲',food:'☕',culture:'🎭'} as Record<string,string>)[key]||'💡';
-      return `<details class="known-category" data-category="${e(key)}" ${openCategories.has(key)?'open':''}><summary><span>${icon} ${e(title)}</span><span class="known-count">${items.length}</span></summary><div class="known-list">${items.map(x=>`<article class="known-row"><div class="known-copy"><h3>${e(x.title)}</h3><p class="known-properties">${x.minutes} Min. · Energie ${e(energyLabels[x.energy]||x.energy)} · ${e(effortLabels[x.effort]||x.effort)} · ${e(activitySettings.find(([id])=>id===settingOf(x))![1])}</p></div><details class="known-more"><summary aria-label="Mehr zu ${e(x.title)}">Mehr</summary><div class="routine-actions">${button('routinePlan','Einplanen',x.id)}${button('editRoutine','Bearbeiten',x.id)}${button('deleteRoutine','Löschen',x.id)}</div></details></article>`).join('')}</div></details>`;
+      return `<details class="known-category" data-category="${e(key)}" ${openCategories.has(key)?'open':''}><summary><span>${icon} ${e(title)}</span><span class="known-count">${items.length}</span></summary><div class="known-list">${items.map(x=>`<article class="known-row"><div class="known-copy"><h3>${e(x.title)}</h3><p class="known-properties">${x.minutes} Min. · Energie ${e(energyLabels[x.energy]||x.energy)} · ${e(effortLabels[x.effort]||x.effort)} · ${e(activitySettings.find(([id])=>id===settingOf(x))![1])}</p></div><details class="known-more"><summary aria-label="Mehr zu ${e(x.title)}">Mehr</summary><div class="routine-actions">${button('editRoutine','Bearbeiten',x.id)}${button('deleteRoutine','Löschen',x.id)}</div></details></article>`).join('')}</div></details>`;
     }).join('');
     return `<section class="planner-box routines-box"><details id="routineLibrary" open><summary>${toolSummary('Bekanntes','',`${allRoutines.length} Ideen`)}</summary>${activityGuide.markup(allRoutines,state.activityStock??[])}<label class="known-setting-filter">Ort filtern<select id="routineSettingFilter">${options([['unknown','Alle Orte'],['inside','Drinnen möglich'],['outside','Draußen möglich']],routineSettingFilter)}</select></label><div class="known-categories">${categories||(allRoutines.length?'<p>Keine Aktivität passt zu diesem Ortsfilter.</p>':'<p>Ergänze deine erste Aktivität.</p>')}</div><details id="routineSection" ${r || routineFormOpen?'open':''}><summary>${r?`„${e(r.title)}“ bearbeiten`:'+ Neue Aktivität ergänzen'}</summary><h3>${r?'Standardaktivität bearbeiten':'Eine Standardaktivität ergänzen'}</h3><form id="routineForm" class="planner-form"><label>Aktivität<input name="title" required maxlength="200" value="${e(r?.title||'')}" placeholder="Zum Beispiel: Am Lech spazieren"></label><label>Dauer in Minuten<input name="minutes" type="number" min="5" max="1440" required value="${r?.minutes||45}"></label><label>Kategorie<select name="activityCategory">${options(activityCategories,r?categoryOf(r):'movement')}</select></label><label>Benötigte Energie<select name="energy">${options([['low','Niedrig'],['medium','Mittel'],['high','Hoch']],r?.energy||'medium')}</select></label><label>Organisationsaufwand<select name="effort">${options([['spontaneous','Direkt loslegen'],['prepare','Ein bisschen vorbereiten'],['trip','Auch etwas planen']],r?.effort||'prepare')}</select></label><label>Ort<select name="setting">${options(activitySettings,r?settingOf(r):'outside')}</select></label><label class="routine-next">Vorbereitung / nächster Schritt<input name="next" maxlength="500" value="${e(neutralDescription(r?.next||''))}" placeholder="Was musst du vorher klären?"></label><button class="planner-submit">${r?'Änderungen speichern':'Aktivität ergänzen'}</button>${button('cancelRoutine','Abbrechen')}</form></details></details></section>`;
-  }
-  function weeklyCheckMarkup() {
-    if (!weeklyCheck) return '';
-    const planned = state.entries.filter(a=>inWeek(a.date)&&a.date>=today()&&!['Abgelehnt','Gemacht'].includes(a.status));
-    const next = planned.find(a=>!a.proposedAt);
-    return `<section class="weekly-check" aria-label="Wochencheck"><h2>Fünf Minuten für deine Woche</h2><ol><li><strong>Termine prüfen</strong><p>Was steht bereits fest?</p>${button('checkAppointments','Termine öffnen')}</li><li><strong>Aktivitäten auswählen</strong><p>${planned.length ? `${planned.length} Vorhaben eingeplant.` : 'Ein oder zwei schöne Vorhaben reichen. Freie Zeit darf frei bleiben.'}</p>${button('checkPlan','Etwas planen')}</li><li><strong>Gemeinsam besprechen</strong><p>${next?e(next.title):'Aktuell kein offenes Vorhaben zu besprechen.'}</p>${next?button('checkPropose','Vorhaben öffnen',next.id):button('checkIdeas','Ideen entdecken')}</li></ol><div class="planner-actions">${button('checked',state.checks.includes(week)?'Wochencheck erledigt ✓':'Wochencheck abschließen')}${button('weeklyCheck','Schließen')}</div></section>`;
   }
   function render() {
     if(!host)return;
     const focused=document.activeElement as HTMLElement | null;
     if((draft||pendingIdea)&&focused?.dataset.action&&!focused.closest('.planning-dialog'))dialogReturn=`[data-action="${CSS.escape(focused.dataset.action)}"][data-id="${CSS.escape(focused.dataset.id||'')}"]`;
     if(!inWeek(activeDate)&&!draft&&!pendingIdea)activeDate=inWeek(today())?today():week;
-    const proposed=state.entries.filter(a=>a.proposedAt&&inWeek(actionDate(a.proposedAt))).length;
-    const done=state.entries.filter(a=>a.doneAt&&inWeek(actionDate(a.doneAt))).length;
-    const planned=state.entries.filter(a=>inWeek(a.date)&&a.date>=today()&&!['Abgelehnt','Gemacht'].includes(a.status));
-    const next=planned.find(a=>!a.proposedAt);
-    const editor=state.entries.find(a=>a.id===openEditor);
-    host.innerHTML=`<div class="planner-heading"><h1>Meine Woche</h1></div><p class="planner-message" role="status" ${routineFeedback(message)?'hidden':''}>${e(message)}</p>
-      ${undoMove?`<div class="calendar-undo" role="status">${e(undoMove.text||'Termin verschoben.')} ${button('undoCalendar','Rückgängig')}</div>`:''}${weekMarkup()}${composerMarkup()}${schedulerMarkup()}${editCalendarMarkup()}${dinnerPickerMarkup()}
-      ${editor?`<section class="planner-box selected-entry"><div class="routine-heading"><h2>Vorhaben bearbeiten</h2>${button('closeEntry','Schließen')}</div>${entryMarkup(editor)}</section>`:''}
-      ${next?`<section class="planner-next"><div><h2>Gemeinsam besprechen</h2><p class="next-activity"><strong>${e(next.title)}</strong><span>${label(next.date)}${next.start?` · ${next.start}–${next.end}`:''}</span></p></div><div class="planner-actions">${button('proposed','Als vorgeschlagen markieren',next.id)}</div></section>`:''}
-      <div class="planner-tools"><section class="tool-group" aria-label="Aktivitäten auswählen">${routinesMarkup()}</section><section class="tool-group" aria-label="Termine und Rückblick"><header><h2>Termine &amp; Rückblick</h2></header><div class="tool-group-grid">
-      <section class="planner-box"><details class="planner-setup" ${openSection==='setup'?'open':''}><summary>${toolSummary('Feste Termine eintragen','Yoga, Töpfern und Verabredungen blockieren Zeit im Kalender.')}</summary><form id="appointmentForm" class="planner-form"><label>Termin<input name="title" required maxlength="120" placeholder="Zum Beispiel: Yoga"></label><label>Person<select name="owner">${options([['Daniel','Ich'],['Eva','Eva'],['Beide','Beide']])}</select></label><label>Datum<input name="date" type="date" required value="${activeDate}"></label><label class="planner-time">Von<input name="start" type="time" required value="18:00"></label><label class="planner-time">Bis<input name="end" type="time" required value="19:30"></label><div class="planner-options" role="group" aria-label="Terminoptionen"><label class="planner-check"><input name="repeat" type="checkbox">Wöchentlich</label><label class="planner-check"><input name="uncertain" type="checkbox">Noch unklar</label></div><button class="planner-submit">Termin hinzufügen</button></form></details></section>
-      <section class="planner-box"><details class="planner-history"><summary>${toolSummary('Vorschläge & Rückmeldungen','Ideen merken und festhalten, was du vorgeschlagen hast.',`${state.entries.length} Einträge`)}</summary><div class="planner-stats"><span><strong>${proposed}</strong> vorgeschlagen</span><span><strong>${done}</strong> gemacht</span></div><p class="planner-small">Nach dem Datum der Handlung in dieser Woche.</p><form id="entryForm" class="planner-form"><label>Idee / früherer Vorschlag<input name="title" required maxlength="200" placeholder="Was möchtest du festhalten?"></label><label>Datum der Aktivität<input name="date" type="date" value="${activeDate}"></label><label>Eintragen als<select name="status">${options([['Idee gespeichert','Gemerkt'],['Vorgeschlagen','Vorgeschlagen']])}</select></label><button class="planner-submit">Im Protokoll speichern</button></form>${state.entries.map(entryMarkup).join('')||'<p>Noch keine Einträge.</p>'}</details></section></div></section></div><section class="tool-group planner-settings" aria-label="Verbindung und Sicherung"><details id="plannerSettings" ${settingsOpen || backup?'open':''}><summary>${toolSummary('Verbindung & Sicherung','Google-Abgleich und Datensicherung bei Bedarf öffnen.')}</summary><div class="settings-refresh">${button('refresh','Stand aktualisieren')}</div><div class="tool-group-grid">
-      <section class="planner-box"><details class="planner-setup"><summary>${toolSummary('Google Kalender',state.googleSync?.lastSuccess?`Freizeitplaner · letzter Abgleich ${new Date(state.googleSync.lastSuccess).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})}`:'Kalender „Freizeitplaner“ verbinden und automatisch abgleichen.',state.googleSync?.error?'Abgleich prüfen':state.googleSync?.lastSuccess?'Eingerichtet':'Einrichten')}</summary><p>${state.googleSync?.lastSuccess ? `Letzte Synchronisierung: ${e(new Date(state.googleSync.lastSuccess).toLocaleString('de-DE'))}. Änderungen werden etwa alle fünf Minuten abgeglichen.` : 'Noch nicht aktiviert. Die Verbindung benötigt einmalig deine Freigabe in Google.'}</p>${state.googleSync?.lastSuccess && Date.now()-Date.parse(state.googleSync.lastSuccess)>15*60*1000?'<p role="status">Seit mehr als 15 Minuten kein erfolgreicher Abgleich. Bitte das Google-Script und seinen Zeit-Trigger prüfen.</p>':''}${state.googleSync?.error?'<p role="alert">Der letzte Abgleich ist fehlgeschlagen. Bitte die Ausführungen im Google-Script prüfen.</p>':''}<p>Es wird ausschließlich der Google-Kalender „Freizeitplaner“ synchronisiert. Geplante Aktivitäten und feste Termine werden übertragen; gespeicherte Ideen ohne vollständigen Zeitpunkt bleiben im Planer. Google-Termine erscheinen als feste Termine. Bei gleichzeitigen Änderungen an Titel oder Zeitpunkt hat Google Vorrang; dein Vorschlagsprotokoll bleibt erhalten.</p><p>Aus Google werden die vergangenen 30 Tage und die kommenden zwölf Monate geladen. Ganztägige und mehrtägige Termine erscheinen pro Tag. Serien kannst du im Kalender einzeln oder vollständig löschen; Einzelne Termine kannst du hier verschieben. Serienregeln und mehrtägige Google-Termine bearbeitest du in Google.</p><ol><li><a href="https://script.google.com/home/start" target="_blank" rel="noopener noreferrer">Google Apps Script öffnen</a> und ein neues Projekt erstellen.</li><li><a href="/google-calendar/Code.gs" download>Verbindungscode herunterladen</a>, öffnen und vollständig in „Code.gs“ einsetzen.</li><li>Links unter „Dienste“ auf + klicken und „Google Calendar API“ hinzufügen.</li><li>Oben die Funktion <strong>install</strong> auswählen, ausführen und den Zugriff freigeben. Sie startet den ersten Abgleich und richtet den Fünf-Minuten-Takt ein.</li></ol><p class="planner-small">Kein Web-App-Deployment erforderlich. Die Verbindung läuft in deinem Google-Konto. Zum Beenden dort die Funktion „uninstall“ ausführen. Bitte nur ein Script-Projekt installieren.</p></details></section>
-      <section class="planner-box"><details class="planner-storage"><summary>${toolSummary('Planung sichern','Eine Sicherung herunterladen oder einen gespeicherten Stand importieren.')}</summary><p>Die Planung wird gemeinsam online gespeichert. Jeder mit Zugriff auf die App kann sie lesen und bearbeiten.</p>${button('export','Sicherung exportieren')}<label>Sicherung importieren<input id="plannerImport" type="file" accept="application/json,.json"></label>${backup?`<p>Sicherung mit ${backup.entries.length} Einträgen. Die Übernahme ersetzt die Planung auf allen Geräten.</p>${button('confirmImport','Diese Sicherung übernehmen')}${button('cancelImport','Abbrechen')}`:''}</details></section></div></details></section>`;
+    host.innerHTML=`<p class="planner-message" role="status" ${routineFeedback(message)?'hidden':''}>${e(message)}</p><div class="planner-tools"><section class="tool-group" aria-label="Aktivitäten auswählen">${routinesMarkup()}</section></div>`;
     renderStock();wire();setBusy();
     const content=host.querySelector<HTMLElement>('#dinnerPicker,#calendarEditor,#dayComposer,#ideaScheduler');
     if(content){
@@ -415,10 +339,6 @@ export function initPlanner(database: SupabaseClient) {
       dialog.querySelector<HTMLInputElement>(dinnerDate?'#dinnerSearch':'input[name=start]')?.focus();
     }else if(dialogReturn){host.querySelector<HTMLElement>(dialogReturn)?.focus();dialogReturn='';}
 
-  }
-  function entryMarkup(a: Entry) {
-    const stamp = (s: string) => s ? new Intl.DateTimeFormat('de-DE',{timeZone:'Europe/Berlin',dateStyle:'short',timeStyle:'short'}).format(new Date(s)) : 'Noch nicht';
-    return `<article class="planner-entry" data-entry="${e(a.id)}"><details class="planner-entry-editor" ${openEditor === a.id ? 'open' : ''}><summary><span>${e(a.title)}</span><span class="planner-entry-meta">${label(a.date)}${a.start ? ` · ${a.start}–${a.end}` : ''} · ${e(entryLabel(a))}</span></summary><div class="planner-form"><label>Status<select data-entry-field="status">${options(statuses.map(s=>[s,s==='Idee gespeichert'?(a.date&&a.start?'Geplant':'Gemerkt'):s]),a.status)}</select></label>${button('editEntryTime','Termin ändern',a.id)}<label>Nächster Schritt<input data-entry-field="next" value="${e(neutralDescription(a.next))}" maxlength="500"></label><label>Notiz / Rückmeldung<textarea data-entry-field="note" maxlength="2000" placeholder="Was wurde besprochen?">${e(a.note)}</textarea></label></div><p class="planner-small">Vorgeschlagen: ${stamp(a.proposedAt)} · Organisiert: ${stamp(a.organizedAt)} · Gemacht: ${stamp(a.doneAt)}</p><details><summary>Vorschlagsdatum nachtragen oder korrigieren</summary><label>Datum<input type="date" data-entry-field="proposedDate" max="${today()}" value="${actionDate(a.proposedAt)}"></label><p class="planner-small">Eine Erinnerung an einen früheren Vorschlag nachtragen. Leeres Datum entfernt die Markierung „vorgeschlagen“.</p></details><div class="planner-actions">${!a.proposedAt ? button('proposed','Vorgeschlagen',a.id) : ''}${safeUrl(a.url) ? `<a href="${e(a.url)}" target="_blank" rel="noopener noreferrer">Quelle</a>` : ''}${a.date && a.start && !state.googleSync?.lastSuccess ? button('activityCalendar','In Kalender übernehmen',a.id) : ''}${button('deleteEntry','Eintrag entfernen',a.id)}</div></details></article>`;
   }
   function wireCalendar() {
     const form=host?.querySelector<HTMLFormElement>('#calendarEditForm');
@@ -443,7 +363,6 @@ export function initPlanner(database: SupabaseClient) {
     });
   }
   function wire() {
-    host?.querySelector<HTMLDetailsElement>('#plannerSettings')?.addEventListener('toggle',ev=>{settingsOpen=(ev.currentTarget as HTMLDetailsElement).open;});
     if (!host) return;
     wireCalendar();wireDinner();
     host.querySelectorAll<HTMLDetailsElement>('.planner-entry-editor').forEach(el=>el.addEventListener('toggle',()=>{if(el.open)openEditor=el.closest<HTMLElement>('[data-entry]')?.dataset.entry||'';}));
@@ -463,7 +382,6 @@ export function initPlanner(database: SupabaseClient) {
     host.querySelector<HTMLFormElement>('#customPlanForm')?.addEventListener('submit',ev=>{
       ev.preventDefault();if(!draft||!draftReady||clash(draft)||occupied(draft))return;const d=new FormData(ev.currentTarget as HTMLFormElement);const title=String(d.get('title')).trim();if(title)void addEntry(title,'','Idee gespeichert',draft);
     });
-    host.querySelector<HTMLSelectElement>('#ideaSlot')?.addEventListener('change',ev=>{scheduleSlot=(ev.target as HTMLSelectElement).value;render();});
     host.querySelector<HTMLFormElement>('#ideaScheduleForm')?.addEventListener('submit',async ev=>{
       ev.preventDefault();if(!pendingIdea)return;
       const form=ev.currentTarget as HTMLFormElement;const d=new FormData(form);const idea=pendingIdea;
@@ -520,7 +438,6 @@ export function initPlanner(database: SupabaseClient) {
     })));
     host.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(b=>b.addEventListener('click',async ()=>{
       const action=b.dataset.action,id=b.dataset.id;
-      if(action==='stockPlan'){const x=usableStock(state.activityStock??[],stockSources().decisions).find(a=>a.id===id);if(x)planStock(x);return;}
       if(activityGuide.handle(action||'',id)){render();host.querySelector<HTMLElement>('[data-guide-focus]')?.focus();return;}
       if(action==='chooseDinner'){openDinner(id!);return;}
       if(action==='moveCurrentDinner'){await moveDinner(id!,dinnerDate);return;}
@@ -610,18 +527,19 @@ export function initPlanner(database: SupabaseClient) {
     download(folded,entry?'freizeit-aktivitaet.ics':'freizeit-planungserinnerungen.ics','text/calendar');
     message=entry?'Kalenderdatei erstellt. Bitte in deinen Kalender importieren.':'Kalenderdatei erstellt: Sonntag und Mittwoch um 18 Uhr, jeweils mit Erinnerung. Bitte importieren; erst danach erinnert dich dein Kalender.';render();
   }
-  function planStock(x:StockItem){
-    beginPlanning({title:x.title,url:x.url,next:x.note+' Öffnung, Wetter und gegebenenfalls Route/Sperren prüfen.',outdoor:x.setting!=='inside',minutes:x.minutes===null||x.travelMinutes===null?undefined:x.minutes+x.travelMinutes,source:'stock',flexible:true});
-  }
   function renderStock(){
     if(!stockHost)return;
-    stockHost.innerHTML=stockMarkup(state.activityStock??[],stockDraft,loaded,saving,stockMessage);
+    const openGroups=new Set(Array.from(stockHost.querySelectorAll<HTMLDetailsElement>('.stock-category[open]')).map(x=>x.dataset.stockCategory));
+    stockHost.innerHTML=stockMarkup(state.activityStock??[],stockDraft,loaded,saving,stockMessage,stockView);
+    stockHost.querySelectorAll<HTMLDetailsElement>('.stock-category').forEach(x=>{x.open=openGroups.has(x.dataset.stockCategory);});
+    const dialog=stockHost.querySelector<HTMLDialogElement>('#stockDialog');
+    if(dialog){dialog.showModal();dialog.addEventListener('cancel',ev=>{ev.preventDefault();if(saving)return;stockDraft=null;stockView=null;renderStock();});}
     stockHost.querySelector<HTMLFormElement>('#stockForm')?.addEventListener('submit',async ev=>{
       ev.preventDefault();if(!stockDraft||!loaded||saving)return;
       const d=new FormData(ev.currentTarget as HTMLFormElement);
       const number=(key:string)=>String(d.get(key)||'').trim()===''?null:Number(d.get(key));
-      const row={...stockDraft,unavailable:d.has('unavailable'),title:String(d.get('title')).trim(),kind:String(d.get('kind')),url:String(d.get('url')).trim(),minutes:number('minutes'),travelMinutes:number('travelMinutes'),distanceKm:number('distanceKm'),elevationM:number('elevationM'),setting:String(d.get('setting')),energy:String(d.get('energy')),effort:String(d.get('effort')),note:String(d.get('note')).trim()};
-      if(!validStockItem(row)){stockMessage='Bitte gültige Angaben eingeben. Unbekannte Werte dürfen leer bleiben.';stockHost.querySelector<HTMLElement>('[role=status]')!.textContent=stockMessage;return;}
+      const row={...stockDraft,unavailable:d.has('unavailable'),title:String(d.get('title')).trim(),kind:String(d.get('kind')),url:String(d.get('url')).trim(),minutes:number('minutes'),distanceKm:number('distanceKm'),elevationM:number('elevationM'),setting:String(d.get('setting')),energy:String(d.get('energy')),effort:String(d.get('effort')),note:String(d.get('note')).trim()};
+      if(!validStockItem(row)){stockMessage='Bitte gültige Angaben eingeben. Unbekannte Werte dürfen leer bleiben.';stockHost.querySelector<HTMLElement>('.stock-form-message')!.textContent=stockMessage;return;}
       stockDraft=row;
       if(await mutate(()=>{const list=state.activityStock??[];const i=list.findIndex(a=>a.id===row.id);if(i<0)list.push(row);else list[i]=row;state.activityStock=list;},'Vorratsidee gespeichert.')){stockDraft=null;stockMessage='Vorratsidee gespeichert. Auf allen Geräten verfügbar.';}
       else stockMessage=message;
@@ -631,39 +549,26 @@ export function initPlanner(database: SupabaseClient) {
   stockHost?.addEventListener('click',async ev=>{
     const b=(ev.target as Element).closest<HTMLButtonElement>('[data-stock-action]');if(!b||b.disabled)return;
     const action=b.dataset.stockAction,id=b.dataset.stockId;
-    if(action==='cancel'){stockDraft=null;stockMessage='';renderStock();return;}
+    if(action==='cancel'){if(saving)return;const previous=stockDraft?.id||stockView;stockDraft=null;stockView=null;stockMessage='';renderStock();Array.from(stockHost.querySelectorAll<HTMLButtonElement>('[data-stock-action=details]')).find(b=>b.dataset.stockId===previous)?.focus();return;}
     if(!loaded||saving)return;
+    if(action==='new'){stockView=null;}
     if(action==='new')stockDraft={id:crypto.randomUUID(),title:'',kind:stockKinds.find(([kind])=>kind===b.dataset.stockKind)?.[0]??'walk',url:'',minutes:null,travelMinutes:null,distanceKm:null,elevationM:null,setting:'outside',energy:'low',effort:'spontaneous',note:''};
     if(action==='import'){const sources=stockSources();const a=sources.decisions.ready?sources.favorites.find(x=>x.suggestionId===id&&!sources.decisions.hidden.has(x.suggestionId)&&(sources.decisions.ratings.get(x.suggestionId)??0)>=0):null;if(a)stockDraft=draftFromFavorite(a,crypto.randomUUID());}
     const row=(state.activityStock??[]).find(x=>x.id===id);
-    if(action==='edit'&&row)stockDraft={...row};
-    if(action==='plan'&&row&&usableStock([row],stockSources().decisions).length){planStock(row);return;}
-    if(action==='remove'&&row){if(!confirm('Nur diese Vorratsidee entfernen? Merkliste und geplante Vorhaben bleiben erhalten.'))return;if(await mutate(()=>{state.activityStock=state.activityStock?.filter(x=>x.id!==id);}))stockMessage='Aus dem Vorrat entfernt.';else stockMessage=message;}
+    if(action==='details'&&row){stockDraft=null;stockView=row.id;}
+    if(action==='edit'&&row){stockView=null;stockDraft={...row};}
+    if(action==='remove'&&row){if(!confirm('Nur diese Vorratsidee entfernen? Merkliste und geplante Vorhaben bleiben erhalten.'))return;if(await mutate(()=>{state.activityStock=state.activityStock?.filter(x=>x.id!==id);})) {stockView=null;stockMessage='Aus dem Vorrat entfernt.';}else stockMessage=message;}
     renderStock();stockHost.querySelector<HTMLInputElement>('input[name=title]')?.focus();
   });
-  document.addEventListener('activity-stock-sources',()=>{if(!stockDraft){renderStock();if(!isEditing())render();}});
-  // Preserve the existing recommendation and favorites flows. Add personal actions separately.
-  const enhance=()=>document.querySelectorAll<HTMLButtonElement>('[data-favorite],[data-plan-favorite]').forEach(b=>{
-    const saved=b.hasAttribute('data-plan-favorite');
-    if(!b.dataset.title||saved&&b.dataset.plannerWired||!saved&&b.parentElement?.querySelector('[data-personal-action]'))return;
-    const action=saved?b:document.createElement('button');action.type='button';action.className='details-btn';action.dataset.personalAction='true';action.textContent='Einplanen';
-    if(saved)b.dataset.plannerWired='true';
-    action.addEventListener('click',()=>{
-      const original=saved?Array.from(document.querySelectorAll<HTMLButtonElement>('.filterable [data-favorite]')).find(source=>source.dataset.id===b.dataset.suggestionId):b;
-      const card=original?.closest<HTMLElement>('.filterable');const date=card?.dataset.date;const category=card?.dataset.category||b.dataset.category||'';
-      beginPlanning({title:b.dataset.title!,url:b.dataset.url||'',next:'Uhrzeit, Dauer, Anfahrt und Verfügbarkeit prüfen; anschließend konkret vorschlagen.',outdoor:['outdoor','wandern','fahrrad','kajak'].includes(category.toLowerCase()),source:'recommendation',minutes:Number(card?.dataset.tourMinutes)||undefined,tourKind:card?.classList.contains('tour-card')?card.dataset.category:undefined,flexible:card?.dataset.flexibleTour==='true',date:card?.dataset.flexibleTour==='true'?undefined:validDate(date)?date:undefined,start:validTime(original?.dataset.eventStart)?original?.dataset.eventStart:undefined});
-    });
-    action.disabled=!loaded||saving;if(!saved)b.insertAdjacentElement('afterend',action);
-  });
-  new MutationObserver(records=>{enhance();if(!isEditing()&&records.some(record=>record.target instanceof Element && record.target.closest('#topCards,#alternativeList,#hikeGroup,#bikeGroup')))render();}).observe(document.querySelector('#app')!,{childList:true,subtree:true});
+  document.addEventListener('activity-stock-sources',()=>{if(!stockDraft&&!stockView){renderStock();if(!isEditing())render();}});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)void refreshCloud();});
   window.addEventListener('focus',()=>{void refreshCloud();});
   window.setInterval(()=>{if(!document.hidden)void refreshCloud();},15000);
-  render();enhance();setBusy();
+  render();setBusy();
   void refreshCloud();
-  const params=new URLSearchParams({latitude:'48.3705',longitude:'10.8978',daily:'precipitation_probability_max',timezone:'Europe/Berlin',forecast_days:'14'});
-  fetch('https://api.open-meteo.com/v1/forecast?'+params).then(r=>{if(!r.ok)throw Error();return r.json();}).then(data=>{if(data.daily?.time)rain=Object.fromEntries(data.daily.time.map((d:string,i:number)=>[d,data.daily.precipitation_probability_max[i]]));if(!host.contains(document.activeElement))render();}).catch(()=>{});
+
 }
+
 
 
 

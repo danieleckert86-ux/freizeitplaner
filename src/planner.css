@@ -190,3 +190,14 @@ body:has(.planning-dialog[open]){overflow:hidden}
 #personalPlanner .dinner-recipe strong{font-size:.85rem;line-height:1.35;display:block}
 #personalPlanner .dinner-recipe small{display:block;font-size:.75rem;color:var(--muted);margin-top:6px}
 @media(max-width:700px){#personalPlanner .dinner-recipes{grid-template-columns:1fr}.day-dinner{padding:12px}}
+
+
+/* A small, local decision aid above the existing compact collection. */
+.activity-guide-start { margin: 1rem 0; }
+.activity-guide { margin: 1rem 0; padding: 1rem; border: 1px solid #cbd5e1; border-radius: 12px; background: #f8fafc; }
+.activity-guide h3 { margin: .4rem 0 1rem; }
+.activity-guide-options { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: .65rem; margin-bottom: 1rem; }
+.activity-guide-options button { min-height: 48px; text-align: left; }
+.activity-guide-pick { padding: .8rem 0; border-bottom: 1px solid #cbd5e1; }
+.activity-guide-pick h4 { font-size: 1.1rem; margin: .5rem 0; }
+.activity-guide button:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }

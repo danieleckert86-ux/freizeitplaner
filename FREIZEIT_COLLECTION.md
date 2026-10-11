@@ -33,3 +33,16 @@ Kein neuer Datenbankendpunkt, keine Migration oder zusätzliche Berechtigung, ke
 Validierung: 11/11 Tests, npx tsc --noEmit und npm run build bestanden. Tests prüfen vollständige Seed-Liste, Feldvalidität, Erhalt eigener Änderungen, Duplikate und dauerhaftes Löschen nach Reload. Produktiver lesender SQL-Check bestätigt 9 bestehende Routinen und noch keinen Marker; keine produktiven Planungsdaten verändert. Kein Geräte-/Browser-End-to-End-Test. Veröffentlichung erfolgt separat als Draft-PR; Integration und Deployment durch00.
 
 Bekanntes wird kompakt nach Draußen, Bewegung, Genuss und Kultur gruppiert. Kategorien sind zunächst zugeklappt; pro Idee stehen Titel, Richtdauer und Mehr-Menü in einer Zeile. Bearbeiten und Löschen verwenden unverändert die gemeinsame Speicherung.
+
+
+## Geführte Entscheidungshilfe (Modul 04, 11.10.2026)
+
+Im Reiter **Bekanntes** öffnet „Hilf mir entscheiden“ drei kurze Fragen: Ruhe/Bewegung/etwas Schönes/offen, Zeitrahmen und drinnen/draußen/offen. „Weiß ich nicht“ ist bei jeder Frage möglich. Das Ergebnis zeigt einen Hauptvorschlag und höchstens eine andere Alternative, mit Zurück, Schließen und Neustart. Keine neue Recherche und kein KI-Aufruf.
+
+`src/activity-guide.ts` verwendet ausschließlich die aktuell geladenen, bearbeitbaren Standardaktivitäten. Keine erneute Aussaat im Fragebogen: gelöschte Aktivitäten bleiben entfernt; geänderte Dauer und Draußen-Markierung werden berücksichtigt. Zeit und Ort sind harte Filter; Bewegung nutzt Kategorie/Bewegungsbegriffe, Ruhe nur niedrige Energie, spontane Vorbereitung und erkennbare ruhige Tätigkeiten. Innerhalb der passenden Menge bevorzugt die Auswahl wenig Aufwand; bei Gleichstand kurze Richtdauer und stabile ID. Die Alternative kommt möglichst aus einer anderen Kategorie. Dies ist eine einfache Entscheidungshilfe, keine medizinische Einschätzung und kein zusätzlicher Geschmacks- oder Eventscore. Bei fehlender passender Aktivität werden Antworten nicht stillschweigend ignoriert.
+
+Antworten bleiben im Speicher dieser geöffneten App; keine Speicherung von Befinden, Bewertungen oder Historie. Der Fragebogen schreibt keine Planung. „Einplanen“ nutzt den vorhandenen Routine-Dialog und dessen ausdrückliche Speicherung sowie Kalenderkonfliktprüfung. Leere Kalendertage werden nicht als frei angenommen. Richtdauer, Öffnung, Anfahrt, Wetter und Bedingungen sind keine neuen verifizierten Tatsachen; Hinweise fordern gegebenenfalls die Prüfung vor der Durchführung. Ein kurzes unverbindliches Ausprobieren wird nur vorgeschlagen, soweit die Aktivität es erlaubt.
+
+Die bestehende kompakte Kategorienliste, Sammlung, Vormerkungen, Bewertungen und Kalenderfunktionen bleiben erhalten. Kein Schema, Endpunkt, Budget, ModuleResult oder Morgenmail-Verhalten geändert.
+
+Validierung: 15/15 Tests (`npm test`), `npx tsc --noEmit` und `npm run build` erfolgreich. Vier neue Tests prüfen Grenzen und Änderungen, ruhige Auswahl, unklare Antworten, gelöschte Ideen, unveränderte Eingaben, den Drei-Schritt-Ablauf, Neustart/Zurück und HTML-Escaping. Ein vollständiger Browser-Klicktest ist hier nicht erfolgt (kein installiertes Browser-Binary); vor Aktivierung in der Preview drei Fragen → Ergebnis → Einplanen/Abbrechen auf Mobil/Desktop prüfen. Keine produktiven privaten Daten oder Testmail verwendet.

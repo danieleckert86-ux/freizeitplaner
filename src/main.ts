@@ -963,7 +963,7 @@ function enhanceDetails() {
     button.textContent = 'Details';
 
     const source = actions.querySelector('a.info-link');
-    actions.insertBefore(button, source);
+    actions.insertBefore(button, source?.parentElement === actions ? source : null);
     button.addEventListener('click', () => openDetails(item));
   });
 }

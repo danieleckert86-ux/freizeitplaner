@@ -62,6 +62,9 @@ function placeMarkup(item: Parameters<typeof recommendationPlace>[0], section = 
   return '<div class="card-place"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 10c0 6-8 11-8 11S4 16 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>' + dataEscape(place) + (travel ? '<small>' + dataEscape(travel) + '</small>' : '') + '</span></div>';
 }
 
+function stockCopyMarkup(f:{id:string;title:string;category:string;description:string;url:string},meta:readonly string[]=[],snapshot:unknown=null){
+ return '<button type="button" class="stock-copy-btn" data-stock-copy data-id="'+dataEscape(f.id)+'" data-title="'+dataEscape(f.title)+'" data-category="'+dataEscape(f.category)+'" data-description="'+dataEscape(f.description)+'" data-url="'+dataEscape(f.url)+'" data-meta="'+dataEscape(JSON.stringify(meta))+'" data-snapshot="'+dataEscape(JSON.stringify(snapshot))+'">In Orte & Touren übernehmen</button>';
+}
 function favoriteMarkup(item: Recommendation, compact = false) {
   const f = item.favorite;
   return '<button class="favorite-btn' + (compact ? ' compact' : '') + '" type="button" data-favorite ' +
@@ -153,7 +156,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       '<div class="tour-top"><span class="tour-category">' + categoryIcon(item.category, item.label || item.title) + dataEscape(item.label) + '</span><span class="meta-label">' + dataEscape(item.metaLabel) + '</span></div>' +
       '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div><h4>' + dataEscape(item.title) + '</h4>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' +
       '<p class="collection-condition">' + dataEscape(item.conditionsStatus||'Vor dem Ausflug Wetter, Sperrungen und Routenverlauf prüfen. Keine aktuelle Freigabe.') + '</p><div class="tour-meta">' + (item.meta ?? []).map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +
-      '<div class="item-actions">' + sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, item.category) + favoriteMarkup(item, true) + '</div></article>'
+      '<div class="item-actions">' + sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, item.category) + stockCopyMarkup({id:item.favorite.id,title:item.title,category:item.favorite.categoryLabel,description:item.description,url:item.favorite.url},item.meta??[],item) + '</div></article>'
     ).join('');
   };
   renderTours('#hikeGroup', data.hikes);
@@ -177,7 +180,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       (item.imdbRating ? '<a class="imdb-rating" href="' + dataEscape(item.imdbUrl || item.url) + '" target="_blank" rel="noopener noreferrer">IMDb ' + dataEscape(item.imdbRating.toFixed(1).replace('.', ',')) + '</a>' : '') +
       (item.trailerUrl ? '<a class="trailer-link trailer-meta" href="' + dataEscape(item.trailerUrl) + '" target="_blank" rel="noopener noreferrer">▶ Trailer</a>' : '') + '</div>' +
       '<div class="lifestyle-actions"><div class="lifestyle-links"><a class="info-link" href="' + dataEscape(item.url) + '" target="_blank" rel="noopener noreferrer">Mehr erfahren</a></div>' +
-      '<div class="lifestyle-card-buttons">' + ratingMarkup(item.id, item.title, section) + lifestyleFavoriteMarkup(item, section) +
+      '<div class="lifestyle-card-buttons">' + ratingMarkup(item.id, item.title, section) + (section==='restaurants'?stockCopyMarkup({id:'lifestyle-'+item.id,title:item.title,category:/caf[eé]/i.test(item.type)?'Café':'Restaurant',description:item.description,url:item.url},item.meta,item):lifestyleFavoriteMarkup(item,section)) +
       '<button class="hide-card-btn" type="button" data-hide-card data-id="' + dataEscape(item.id) + '" data-section="' + section + '" data-title="' + dataEscape(item.title) + '">Ausblenden</button></div></div></article>'
     ).join('');
   };
@@ -400,6 +403,7 @@ const resultCount = document.querySelector<HTMLElement>('#resultCount');
 const resetFilters = document.querySelector<HTMLButtonElement>('#resetFilters');
 
 refreshFinder();renderFavorites();
+document.dispatchEvent(new Event('stock-copy-ready'));
 const favoriteButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-favorite]'));
 function berlinDateIso(date = new Date()) {
   const parts = new Intl.DateTimeFormat('en-GB', {
@@ -1017,6 +1021,12 @@ document.querySelector<HTMLSelectElement>('#eventPeriod')?.addEventListener('cha
     card.hidden = !show; if (show) visible++;
   });
   document.querySelector<HTMLElement>('#eventsEmpty')!.hidden = visible > 0;
+});
+document.addEventListener('click',ev=>{
+ const button=(ev.target as Element).closest<HTMLButtonElement>('[data-stock-copy]');if(!button||button.disabled)return;
+ button.disabled=true;button.textContent='Wird übernommen …';
+ const favorite={suggestionId:button.dataset.id||'',title:button.dataset.title||'',category:button.dataset.category||'',description:button.dataset.description||'',url:button.dataset.url||''};
+ document.dispatchEvent(new CustomEvent('stock-copy-request',{detail:{favorite,meta:JSON.parse(button.dataset.meta||'[]'),snapshot:JSON.parse(button.dataset.snapshot||'null'),done:(ok:boolean,message:string)=>{button.disabled=ok;button.textContent=ok?'In Orte & Touren gespeichert':'Erneut übernehmen';button.title=message;const status=document.querySelector<HTMLElement>('#stockCopyStatus');if(status)status.textContent=message;}}}));
 });
 void bootstrap();
 

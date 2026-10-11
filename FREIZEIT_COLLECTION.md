@@ -121,3 +121,10 @@ Nur gemerkt filtert jeden Bereich. Sterne an eigenen Standardaktivitäten und Vo
 Validierung: 40 Tests, TypeScript und Produktionsbuild erfolgreich. Zwei-Bereiche-Navigation, Filter, echte Kategorien und Dialoge werden zusätzlich auf der veröffentlichten Oberfläche geprüft. Keine Recherche, Mail oder Rücksetzung.
 
 Liveprüfung: beide Reiter, Veranstaltungs-/Kino-/Streamingauswahl, Nur gemerkt, Erhalt der vier bisherigen Favoriten, Detailfenster und Abbrechen erfolgreich. Keine produktive Sternänderung oder Speicherung zum Test. Leere Sternkategorien entfallen im Filter; gespeichertes Kinoprogramm wird ausdrücklich als gespeicherter Stand bezeichnet.
+
+## Direkte Übernahme von Rechercheideen · 11.10.2026
+Wander-, Fahrrad- und Restaurant-/Café-Recherchekarten bieten In Orte & Touren übernehmen. Direkte Speicherung im bestehenden gemeinsamen Payload mit Revisionsschutz, ohne Merken als Zwischenschritt oder Pflichtformular. Original-Link, Beschreibung, Quellen-ID und explizite Metadaten bleiben erhalten. Exakte km/hm/Minuten aus Metadaten werden übernommen; Zeitspannen/fehlende Werte bleiben unbekannt. Keine Prüfung erneuert, keine bezahlte Recherche. Bereits gespeicherte Quellen-ID oder gleichnamiger eigener Ort verhindert Duplikate und überschreibt keine eigenen Angaben. Fehlgeschlagene Speicherung wird nicht als Erfolg dargestellt.
+
+Nutzerpräzisierung: Übernehmen ersetzt Merken auf Touren/Gastronomie-Karten. Merken bleibt für zeitabhängige Angebote. Vollständiger öffentlicher Vorschlag wird als privater Quellen-Snapshot erhalten; Beschreibung, Metadaten, Bedingungen und sicherer Original-Link sind im Detaildialog sichtbar, die Listenzeile bleibt kurz. Bei gleichnamigem vorhandenem Ort werden eigene Angaben erhalten, nur unbekannte Werte ergänzt und die Originalinformationen zusätzlich gespeichert. Keine Datenbankmigration.
+
+Validierung: 42 Tests einschließlich Original-Snapshot, sicherer Links im Dialog, expliziter Tourdaten und Duplikaterkennung; TypeScript und Produktionsbuild erfolgreich. Keine produktiven Schreibtests oder Recherche.

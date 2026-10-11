@@ -121,3 +121,22 @@ test('saved stock filter preserves the collection and selects explicit stars onl
  assert.ok(html.includes('Lieblingscafé'));assert.ok(!html.includes('Anderes Café'));assert.equal(JSON.stringify(rows),before);
  assert.equal(withMapsStock({stockMapsVersion:1,activityStock:rows}).activityStock[0].favorite,true);
 });
+
+import {stockFromSuggestion,existingStockSuggestion} from '../src/activity-stock.ts';
+test('one-click copy keeps explicit route facts, leaves ranges unknown and does not overwrite existing places',()=>{
+ const suggestion={suggestionId:'route-1',title:'Lechrunde',category:'Fahrrad',description:'Rundtour',url:'https://example.com/route'};
+ const copy=stockFromSuggestion(suggestion,'new',['12,4 km','240 hm','90 min']);
+ assert.ok(copy);assert.equal(copy.distanceKm,12.4);assert.equal(copy.elevationM,240);assert.equal(copy.minutes,90);assert.equal(copy.sourceId,'route-1');assert.equal(copy.travelMinutes,null);
+ assert.equal(stockFromSuggestion(suggestion,'new',['3–4 h']).minutes,null);
+ const own=idea('own',{title:' LECHRUNDE ',note:'Meine Änderung'});assert.equal(existingStockSuggestion([own],suggestion),own);assert.equal(own.note,'Meine Änderung');
+ assert.equal(stockFromSuggestion({...suggestion,category:'Musik'},'event'),null);
+});
+
+test('import retains the original recommendation and exposes safe links only inside details',()=>{
+ const s={suggestionId:'tour',title:'Tour',category:'Wandern',description:'Kurztext',url:'https://example.com/tour'};
+ const original={description:'Vollständige Beschreibung',why:'Gipfeltour',conditionsStatus:'Sperren ungeprüft',meta:['12 km'],url:s.url,otherConfirmedFact:'bleibt erhalten'};
+ const row=stockFromSuggestion(s,'new',original.meta,original);assert.deepEqual(row.sourceDetails,[original]);original.description='später geändert';assert.equal(row.sourceDetails[0].description,'Vollständige Beschreibung');
+ const overview=stockMarkup([row],null,true,false,'');assert.ok(!overview.includes('Vollständige Beschreibung'));assert.ok(!overview.includes('href="https://example.com/tour"'));
+ const detail=stockMarkup([row],null,true,false,'',row.id);assert.ok(detail.includes('Vollständige Beschreibung'));assert.ok(detail.includes('Sperren ungeprüft'));assert.ok(detail.includes('href="https://example.com/tour"'));
+ const edit=JSON.parse(JSON.stringify({...row,title:'Mein Titel',note:'Eigene Notiz'}));assert.equal(edit.sourceDetails[0].otherConfirmedFact,'bleibt erhalten');
+});

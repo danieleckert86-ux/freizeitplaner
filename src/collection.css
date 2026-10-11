@@ -25,3 +25,5 @@
 #personalPlanner .known-more .routine-actions button{min-height:44px;font-size:12px}
 
 .main-nav{grid-template-columns:repeat(2,minmax(0,1fr))}.finder-toolbar{display:flex;gap:16px;justify-content:space-between;align-items:center;margin:16px 0;flex-wrap:wrap}.finder-toolbar label{display:flex;gap:8px;align-items:center;font-size:13px;color:#52675e}.finder-toolbar select{padding:9px;border:1px solid #d9e3dd;border-radius:8px;background:white}.finder-toolbar [hidden]{display:none!important}.media-switch{display:none!important}#activityStock{margin-top:20px}.finder-star{border:0;background:transparent;color:#557366;font-size:20px;min-width:44px;min-height:44px}.finder-star[aria-pressed=true]{color:#997422}.stock-row{grid-template-columns:minmax(0,1fr) auto auto!important}
+
+.stock-copy-btn{padding:9px 12px;border:1px solid #cadbd0;border-radius:9px;background:#edf4ef;color:#315b43;font-size:12px;min-height:44px}.stock-copy-btn:disabled{opacity:.65}#stockCopyStatus:empty{display:none}

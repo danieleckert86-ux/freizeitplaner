@@ -1,5 +1,5 @@
 import {withMapsStock} from './maps-stock';
-import {stockMarkup,stockSources,stockKinds,validStockItem,draftFromFavorite, type StockItem} from './activity-stock';
+import {stockFromSuggestion,existingStockSuggestion,type StockFavorite,stockMarkup,stockSources,stockKinds,validStockItem,draftFromFavorite, type StockItem} from './activity-stock';
 import './planner.css';
 import {withKnownActivities, type KnownActivity} from './known-activities';
 import {activityCategories,activitySettings,categoryOf,settingOf,matchesSetting,legacyMood,validActivityProperties,energyLabels,effortLabels, type ActivityCategory, type ActivitySetting} from './activity-properties';
@@ -531,7 +531,28 @@ export function initPlanner(database: SupabaseClient) {
     download(folded,entry?'freizeit-aktivitaet.ics':'freizeit-planungserinnerungen.ics','text/calendar');
     message=entry?'Kalenderdatei erstellt. Bitte in deinen Kalender importieren.':'Kalenderdatei erstellt: Sonntag und Mittwoch um 18 Uhr, jeweils mit Erinnerung. Bitte importieren; erst danach erinnert dich dein Kalender.';render();
   }
+  function syncStockCopyButtons(){
+    document.querySelectorAll<HTMLButtonElement>('[data-stock-copy]').forEach(b=>{
+      const existing=existingStockSuggestion(state.activityStock??[],{suggestionId:b.dataset.id||'',title:'',category:'',description:'',url:''});
+      const exists=existing?.importedSourceIds?.includes(b.dataset.id||'');
+      b.disabled=!loaded||saving||!!exists;b.textContent=exists?'In Orte & Touren gespeichert':'In Orte & Touren übernehmen';
+    });
+  }
+  document.addEventListener('stock-copy-ready',syncStockCopyButtons);
+  document.addEventListener('stock-copy-request',async ev=>{
+    const {favorite,meta,snapshot,done}=(ev as CustomEvent<{favorite:StockFavorite;meta:string[];snapshot:Record<string,unknown>|null;done:(ok:boolean,message:string)=>void}>).detail;
+    if(!loaded||saving){done(false,'Die Sammlung wird noch geladen oder gespeichert. Bitte kurz warten.');return;}
+    const sources=stockSources();
+    if(!sources.decisions.ready||sources.decisions.hidden.has(favorite.suggestionId)||(sources.decisions.ratings.get(favorite.suggestionId)??0)<0){done(false,'Dieser Vorschlag ist ausgeblendet, abgelehnt oder noch nicht prüfbar.');return;}
+    const existing=existingStockSuggestion(state.activityStock??[],favorite);
+    if(existing?.importedSourceIds?.includes(favorite.suggestionId)){done(true,'Bereits in Orte & Touren vorhanden.');syncStockCopyButtons();return;}
+    const row=stockFromSuggestion(favorite,crypto.randomUUID(),meta,snapshot);
+    if(!row){done(false,'Die Angaben konnten nicht übernommen werden.');return;}
+    const ok=await mutate(()=>{if(existing){existing.importedSourceIds=[...new Set([...(existing.importedSourceIds??[]),favorite.suggestionId])];existing.sourceDetails=[...(existing.sourceDetails??[]),...(row.sourceDetails??[])];if(!existing.url)existing.url=row.url;if(!existing.sourceId)existing.sourceId=row.sourceId;if(existing.minutes===null)existing.minutes=row.minutes;if(existing.distanceKm===null)existing.distanceKm=row.distanceKm;if(existing.elevationM===null)existing.elevationM=row.elevationM;}else state.activityStock=[...(state.activityStock??[]),row];},'In Orte & Touren gespeichert. Auf allen Geräten verfügbar.');
+    done(ok,ok?'In Orte & Touren gespeichert. Auf allen Geräten verfügbar.':message);syncStockCopyButtons();
+  });
   function renderStock(){
+    syncStockCopyButtons();
     if(!stockHost)return;
     const openGroups=new Set(Array.from(stockHost.querySelectorAll<HTMLDetailsElement>('.stock-category[open]')).map(x=>x.dataset.stockCategory));
     stockHost.innerHTML=stockMarkup(state.activityStock??[],stockDraft,loaded,saving,stockMessage,stockView,onlySaved);

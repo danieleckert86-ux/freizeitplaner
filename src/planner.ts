@@ -1,4 +1,5 @@
 import './planner.css';
+import {withKnownActivities} from './known-activities';
 import { neutralDescription } from './wording';
 import { categoryIcon } from './category-icons';
 import { loadDinnerRecipes, recipeLink, type DinnerRecipe } from './dinner-recipes';
@@ -9,7 +10,7 @@ type Slot = { id: string; date: string; start: string; end: string; energy: stri
 type Entry = { id: string; title: string; url: string; date: string; start: string; end: string; slotId: string; status: string; createdAt: string; proposedAt: string; organizedAt: string; doneAt: string; note: string; next: string; routineId?: string; source?: string };
 type Routine = { id: string; title: string; minutes: number; energy: string; mood: string; effort: string; outdoor: boolean; next: string };
 type Dinner = {id:string;date:string;recipeId:string;title:string};
-type State = { dinners?: Dinner[]; routines?: Routine[]; version: 1; appointments: Appointment[]; slots: Slot[]; entries: Entry[]; checks: string[]; googleDeleteSeries?: string[]; googleSync?: { lastSuccess: string; error?: string } };
+type State = { knownActivitiesVersion?:number; dinners?: Dinner[]; routines?: Routine[]; version: 1; appointments: Appointment[]; slots: Slot[]; entries: Entry[]; checks: string[]; googleDeleteSeries?: string[]; googleSync?: { lastSuccess: string; error?: string } };
 type Idea = { title: string; url: string; next: string; outdoor: boolean; minutes?: number; source?: string; routineId?: string; date?: string; start?: string; tourKind?: string; flexible?: boolean };
 const defaultRoutines = (): Routine[] => [
   {id:'walk',title:'Spazieren durch die Stadt',minutes:45,energy:'low',mood:'outdoor',effort:'spontaneous',outdoor:true,next:'Eine gemeinsame Runde zu Beginn des Zeitfensters vorschlagen.'},
@@ -40,7 +41,7 @@ function validState(v: unknown): v is State {
   if (!v || typeof v !== 'object') return false;
   const s = v as State;
   const strings = (x: unknown, keys: string[]) => !!x && typeof x === 'object' && keys.every(k => typeof (x as Record<string, unknown>)[k] === 'string');
-  return s.version === 1 && Array.isArray(s.appointments) && Array.isArray(s.slots) && Array.isArray(s.entries) && Array.isArray(s.checks)
+  return (s.knownActivitiesVersion === undefined || s.knownActivitiesVersion === 1) && s.version === 1 && Array.isArray(s.appointments) && Array.isArray(s.slots) && Array.isArray(s.entries) && Array.isArray(s.checks)
     && (s.routines === undefined || Array.isArray(s.routines) && s.routines.every(r => strings(r,['id','title','energy','mood','effort','next']) && Number.isInteger(r.minutes) && r.minutes >= 5 && r.minutes <= 1440 && typeof r.outdoor === 'boolean' && ['low','medium','high'].includes(r.energy) && ['outdoor','movement','food','culture'].includes(r.mood) && ['spontaneous','prepare','trip'].includes(r.effort)))
     && (s.googleDeleteSeries === undefined || Array.isArray(s.googleDeleteSeries) && s.googleDeleteSeries.every(id => typeof id === 'string'))
     && (s.googleSync === undefined || !!s.googleSync && typeof s.googleSync.lastSuccess === 'string' && (!s.googleSync.lastSuccess || !isNaN(Date.parse(s.googleSync.lastSuccess))) && (s.googleSync.error === undefined || typeof s.googleSync.error === 'string'))
@@ -66,7 +67,7 @@ export function initPlanner(database: SupabaseClient) {
   async function readCloud() {
     const { data, error } = await database.from('personal_planning').select('payload,revision').eq('id', 'shared').abortSignal(AbortSignal.timeout(12000)).single();
     if (error || !data || !validState(data.payload) || !Number.isSafeInteger(Number(data.revision))) throw Error('Cloud data unavailable');
-    return { state: { ...data.payload, routines: data.payload.routines ?? defaultRoutines() } as State, revision: Number(data.revision) };
+    return { state: withKnownActivities({ ...data.payload, routines: data.payload.routines ?? defaultRoutines() } as State), revision: Number(data.revision) };
   }
   const isEditing = () => !!dinnerDate || !!calendarEdit || !!dragging || !!draft || !!pendingIdea || host?.contains(document.activeElement) && ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName || '');
   const actionDate = (stamp: string) => stamp ? new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Berlin' }).format(new Date(stamp)) : '';
@@ -103,7 +104,7 @@ export function initPlanner(database: SupabaseClient) {
     const previous = JSON.stringify(state);
     saving = true;
     let payload: State;
-    try { fn(); if (!validState(state)) throw Error(); payload = JSON.parse(JSON.stringify(state)); }
+    try { fn(); state=withKnownActivities(state); if (!validState(state)) throw Error(); payload = JSON.parse(JSON.stringify(state)); }
     catch { state = JSON.parse(previous); saving = false; message = 'Änderung ungültig. Bitte Datum und Uhrzeiten prüfen.'; render(); return false; }
     message = 'Wird gemeinsam gespeichert …';
     setBusy();
@@ -357,7 +358,7 @@ export function initPlanner(database: SupabaseClient) {
   const toolSummary = (title: string, _help: string, badge = '') => `<span class="tool-summary-copy"><strong>${e(title)}</strong></span>${badge?`<span class="tool-summary-badge">${e(badge)}</span>`:''}<span class="tool-summary-toggle" aria-hidden="true">+</span>`;
   function routinesMarkup() {
     const routines=state.routines??[];const r=routines.find(x=>x.id===editingRoutine);
-    return `<section class="planner-box routines-box"><details id="routineLibrary" ${openSection==='routines'?'open':''}><summary>${toolSummary('Meine regelmäßigen Aktivitäten','Schwimmen, Spazieren, Kajak … auswählen, einplanen oder ergänzen.',`${routines.length} Ideen`)}</summary><div class="routine-grid">${routines.map(x=>{
+    return `<section class="planner-box routines-box"><details id="routineLibrary" open><summary>${toolSummary('Bekanntes','Bekanntes zählt genauso wie Neues. Ideen und Dauer kannst du anpassen.',`${routines.length} Ideen`)}</summary><p class="planner-small">Die Dauer ist ein anpassbarer Richtwert.</p><div class="routine-grid">${routines.map(x=>{
       const count=state.entries.filter(a=>inWeek(a.date)&&a.status!=='Abgelehnt'&&(a.routineId===x.id||!a.routineId&&a.title===x.title)).length;
       return `<article class="routine-card"><div><span class="routine-category">${categoryIcon(x.mood,x.title)}${e(moodOptions.find(o=>o[0]===x.mood)?.[1]||'Aktivität')}</span><h3>${e(x.title)}</h3><p>${x.minutes} Min.</p>${count?`<span class="routine-planned">${count}× diese Woche eingeplant</span>`:''}</div><div class="routine-actions">${button('routinePlan','Einplanen',x.id)}${button('editRoutine','Bearbeiten',x.id)}${button('deleteRoutine','Löschen',x.id)}</div></article>`;
     }).join('')||'<p>Ergänze deine erste Standardaktivität.</p>'}</div><details id="routineSection" ${r || routineFormOpen?'open':''}><summary>${r?`„${e(r.title)}“ bearbeiten`:'+ Neue Aktivität ergänzen'}</summary><h3>${r?'Standardaktivität bearbeiten':'Eine Standardaktivität ergänzen'}</h3><form id="routineForm" class="planner-form"><label>Aktivität<input name="title" required maxlength="200" value="${e(r?.title||'')}" placeholder="Zum Beispiel: Am Lech spazieren"></label><label>Dauer in Minuten<input name="minutes" type="number" min="5" max="1440" required value="${r?.minutes||45}"></label><label>Kategorie<select name="mood">${options(moodOptions,r?.mood||'outdoor')}</select></label><label class="planner-check"><input name="outdoor" type="checkbox" ${r?.outdoor?'checked':''}>Draußen</label><label class="routine-next">Vorbereitung / nächster Schritt<input name="next" maxlength="500" value="${e(neutralDescription(r?.next||''))}" placeholder="Was musst du vorher klären?"></label><button class="planner-submit">${r?'Änderungen speichern':'Aktivität ergänzen'}</button>${button('cancelRoutine','Abbrechen')}</form></details></details></section>`;

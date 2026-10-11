@@ -1,3 +1,5 @@
+import {withTasteRating,validTasteRating,withExistingTasteRatings,type TasteRating,type TasteSuggestion} from './taste-profile';
+import {publishTasteProfile,registerTasteSuggestion,tasteRatingMarkup,refreshTasteUI} from './taste-ui';
 import {withMapsStock} from './maps-stock';
 import {placeOnlyKind,withStockRating,stockFromSuggestion,existingStockSuggestion,type StockFavorite,stockMarkup,stockSources,stockKinds,validStockItem,draftFromFavorite, type StockItem} from './activity-stock';
 import './planner.css';
@@ -14,7 +16,7 @@ type Slot = { id: string; date: string; start: string; end: string; energy: stri
 type Entry = { id: string; title: string; url: string; date: string; start: string; end: string; slotId: string; status: string; createdAt: string; proposedAt: string; organizedAt: string; doneAt: string; note: string; next: string; routineId?: string; source?: string };
 type Routine = KnownActivity;
 type Dinner = {id:string;date:string;recipeId:string;title:string};
-type State = { stockMapsVersion?:number; activityStock?:StockItem[]; knownActivitiesVersion?:number; dinners?: Dinner[]; routines?: Routine[]; version: 1; appointments: Appointment[]; slots: Slot[]; entries: Entry[]; checks: string[]; googleDeleteSeries?: string[]; googleSync?: { lastSuccess: string; error?: string } };
+type State = { tasteRatings?:TasteRating[]; stockMapsVersion?:number; activityStock?:StockItem[]; knownActivitiesVersion?:number; dinners?: Dinner[]; routines?: Routine[]; version: 1; appointments: Appointment[]; slots: Slot[]; entries: Entry[]; checks: string[]; googleDeleteSeries?: string[]; googleSync?: { lastSuccess: string; error?: string } };
 type Idea = { title: string; url: string; next: string; outdoor: boolean; minutes?: number; source?: string; routineId?: string; date?: string; start?: string; tourKind?: string; flexible?: boolean };
 const defaultRoutines = (): Routine[] => [
   {id:'walk',title:'Spazieren durch die Stadt',minutes:45,energy:'low',mood:'outdoor',effort:'spontaneous',outdoor:true,next:'Eine gemeinsame Runde zu Beginn des Zeitfensters vorschlagen.'},
@@ -46,8 +48,9 @@ function validState(v: unknown): v is State {
   const s = v as State;
   const strings = (x: unknown, keys: string[]) => !!x && typeof x === 'object' && keys.every(k => typeof (x as Record<string, unknown>)[k] === 'string');
   return (s.stockMapsVersion === undefined || s.stockMapsVersion === 1) && (s.knownActivitiesVersion === undefined || s.knownActivitiesVersion === 1) && s.version === 1 && Array.isArray(s.appointments) && Array.isArray(s.slots) && Array.isArray(s.entries) && Array.isArray(s.checks)
-    && (s.routines === undefined || Array.isArray(s.routines) && s.routines.every(r => strings(r,['id','title','energy','mood','effort','next']) && Number.isInteger(r.minutes) && r.minutes >= 5 && r.minutes <= 1440 && typeof r.outdoor === 'boolean' && ['low','medium','high'].includes(r.energy) && ['outdoor','movement','food','culture'].includes(r.mood) && ['spontaneous','prepare','trip'].includes(r.effort) && validActivityProperties(r)))
+    && (s.routines === undefined || Array.isArray(s.routines) && s.routines.every(r => strings(r,['id','title','energy','mood','effort','next']) && Number.isInteger(r.minutes) && r.minutes >= 5 && r.minutes <= 1440 && typeof r.outdoor === 'boolean' && ['low','medium','high'].includes(r.energy) && ['outdoor','movement','food','culture'].includes(r.mood) && ['spontaneous','prepare','trip'].includes(r.effort) && validActivityProperties(r) && (r.rating===undefined||Number.isInteger(r.rating)&&r.rating>=1&&r.rating<=5)))
     && (s.activityStock===undefined||Array.isArray(s.activityStock)&&s.activityStock.length<=500&&s.activityStock.every(validStockItem)&&new Set(s.activityStock.map(x=>x.id)).size===s.activityStock.length)
+    && (s.tasteRatings===undefined||Array.isArray(s.tasteRatings)&&s.tasteRatings.length<=2000&&s.tasteRatings.every(validTasteRating)&&new Set(s.tasteRatings.map(r=>r.id)).size===s.tasteRatings.length)
     && (s.googleDeleteSeries === undefined || Array.isArray(s.googleDeleteSeries) && s.googleDeleteSeries.every(id => typeof id === 'string'))
     && (s.googleSync === undefined || !!s.googleSync && typeof s.googleSync.lastSuccess === 'string' && (!s.googleSync.lastSuccess || !isNaN(Date.parse(s.googleSync.lastSuccess))) && (s.googleSync.error === undefined || typeof s.googleSync.error === 'string'))
     && (s.dinners === undefined || Array.isArray(s.dinners) && s.dinners.every(d=>strings(d,['id','date','recipeId','title']) && validDate(d.date) && !!d.id && !!d.recipeId && !!d.title) && new Set(s.dinners.map(d=>d.date)).size===s.dinners.length && new Set(s.dinners.map(d=>d.id)).size===s.dinners.length)
@@ -72,7 +75,7 @@ export function initPlanner(database: SupabaseClient) {
   async function readCloud() {
     const { data, error } = await database.from('personal_planning').select('payload,revision').eq('id', 'shared').abortSignal(AbortSignal.timeout(12000)).single();
     if (error || !data || !validState(data.payload) || !Number.isSafeInteger(Number(data.revision))) throw Error('Cloud data unavailable');
-    return { state: withMapsStock(withKnownActivities({ ...data.payload, routines: data.payload.routines ?? defaultRoutines() } as State)), revision: Number(data.revision) };
+    return { state: withExistingTasteRatings(withMapsStock(withKnownActivities({ ...data.payload, routines: data.payload.routines ?? defaultRoutines() } as State))), revision: Number(data.revision) };
   }
   const stockHost=document.querySelector<HTMLElement>('#activityStock');
   let stockDraft: StockItem|null=null;
@@ -313,6 +316,7 @@ export function initPlanner(database: SupabaseClient) {
   }
   const toolSummary = (title: string, _help: string, badge = '') => `<span class="tool-summary-copy"><strong>${e(title)}</strong></span>${badge?`<span class="tool-summary-badge">${e(badge)}</span>`:''}<span class="tool-summary-toggle" aria-hidden="true">+</span>`;
   function routinesMarkup() {
+    for(const r of state.routines??[])registerTasteSuggestion({id:'routine:'+r.id,title:r.title,category:categoryOf(r),description:r.next,kind:'routine',url:''});
     const allRoutines=state.routines??[];const routines=allRoutines.filter(a=>(!onlySaved||a.favorite)&&matchesSetting(a,routineSettingFilter));const r=allRoutines.find(x=>x.id===editingRoutine);
     const openCategories=new Set(Array.from(host?.querySelectorAll<HTMLDetailsElement>('.known-category[open]')??[]).map(x=>x.dataset.category));
     const groups=activityCategories;
@@ -320,17 +324,18 @@ export function initPlanner(database: SupabaseClient) {
       const items=routines.filter(x=>categoryOf(x)===key);
       if(!items.length)return '';
       const icon=({explore:'🌿',relaxation:'🧘',movement:'🚲',food:'☕',culture:'🎭'} as Record<string,string>)[key]||'💡';
-      return `<details class="known-category" data-category="${e(key)}" ${openCategories.has(key)?'open':''}><summary><span>${icon} ${e(title)}</span><span class="known-count">${items.length}</span></summary><div class="known-list">${items.map(x=>`<article class="known-row"><div class="known-copy"><h3>${e(x.title)}</h3><p class="known-properties">${x.minutes} Min. · Energie ${e(energyLabels[x.energy]||x.energy)} · ${e(effortLabels[x.effort]||x.effort)} · ${e(activitySettings.find(([id])=>id===settingOf(x))![1])}</p></div><details class="known-more"><summary aria-label="Mehr zu ${e(x.title)}">Mehr</summary><div class="routine-actions">${button('editRoutine','Bearbeiten',x.id)}${button('deleteRoutine','Löschen',x.id)}</div></details></article>`).join('')}</div></details>`;
+      return `<details class="known-category" data-category="${e(key)}" ${openCategories.has(key)?'open':''}><summary><span>${icon} ${e(title)}</span><span class="known-count">${items.length}</span></summary><div class="known-list">${items.map(x=>`<article class="known-row"><div class="known-copy"><h3>${e(x.title)}</h3><p class="known-properties">${x.minutes} Min. · Energie ${e(energyLabels[x.energy]||x.energy)} · ${e(effortLabels[x.effort]||x.effort)} · ${e(activitySettings.find(([id])=>id===settingOf(x))![1])}</p></div><details class="known-more"><summary aria-label="Mehr zu ${e(x.title)}">Mehr</summary><div class="routine-actions">${tasteRatingMarkup('routine:'+x.id)}${button('editRoutine','Bearbeiten',x.id)}${button('deleteRoutine','Löschen',x.id)}</div></details></article>`).join('')}</div></details>`;
     }).join('');
     return `<section class="planner-box routines-box"><details id="routineLibrary" open><summary>${toolSummary('Standardaktivitäten','',`${allRoutines.length} Ideen`)}</summary>${activityGuide.markup(allRoutines,state.activityStock??[])}<label class="known-setting-filter">Ort filtern<select id="routineSettingFilter">${options([['unknown','Alle Orte'],['inside','Drinnen möglich'],['outside','Draußen möglich']],routineSettingFilter)}</select></label><div class="known-categories">${categories||(allRoutines.length?onlySaved?'<p>Noch keine passende Standardaktivität vorgemerkt. Markiere sie mit einem Stern.</p>':'<p>Keine Aktivität passt zu diesem Ortsfilter.</p>':'<p>Ergänze deine erste Aktivität.</p>')}</div><details id="routineSection" ${r || routineFormOpen?'open':''}><summary>${r?`„${e(r.title)}“ bearbeiten`:'+ Neue Aktivität ergänzen'}</summary><h3>${r?'Standardaktivität bearbeiten':'Eine Standardaktivität ergänzen'}</h3><form id="routineForm" class="planner-form"><label>Aktivität<input name="title" required maxlength="200" value="${e(r?.title||'')}" placeholder="Zum Beispiel: Am Lech spazieren"></label><label>Dauer in Minuten<input name="minutes" type="number" min="5" max="1440" required value="${r?.minutes||45}"></label><label>Kategorie<select name="activityCategory">${options(activityCategories,r?categoryOf(r):'movement')}</select></label><label>Benötigte Energie<select name="energy">${options([['low','Niedrig'],['medium','Mittel'],['high','Hoch']],r?.energy||'medium')}</select></label><label>Organisationsaufwand<select name="effort">${options([['spontaneous','Direkt loslegen'],['prepare','Ein bisschen vorbereiten'],['trip','Auch etwas planen']],r?.effort||'prepare')}</select></label><label>Ort<select name="setting">${options(activitySettings,r?settingOf(r):'outside')}</select></label><label class="routine-next">Vorbereitung / nächster Schritt<input name="next" maxlength="500" value="${e(neutralDescription(r?.next||''))}" placeholder="Was musst du vorher klären?"></label><button class="planner-submit">${r?'Änderungen speichern':'Aktivität ergänzen'}</button>${button('cancelRoutine','Abbrechen')}</form></details></details></section>`;
   }
   function render() {
     if(!host)return;
+    publishTasteProfile(state.tasteRatings??[],loaded);
     const focused=document.activeElement as HTMLElement | null;
     if((draft||pendingIdea)&&focused?.dataset.action&&!focused.closest('.planning-dialog'))dialogReturn=`[data-action="${CSS.escape(focused.dataset.action)}"][data-id="${CSS.escape(focused.dataset.id||'')}"]`;
     if(!inWeek(activeDate)&&!draft&&!pendingIdea)activeDate=inWeek(today())?today():week;
     host.innerHTML=`<p class="planner-message" role="status" ${routineFeedback(message)?'hidden':''}>${e(message)}</p><div class="planner-tools"><section class="tool-group" aria-label="Aktivitäten auswählen">${routinesMarkup()}</section></div>`;
-    renderStock();wire();setBusy();
+    renderStock();wire();setBusy();refreshTasteUI();
     const content=host.querySelector<HTMLElement>('#dinnerPicker,#calendarEditor,#dayComposer,#ideaScheduler');
     if(content){
       const dialog=document.createElement('dialog');dialog.className='planning-dialog';dialog.setAttribute('aria-label',dinnerDate?'Abendessen planen':calendarEdit?'Termin ändern':'Aktivität planen');
@@ -404,7 +409,7 @@ export function initPlanner(database: SupabaseClient) {
     host.querySelector<HTMLSelectElement>('#routineSettingFilter')?.addEventListener('change',ev=>{routineSettingFilter=(ev.currentTarget as HTMLSelectElement).value as ActivitySetting|'unknown';render();host.querySelector<HTMLSelectElement>('#routineSettingFilter')?.focus();});
     host.querySelector<HTMLFormElement>('#routineForm')?.addEventListener('submit',async ev=>{
       ev.preventDefault();const d=new FormData(ev.currentTarget as HTMLFormElement);
-      const r:Routine={favorite:state.routines?.find(a=>a.id===editingRoutine)?.favorite,id:editingRoutine||crypto.randomUUID(),title:String(d.get('title')).trim(),minutes:Number(d.get('minutes')),energy:String(d.get('energy')),activityCategory:String(d.get('activityCategory')) as ActivityCategory,setting:String(d.get('setting')) as ActivitySetting,mood:legacyMood(String(d.get('activityCategory')) as ActivityCategory),effort:String(d.get('effort')),outdoor:d.get('setting')!=='inside',next:String(d.get('next')).trim()||'Einen konkreten Zeitpunkt vorschlagen.'};
+      const r:Routine={rating:state.routines?.find(a=>a.id===editingRoutine)?.rating,favorite:state.routines?.find(a=>a.id===editingRoutine)?.favorite,id:editingRoutine||crypto.randomUUID(),title:String(d.get('title')).trim(),minutes:Number(d.get('minutes')),energy:String(d.get('energy')),activityCategory:String(d.get('activityCategory')) as ActivityCategory,setting:String(d.get('setting')) as ActivitySetting,mood:legacyMood(String(d.get('activityCategory')) as ActivityCategory),effort:String(d.get('effort')),outdoor:d.get('setting')!=='inside',next:String(d.get('next')).trim()||'Einen konkreten Zeitpunkt vorschlagen.'};
       if(!r.title)return;openSection='routines';
       if(await mutate(()=>{const routines=state.routines??[];const i=routines.findIndex(x=>x.id===r.id);if(i<0)routines.push(r);else routines[i]=r;state.routines=routines;},'Standardaktivität gespeichert. Auf allen Geräten verfügbar.')){editingRoutine='';routineFormOpen=false;}render();
     });
@@ -538,6 +543,17 @@ export function initPlanner(database: SupabaseClient) {
       b.disabled=!loaded||saving||!!exists;b.textContent=exists?'In Orte & Touren gespeichert':'In Orte & Touren übernehmen';
     });
   }
+  document.addEventListener('taste-rating-request',async ev=>{
+    const {item,stars,reason,done}=(ev as CustomEvent<{item:TasteSuggestion;stars:number;reason:string;done:(ok:boolean,message:string)=>void}>).detail;
+    if(!loaded||saving){done(false,'Die Sammlung wird noch geladen oder gespeichert. Bitte kurz warten.');return;}
+    const ok=await mutate(()=>{
+      state=withTasteRating(state,item,stars,reason);
+      if(item.id.startsWith('routine:'))state.routines=state.routines?.map(r=>r.id===item.id.slice(8)?{...r,rating:stars||undefined}:r);
+      // Imported source IDs share a rating with the public suggestion; local Maps places keep their own ID.
+      state.activityStock=state.activityStock?.map(r=>('stock:'+r.id===item.id||r.sourceId===item.id||r.importedSourceIds?.includes(item.id))?withStockRating(r,stars):r);
+    },stars?'Geschmacksbewertung gespeichert. Auf allen Geräten verfügbar.':'Bewertung entfernt.');
+    done(ok,message);
+  });
   document.addEventListener('stock-copy-ready',syncStockCopyButtons);
   document.addEventListener('stock-copy-request',async ev=>{
     const {favorite,meta,snapshot,done}=(ev as CustomEvent<{favorite:StockFavorite;meta:string[];snapshot:Record<string,unknown>|null;done:(ok:boolean,message:string)=>void}>).detail;
@@ -554,9 +570,11 @@ export function initPlanner(database: SupabaseClient) {
   function renderStock(){
     syncStockCopyButtons();
     if(!stockHost)return;
+    for(const row of state.activityStock??[])registerTasteSuggestion({id:row.sourceId||'stock:'+row.id,title:row.title,category:row.kind,description:row.note,kind:row.kind,url:row.url});
     const openGroups=new Set(Array.from(stockHost.querySelectorAll<HTMLDetailsElement>('.stock-category[open]')).map(x=>x.dataset.stockCategory));
     stockHost.innerHTML=stockMarkup(state.activityStock??[],stockDraft,loaded,saving,stockMessage,stockView,onlySaved);
     stockHost.querySelectorAll<HTMLDetailsElement>('.stock-category').forEach(x=>{x.open=openGroups.has(x.dataset.stockCategory);});
+    refreshTasteUI();
     const dialog=stockHost.querySelector<HTMLDialogElement>('#stockDialog');
     if(dialog){dialog.showModal();dialog.addEventListener('cancel',ev=>{ev.preventDefault();if(saving)return;stockDraft=null;stockView=null;renderStock();});}
     const kindSelect=stockHost.querySelector<HTMLSelectElement>('#stockForm select[name=kind]');
@@ -582,7 +600,7 @@ export function initPlanner(database: SupabaseClient) {
     if(action==='new')stockDraft={id:crypto.randomUUID(),title:'',kind:stockKinds.find(([kind])=>kind===b.dataset.stockKind)?.[0]??'walk',url:'',minutes:null,travelMinutes:null,distanceKm:null,elevationM:null,setting:'outside',energy:'low',effort:'spontaneous',note:''};
     if(action==='import'){const sources=stockSources();const a=sources.decisions.ready?sources.favorites.find(x=>x.suggestionId===id&&!sources.decisions.hidden.has(x.suggestionId)&&(sources.decisions.ratings.get(x.suggestionId)??0)>=0):null;if(a)stockDraft=draftFromFavorite(a,crypto.randomUUID());}
     const row=(state.activityStock??[]).find(x=>x.id===id);
-    if(action==='rate'&&row){const rating=Number(b.dataset.stockRating);if(!Number.isInteger(rating)||rating<0||rating>5)return;const ok=await mutate(()=>{state.activityStock=state.activityStock?.map(x=>x.id===id?withStockRating(x,rating):x);},rating?'Bewertung gespeichert. Auf allen Geräten verfügbar.':'Bewertung entfernt.');stockMessage=message;if(ok)stockView=id??null;renderStock();return;}
+    if(action==='rate'&&row){const rating=Number(b.dataset.stockRating);if(!Number.isInteger(rating)||rating<0||rating>5)return;const ok=await mutate(()=>{state.activityStock=state.activityStock?.map(x=>x.id===id?withStockRating(x,rating):x);state=withTasteRating(state,{id:row.sourceId||'stock:'+row.id,title:row.title,category:row.kind,description:row.note,kind:row.kind,url:row.url,facts:row.sourceDetails?.flatMap(x=>typeof x.description==='string'?[x.description.slice(0,1000)]:[])},rating,state.tasteRatings?.find(x=>x.id===(row.sourceId||'stock:'+row.id))?.reason??'');},rating?'Bewertung gespeichert. Auf allen Geräten verfügbar.':'Bewertung entfernt.');stockMessage=message;if(ok)stockView=id??null;renderStock();return;}
     if(action==='favorite'&&row){await mutate(()=>{row.favorite=!row.favorite;});return;}
     if(action==='details'&&row){stockDraft=null;stockView=row.id;}
     if(action==='edit'&&row){stockView=null;stockDraft={...row};}

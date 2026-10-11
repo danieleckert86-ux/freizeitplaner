@@ -17,7 +17,7 @@ export function chooseActivities(activities: readonly KnownActivity[], answers: 
     && (answers.energy !== 'medium' || a.energy !== 'high')
     && (answers.need !== 'move' || moving(a))
     && (answers.need !== 'rest' || a.energy === 'low' && a.effort === 'spontaneous' && (categoryOf(a)==='relaxation'||calm.test(a.title))));
-  const score = (a: KnownActivity) => (a.effort === 'spontaneous' ? 30 : a.effort === 'prepare' ? 10 : 0)
+  const score = (a: KnownActivity) => ((a.rating??3)-3)*30 + (a.effort === 'spontaneous' ? 30 : a.effort === 'prepare' ? 10 : 0)
     + (answers.need === 'rest' && (categoryOf(a)==='relaxation'||calm.test(a.title)) ? 40 : 0)
     + (answers.need === 'change' && ['culture','food','explore'].includes(categoryOf(a)) ? 20 : 0)
     + (answers.energy === a.energy ? 80 : 0)

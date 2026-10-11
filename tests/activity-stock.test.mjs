@@ -166,10 +166,10 @@ test('rated pools use the standard swim duration without inventing a duration fo
 });
 test('ratings are only editable inside details and do not replace favorite state',()=>{
  const row=idea('rated',{rating:4,favorite:true});
- assert.ok(!stockMarkup([row],null,true,false,'').includes('data-stock-action="rate"'));
+ assert.ok(!stockMarkup([row],null,true,false,'').includes('data-taste-rate="4"'));
  const dialog=stockMarkup([row],null,true,false,'Bewertung gespeichert.',row.id);
- assert.equal((dialog.match(/data-stock-action="rate"/g)||[]).length,6);
- assert.match(dialog,/4 von 5 Sternen/);assert.match(dialog,/Bewertung gespeichert/);
+ assert.equal((dialog.match(/data-taste-rate=/g)||[]).length,5);
+ assert.match(dialog,/4 \/ 5/);assert.match(dialog,/Bewertung gespeichert/);
  assert.equal(row.favorite,true);
 });
 

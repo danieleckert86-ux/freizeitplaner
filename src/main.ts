@@ -1,3 +1,4 @@
+import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI} from './taste-ui';
 import {publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
 import { favoriteArea } from './finder-navigation';
 import { initPlanner } from './planner';
@@ -79,10 +80,8 @@ function sourceMarkup(item: Recommendation) {
     dataEscape((item.sourceLabel || 'Originalquelle').replace('Originalquelle', 'Quelle')) + '</a><button class="hide-card-btn" type="button" data-hide-card data-id="'+dataEscape(item.id||item.favorite.id)+'" data-section="catalog" data-title="'+dataEscape(item.title)+'">Ausblenden</button>';
 }
 
-function ratingMarkup(id: string, title: string, section: string) {
-  return '<div class="rating-actions" data-rating-wrap>' +
-    '<button class="rating-btn" type="button" data-rate="1" data-id="' + dataEscape(id) + '" data-section="' + dataEscape(section) + '" data-title="' + dataEscape(title) + '" aria-label="Gefällt mir">👍</button>' +
-    '<button class="rating-btn" type="button" data-rate="-1" data-id="' + dataEscape(id) + '" data-section="' + dataEscape(section) + '" data-title="' + dataEscape(title) + '" aria-label="Gefällt mir nicht">👎</button></div>';
+function ratingMarkup(id: string, _title: string, _section: string) {
+  return tasteRatingMarkup(id);
 }
 
 function lifestyleFavoriteMarkup(item: LifestyleRecommendation, section: 'restaurants' | 'cinema' | 'stream') {
@@ -103,6 +102,14 @@ function tourAttributes(item: Recommendation) {
 }
 
 function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<string>()) {
+  for(const [kind,items] of Object.entries({event:[...data.top,...data.ideas,...data.discoveries],hike:data.hikes,bike:data.bikes,restaurant:data.restaurants??[],cinema:data.cinema??[],stream:data.stream??[]})){
+    for(const item of items){
+      const rec=item as Recommendation & LifestyleRecommendation;
+      const id=rec.favorite?.id||rec.id;if(!id)continue;
+      const snapshot={id,title:rec.title,category:rec.favorite?.categoryLabel||rec.badge||rec.type||rec.category||kind,description:rec.description||'',kind,url:rec.url||'',...(rec.date?{date:rec.date}:{}),...(Number.isFinite(rec.fitScore)?{fitScore:rec.fitScore}:{}),...(rec.imported===undefined?{}:{imported:rec.imported}),facts:[...(rec.facts??[]),...(rec.meta??[])]};
+      tasteItems.set(id,snapshot);registerTasteSuggestion(snapshot);
+    }
+  }
   const hide=(items:Recommendation[])=>items.filter(x=>!hiddenIds.has(x.id||x.favorite?.id||''));
   data={...data,top:hide(data.top),ideas:hide(data.ideas),discoveries:hide(data.discoveries),hikes:hide(data.hikes),bikes:hide(data.bikes)};
   const evidence=document.querySelector<HTMLElement>('#collectionEvidence');
@@ -202,33 +209,32 @@ async function loadRecommendationRatings() {
   return new Map((data ?? []).map(row => [row.suggestion_id as string, row.rating as number]));
 }
 
+let legacyRecommendationRatings=new Map<string,number>();
 function wireRatingButtons(ratings: Map<string, number>) {
-  document.querySelectorAll<HTMLButtonElement>('[data-rate]').forEach(button => {
-    const id = button.dataset.id ?? '';
-    const value = Number(button.dataset.rate);
-    button.classList.toggle('active', ratings.get(id) === value);
-    button.addEventListener('click', async () => {
-      const current = ratings.get(id);
-      if (current === value) {
-        const { error } = await supabase.from('recommendation_ratings').delete().eq('suggestion_id', id);
-        if (!error) ratings.delete(id);
-      } else {
-        const { error } = await supabase.from('recommendation_ratings').upsert({
-          suggestion_id: id,
-          section: button.dataset.section ?? '',
-          title: button.dataset.title ?? '',
-          rating: value,
-          rated_at: new Date().toISOString(),
-        });
-        if (!error) ratings.set(id, value);
-      }
-      publishStockRatings(ratings);
-      document.querySelectorAll<HTMLButtonElement>('[data-rate][data-id="' + CSS.escape(id) + '"]').forEach(b =>
-        b.classList.toggle('active', ratings.get(id) === Number(b.dataset.rate))
-      );
-    });
-  });
+  legacyRecommendationRatings=ratings;
+  setLegacyTasteRatings(ratings);
+  applyPersonalTasteScores();
 }
+function applyPersonalTasteScores(){
+  document.querySelectorAll<HTMLElement>('.discovery-item,.tour-card,.lifestyle-card,.idea-card,.card').forEach(card=>{
+    const id=card.querySelector<HTMLElement>('[data-taste-wrap]')?.dataset.tasteWrap;
+    if(!id)return;
+    const item=tasteItems.get(id);if(!item)return;
+    const fit=adjustedTaste(item),label=card.querySelector<HTMLElement>('.collection-fit');
+    if(label){label.textContent=fit.score===null?'Passung noch nicht bewertet':`${fit.score} / 100 · persönliche Passung`;label.title=fit.reason;}
+    if(card.classList.contains('discovery-item'))card.dataset.fitScore=fit.score===null?'':String(fit.score);
+  });
+  refreshEventHighlights();
+  document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));
+}
+const tasteItems=new Map<string,Parameters<typeof registerTasteSuggestion>[0]>();
+document.addEventListener('taste-scores-changed',()=>{
+  applyPersonalTasteScores();
+  const effective=effectiveLegacyRatings(legacyRecommendationRatings);
+  if(JSON.stringify([...effective])!==lastPublishedRatings){lastPublishedRatings=JSON.stringify([...effective]);publishStockRatings(effective);}
+});
+let lastPublishedRatings='';
+initTasteUI();
 
 async function loadHiddenRecommendationIds() {
   const { data, error } = await supabase.from('hidden_recommendations').select('suggestion_id');
@@ -267,7 +273,7 @@ async function loadRecommendationData() {
 
   if (data.schemaVersion !== 2) throw new Error('Unsupported recommendation schema');
   const [hiddenIds, ratings] = await Promise.all([loadHiddenRecommendationIds(), loadRecommendationRatings()]);
-  publishStockDecisions(hiddenIds,ratings,stockRatingsAvailable);
+  publishStockDecisions(hiddenIds,effectiveLegacyRatings(ratings),stockRatingsAvailable);
   renderRecommendationData(data, hiddenIds);
   wireRatingButtons(ratings);
   document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));

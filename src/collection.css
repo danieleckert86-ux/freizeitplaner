@@ -2,7 +2,7 @@
 
 .collection-mode #personalPlanner .week-board{display:none!important}
 
-.collection-mode #personalPlanner > :not(.planner-tools):not(.planner-message){display:none!important}
+.collection-mode #personalPlanner > :not(.planner-tools):not(.planner-message):not(.planning-dialog){display:none!important}
 
 @media(max-width:420px){.main-nav{grid-template-columns:repeat(2,minmax(0,1fr));}}
 

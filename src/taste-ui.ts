@@ -30,7 +30,7 @@ async function saveRating(item:TasteSuggestion,score:number|null,reason:string){
  else {const status=document.querySelector<HTMLElement>('#tasteStatus');if(status)status.textContent=result.message;}
 }
 export function initTasteUI(){
- document.addEventListener('input',ev=>{const input=ev.target as HTMLInputElement;if(!input.matches('[data-taste-score]'))return;input.dataset.dirty='true';const group=input.closest('.taste-slider')!,score=Number(input.value);group.querySelector('output')!.textContent=score+' / 100';input.setAttribute('aria-valuetext',score+' von 100 · '+scoreLabel(score));});
+ document.addEventListener('input',ev=>{const input=ev.target as HTMLInputElement;if(!input.matches('[data-taste-score]'))return;input.dataset.dirty='true';const group=input.closest('.taste-slider')!,score=Number(input.value);group.querySelector('output')!.textContent=score+' / 100';input.setAttribute('aria-valuetext',score+' von 100 · '+scoreLabel(score));const note=input.closest('[data-taste-wrap],#tasteRatingDialog')?.querySelector<HTMLElement>('[data-dialog-rating],[data-taste-label]');if(note)note.textContent=score+' / 100 · '+scoreLabel(score)+' · noch nicht gespeichert';});
  document.addEventListener('click',ev=>{
   const target=ev.target as Element;if(target.closest('[data-taste-close]')){document.querySelector<HTMLDialogElement>('#tasteRatingDialog')?.close();return;}
   const detail=target.closest<HTMLElement>('[data-taste-details]');if(detail){openTasteDetails(detail.dataset.tasteDetails!);return;}

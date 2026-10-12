@@ -48,7 +48,7 @@ function validState(v: unknown): v is State {
   const s = v as State;
   const strings = (x: unknown, keys: string[]) => !!x && typeof x === 'object' && keys.every(k => typeof (x as Record<string, unknown>)[k] === 'string');
   return (s.stockMapsVersion === undefined || s.stockMapsVersion === 1) && (s.knownActivitiesVersion === undefined || s.knownActivitiesVersion === 1) && s.version === 1 && Array.isArray(s.appointments) && Array.isArray(s.slots) && Array.isArray(s.entries) && Array.isArray(s.checks)
-    && (s.routines === undefined || Array.isArray(s.routines) && s.routines.every(r => strings(r,['id','title','energy','mood','effort','next']) && Number.isInteger(r.minutes) && r.minutes >= 5 && r.minutes <= 1440 && typeof r.outdoor === 'boolean' && ['low','medium','high'].includes(r.energy) && ['outdoor','movement','food','culture'].includes(r.mood) && ['spontaneous','prepare','trip'].includes(r.effort) && validActivityProperties(r) && (r.rating===undefined||Number.isInteger(r.rating)&&r.rating>=1&&r.rating<=5)))
+    && (s.routines === undefined || Array.isArray(s.routines) && s.routines.every(r => strings(r,['id','title','energy','mood','effort','next']) && Number.isInteger(r.minutes) && r.minutes >= 5 && r.minutes <= 1440 && typeof r.outdoor === 'boolean' && ['low','medium','high'].includes(r.energy) && ['outdoor','movement','food','culture'].includes(r.mood) && ['spontaneous','prepare','trip'].includes(r.effort) && validActivityProperties(r) && (r.ratingScore===undefined||Number.isInteger(r.ratingScore)&&r.ratingScore>=0&&r.ratingScore<=100&&r.ratingScore%5===0) && (r.rating===undefined||Number.isInteger(r.rating)&&r.rating>=1&&r.rating<=5)))
     && (s.activityStock===undefined||Array.isArray(s.activityStock)&&s.activityStock.length<=500&&s.activityStock.every(validStockItem)&&new Set(s.activityStock.map(x=>x.id)).size===s.activityStock.length)
     && (s.tasteRatings===undefined||Array.isArray(s.tasteRatings)&&s.tasteRatings.length<=2000&&s.tasteRatings.every(validTasteRating)&&new Set(s.tasteRatings.map(r=>r.id)).size===s.tasteRatings.length)
     && (s.googleDeleteSeries === undefined || Array.isArray(s.googleDeleteSeries) && s.googleDeleteSeries.every(id => typeof id === 'string'))
@@ -83,7 +83,7 @@ export function initPlanner(database: SupabaseClient) {
   let stockView:string|null=null;
   let onlySaved=false;
   document.addEventListener('finder-saved-filter',ev=>{onlySaved=(ev as CustomEvent<boolean>).detail; if(!isEditing())render();});
-  const isEditing = () => !!stockDraft || !!stockView || !!dinnerDate || !!calendarEdit || !!dragging || !!draft || !!pendingIdea || host?.contains(document.activeElement) && ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName || '');
+  const isEditing = () => !!document.querySelector('#tasteRatingDialog[open]') || !!document.activeElement?.matches('[data-taste-score]') || !!stockDraft || !!stockView || !!dinnerDate || !!calendarEdit || !!dragging || !!draft || !!pendingIdea || host?.contains(document.activeElement) && ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName || '');
   let week = day(today()).getUTCDay() === 0 ? addDays(monday(today()),7) : monday(today());
   let activeDate = today();
   let openSection = '';
@@ -409,7 +409,7 @@ export function initPlanner(database: SupabaseClient) {
     host.querySelector<HTMLSelectElement>('#routineSettingFilter')?.addEventListener('change',ev=>{routineSettingFilter=(ev.currentTarget as HTMLSelectElement).value as ActivitySetting|'unknown';render();host.querySelector<HTMLSelectElement>('#routineSettingFilter')?.focus();});
     host.querySelector<HTMLFormElement>('#routineForm')?.addEventListener('submit',async ev=>{
       ev.preventDefault();const d=new FormData(ev.currentTarget as HTMLFormElement);
-      const r:Routine={rating:state.routines?.find(a=>a.id===editingRoutine)?.rating,favorite:state.routines?.find(a=>a.id===editingRoutine)?.favorite,id:editingRoutine||crypto.randomUUID(),title:String(d.get('title')).trim(),minutes:Number(d.get('minutes')),energy:String(d.get('energy')),activityCategory:String(d.get('activityCategory')) as ActivityCategory,setting:String(d.get('setting')) as ActivitySetting,mood:legacyMood(String(d.get('activityCategory')) as ActivityCategory),effort:String(d.get('effort')),outdoor:d.get('setting')!=='inside',next:String(d.get('next')).trim()||'Einen konkreten Zeitpunkt vorschlagen.'};
+      const r:Routine={ratingScore:state.routines?.find(a=>a.id===editingRoutine)?.ratingScore,rating:state.routines?.find(a=>a.id===editingRoutine)?.rating,favorite:state.routines?.find(a=>a.id===editingRoutine)?.favorite,id:editingRoutine||crypto.randomUUID(),title:String(d.get('title')).trim(),minutes:Number(d.get('minutes')),energy:String(d.get('energy')),activityCategory:String(d.get('activityCategory')) as ActivityCategory,setting:String(d.get('setting')) as ActivitySetting,mood:legacyMood(String(d.get('activityCategory')) as ActivityCategory),effort:String(d.get('effort')),outdoor:d.get('setting')!=='inside',next:String(d.get('next')).trim()||'Einen konkreten Zeitpunkt vorschlagen.'};
       if(!r.title)return;openSection='routines';
       if(await mutate(()=>{const routines=state.routines??[];const i=routines.findIndex(x=>x.id===r.id);if(i<0)routines.push(r);else routines[i]=r;state.routines=routines;},'Standardaktivität gespeichert. Auf allen Geräten verfügbar.')){editingRoutine='';routineFormOpen=false;}render();
     });
@@ -544,14 +544,14 @@ export function initPlanner(database: SupabaseClient) {
     });
   }
   document.addEventListener('taste-rating-request',async ev=>{
-    const {item,stars,reason,done}=(ev as CustomEvent<{item:TasteSuggestion;stars:number;reason:string;done:(ok:boolean,message:string)=>void}>).detail;
+    const {item,score,reason,done}=(ev as CustomEvent<{item:TasteSuggestion;score:number|null;reason:string;done:(ok:boolean,message:string)=>void}>).detail;
     if(!loaded||saving){done(false,'Die Sammlung wird noch geladen oder gespeichert. Bitte kurz warten.');return;}
     const ok=await mutate(()=>{
-      state=withTasteRating(state,item,stars,reason);
-      if(item.id.startsWith('routine:'))state.routines=state.routines?.map(r=>r.id===item.id.slice(8)?{...r,rating:stars||undefined}:r);
+      state=withTasteRating(state,item,score,reason);
+      if(item.id.startsWith('routine:'))state.routines=state.routines?.map(r=>r.id===item.id.slice(8)?{...r,rating:undefined,ratingScore:score??undefined}:r);
       // Imported source IDs share a rating with the public suggestion; local Maps places keep their own ID.
-      state.activityStock=state.activityStock?.map(r=>('stock:'+r.id===item.id||r.sourceId===item.id||r.importedSourceIds?.includes(item.id))?withStockRating(r,stars):r);
-    },stars?'Geschmacksbewertung gespeichert. Auf allen Geräten verfügbar.':'Bewertung entfernt.');
+      state.activityStock=state.activityStock?.map(r=>('stock:'+r.id===item.id||r.sourceId===item.id||r.importedSourceIds?.includes(item.id))?withStockRating(r,score):r);
+    },score!==null?'Geschmacksbewertung gespeichert. Auf allen Geräten verfügbar.':'Bewertung entfernt.');
     done(ok,message);
   });
   document.addEventListener('stock-copy-ready',syncStockCopyButtons);
@@ -600,7 +600,6 @@ export function initPlanner(database: SupabaseClient) {
     if(action==='new')stockDraft={id:crypto.randomUUID(),title:'',kind:stockKinds.find(([kind])=>kind===b.dataset.stockKind)?.[0]??'walk',url:'',minutes:null,travelMinutes:null,distanceKm:null,elevationM:null,setting:'outside',energy:'low',effort:'spontaneous',note:''};
     if(action==='import'){const sources=stockSources();const a=sources.decisions.ready?sources.favorites.find(x=>x.suggestionId===id&&!sources.decisions.hidden.has(x.suggestionId)&&(sources.decisions.ratings.get(x.suggestionId)??0)>=0):null;if(a)stockDraft=draftFromFavorite(a,crypto.randomUUID());}
     const row=(state.activityStock??[]).find(x=>x.id===id);
-    if(action==='rate'&&row){const rating=Number(b.dataset.stockRating);if(!Number.isInteger(rating)||rating<0||rating>5)return;const ok=await mutate(()=>{state.activityStock=state.activityStock?.map(x=>x.id===id?withStockRating(x,rating):x);state=withTasteRating(state,{id:row.sourceId||'stock:'+row.id,title:row.title,category:row.kind,description:row.note,kind:row.kind,url:row.url,facts:row.sourceDetails?.flatMap(x=>typeof x.description==='string'?[x.description.slice(0,1000)]:[])},rating,state.tasteRatings?.find(x=>x.id===(row.sourceId||'stock:'+row.id))?.reason??'');},rating?'Bewertung gespeichert. Auf allen Geräten verfügbar.':'Bewertung entfernt.');stockMessage=message;if(ok)stockView=id??null;renderStock();return;}
     if(action==='favorite'&&row){await mutate(()=>{row.favorite=!row.favorite;});return;}
     if(action==='details'&&row){stockDraft=null;stockView=row.id;}
     if(action==='edit'&&row){stockView=null;stockDraft={...row};}

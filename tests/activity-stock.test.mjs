@@ -145,8 +145,8 @@ import {withStockRating} from '../src/activity-stock.ts';
 test('star ratings validate 1–5, clear explicitly and preserve complete imported data',()=>{
  const original=idea('rated',{favorite:true,sourceDetails:[{description:'Beleg',checkedAt:'2026-10-10'}],importedSourceIds:['old'],note:'Eigene Notiz'});
  const before=JSON.stringify(original);
- for(let n=1;n<=5;n++){const rated=withStockRating(original,n);assert.ok(validStockItem(rated));assert.equal(JSON.parse(JSON.stringify(rated)).rating,n);assert.deepEqual(withStockRating(rated,0),original);}
- for(const rating of [-1,6,2.5,NaN])assert.throws(()=>withStockRating(original,rating));
+ for(let n=0;n<=100;n+=5){const rated=withStockRating(original,n);assert.ok(validStockItem(rated));assert.equal(JSON.parse(JSON.stringify(rated)).ratingScore,n);assert.deepEqual(withStockRating(rated,null),original);}
+ for(const rating of [-1,101,77,NaN])assert.throws(()=>withStockRating(original,rating));
  for(const rating of [null,0,6,'5',2.5])assert.equal(validStockItem({...original,rating}),false);
  assert.equal(JSON.stringify(original),before);
 });
@@ -158,6 +158,11 @@ test('personal stars prefer matching places while unrated and three stars remain
  const tooLong=idea('long',{rating:5,minutes:61}),closed=idea('closed',{rating:5,unavailable:true}),hidden=idea('hidden',{rating:5,sourceId:'hidden'});
  assert.equal(matchingStock(a,[tooLong,closed,hidden,idea('okay')],answers,decisions({hidden:new Set(['hidden'])}))[0].id,'okay');
 });
+test('fine point ratings rank places without reverting to stars; zero remains persisted',()=>{
+ const a=activity('Spaziergang'),answers={...emptyGuideAnswers(),minutes:60};
+ assert.equal(matchingStock(a,[idea('a',{ratingScore:75}),idea('z',{ratingScore:80})],answers,decisions())[0].id,'z');
+ const zero=withStockRating(idea('zero'),0);assert.equal(zero.ratingScore,0);assert.ok(validStockItem(zero));assert.equal(withStockRating(zero,null).ratingScore,undefined);
+});
 test('rated pools use the standard swim duration without inventing a duration for the place',()=>{
  const a=activity('Schwimmen',{minutes:90,outdoor:false});const place=idea('pool',{kind:'swim',minutes:null,setting:'inside',rating:5});
  assert.equal(matchingStock(a,[place],{...emptyGuideAnswers(),minutes:180,place:'inside'},decisions())[0].id,'pool');
@@ -168,8 +173,8 @@ test('ratings are only editable inside details and do not replace favorite state
  const row=idea('rated',{rating:4,favorite:true});
  assert.ok(!stockMarkup([row],null,true,false,'').includes('data-taste-rate="4"'));
  const dialog=stockMarkup([row],null,true,false,'Bewertung gespeichert.',row.id);
- assert.equal((dialog.match(/data-taste-rate=/g)||[]).length,5);
- assert.match(dialog,/4 \/ 5/);assert.match(dialog,/Bewertung gespeichert/);
+ assert.match(dialog,/type="range"/);
+ assert.match(dialog,/75 \/ 100/);assert.match(dialog,/Bewertung gespeichert/);
  assert.equal(row.favorite,true);
 });
 

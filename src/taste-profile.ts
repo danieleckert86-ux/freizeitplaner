@@ -1,22 +1,26 @@
 // Private, explicit ratings. The catalogue and its source timestamps stay unchanged.
 export type TasteSuggestion={id:string;title:string;category:string;description:string;kind:string;url:string;date?:string;fitScore?:number;imported?:boolean;closed?:boolean;facts?:string[]};
-export type TasteRating=TasteSuggestion&{stars:number;reason:string;ratedAt:string};
+export type TasteRating=TasteSuggestion&{score?:number;stars?:number;reason:string;ratedAt:string};
 const escape=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const normalized=(s:string)=>s.normalize('NFKC').trim().replace(/\s+/g,' ').toLocaleLowerCase('de');
 export const starLabels=['gefällt mir gar nicht','eher nicht mein Geschmack','okay','gefällt mir gut','trifft meinen Geschmack genau'];
+export const validScore=(v:unknown):v is number=>typeof v==='number'&&Number.isInteger(v)&&v>=0&&v<=100&&v%5===0;
+export const legacyStarsToScore=(stars:number)=>(stars-1)*25;
+export function ratingScore(r:{score?:number;stars?:number}){return r.score??(r.stars===undefined?undefined:legacyStarsToScore(r.stars));}
+export function scoreLabel(score:number){return score<=10?'gefällt mir gar nicht':score<40?'eher nicht mein Geschmack':score<=60?'okay':score<90?'gefällt mir gut':'trifft meinen Geschmack genau';}
 export function validTasteRating(v:unknown):v is TasteRating{
  if(!v||typeof v!=='object')return false;const x=v as TasteRating;
  return ['id','title','category','description','kind','url','reason','ratedAt'].every(k=>typeof (x as unknown as Record<string,unknown>)[k]==='string')
   &&!!x.id&&x.id.length<=250&&x.title.length<=500&&x.category.length<=300&&x.description.length<=12000&&x.reason.length<=1000&&x.url.length<=2000&&(!x.url||/^https?:\/\//.test(x.url))
-  &&Number.isInteger(x.stars)&&x.stars>=1&&x.stars<=5&&(!x.ratedAt||Number.isFinite(Date.parse(x.ratedAt)))
+  &&(x.score!==undefined?validScore(x.score):typeof x.stars==='number'&&Number.isInteger(x.stars)&&x.stars>=1&&x.stars<=5)&&(!x.ratedAt||Number.isFinite(Date.parse(x.ratedAt)))
   &&(x.fitScore===undefined||Number.isFinite(x.fitScore)&&x.fitScore>=0&&x.fitScore<=100)
   &&(x.date===undefined||/^\d{4}-\d{2}-\d{2}$/.test(x.date))
   &&(x.facts===undefined||Array.isArray(x.facts)&&x.facts.length<=50&&x.facts.every(f=>typeof f==='string'&&f.length<=1000));
 }
-export function withTasteRating<T extends {tasteRatings?:TasteRating[]}>(state:T,item:TasteSuggestion,stars:number,reason='',at=new Date().toISOString()):T{
- if(!Number.isInteger(stars)||stars<0||stars>5)throw Error('Invalid stars');
+export function withTasteRating<T extends {tasteRatings?:TasteRating[]}>(state:T,item:TasteSuggestion,score:number|null,reason='',at=new Date().toISOString()):T{
+ if(score!==null&&!validScore(score))throw Error('Invalid score');
  const rows=(state.tasteRatings??[]).filter(x=>x.id!==item.id);
- if(stars){const row={...item,stars,reason:reason.trim(),ratedAt:at};if(!validTasteRating(row))throw Error('Invalid taste example');rows.unshift(row);}
+ if(score!==null){const {stars:_oldStars,score:_oldScore,...snapshot}=item as TasteRating;const row={...snapshot,score,reason:reason.trim(),ratedAt:at};if(!validTasteRating(row))throw Error('Invalid taste example');rows.unshift(row);}
  if(rows.length>2000)throw Error('Taste collection full');
  return {...state,tasteRatings:rows};
 }
@@ -47,29 +51,30 @@ export function personalTasteFit(item:TasteSuggestion,ratings:readonly TasteRati
  const original=item.fitScore!;
  if(original===0)return {score:0,reason:'Bestehender Ausschluss bleibt erhalten',confidence:'excluded'};
  const direct=ratings.find(r=>r.id===item.id);
- if(direct)return {score:[15,35,60,85,100][direct.stars-1],reason:`Deine Bewertung: ${direct.stars} von 5 Sternen`,confidence:'rated'};
+ if(direct)return {score:ratingScore(direct)!,reason:`Deine Bewertung: ${ratingScore(direct)} / 100`,confidence:'rated'};
  // An artist rated at another concert is a useful direct example, not genre training.
  const same=ratings.filter(r=>tasteDomain(r)===domain&&normalized(r.title)===normalized(item.title)).sort((a,b)=>b.ratedAt.localeCompare(a.ratedAt))[0];
- if(same)return {score:[15,35,60,85,100][same.stars-1],reason:`Dein bewertetes Beispiel „${same.title}“: ${same.stars} von 5 Sternen`,confidence:'reference'};
+ if(same)return {score:ratingScore(same)!,reason:`Dein bewertetes Beispiel „${same.title}“: ${ratingScore(same)} / 100`,confidence:'reference'};
  const broadMusic=domain==='music'&&features.length===0&&!referenceArtist.test(item.title.trim());
  const base=broadMusic?Math.min(original,70):original;
  // One artist/place contributes once. Weak shared genre alone never trains a whole genre.
  const unique=new Map<string,TasteRating>();
  for(const r of [...ratings].sort((a,b)=>b.ratedAt.localeCompare(a.ratedAt))){const key=tasteDomain(r)+'|'+normalized(r.title);if(!unique.has(key))unique.set(key,r);}
  const related=[...unique.values()].filter(r=>tasteDomain(r)===domain&&tasteFeatures(r).filter(f=>features.includes(f)).length>=2);
- const adjustment=related.length>=2?Math.round(Math.max(-12,Math.min(12,related.reduce((sum,r)=>sum+(r.stars-3)*6,0)/(related.length+2)))):0;
+ const adjustment=related.length>=2?Math.round(Math.max(-12,Math.min(12,related.reduce((sum,r)=>sum+(ratingScore(r)!-50)*0.24,0)/(related.length+2)))):0;
  const reasons=[broadMusic?'Nur Musikrichtung belegt; Feinpassung offen':features.length?'Belegte Merkmale: '+features.join(', '):'Grundpassung aus deinen Vorgaben',adjustment?`${related.length} ähnliche bewertete Beispiele: ${adjustment>0?'+':''}${adjustment} Punkte`:''];
  return {score:Math.max(0,Math.min(100,base+adjustment)),reason:reasons.filter(Boolean).join(' · '),confidence:broadMusic?'broad':'features'};
 }
-export function starsMarkup(id:string,stars?:number,disabled=false){
- return `<div class="taste-stars" role="group" aria-label="Geschmack bewerten">${[1,2,3,4,5].map(n=>`<button type="button" data-taste-rate="${n}" data-taste-id="${escape(id)}" aria-label="${n} ${n===1?'Stern':'Sterne'} – ${starLabels[n-1]}" aria-pressed="${stars===n}" ${disabled?'disabled':''}>${n<=(stars??0)?'★':'☆'}</button>`).join('')}</div>`;
+export function starsMarkup(id:string,score?:number,disabled=false){
+ const value=score??50;
+ return `<div class="taste-slider" role="group" aria-label="Geschmack bewerten"><label>Deine Bewertung <output data-score-output>${score===undefined?'Noch nicht bewertet':score+' / 100'}</output><input type="range" min="0" max="100" step="5" value="${value}" data-taste-score data-taste-id="${escape(id)}" aria-label="Deine Geschmacksbewertung von 0 bis 100" aria-valuetext="${score===undefined?'Noch nicht bewertet':score+' von 100 · '+scoreLabel(score)}" ${disabled?'disabled':''}></label><div class="taste-scale"><span>0 · gar nicht</span><span>50 · okay</span><span>100 · genau meins</span></div><button type="button" data-taste-save="${escape(id)}" ${disabled?'disabled':''}>Bewertung speichern</button></div>`;
 }
-export function ratingSectionMarkup(id:string,stars?:number,disabled=true){return `<section class="rating-actions taste-rating" data-taste-wrap="${escape(id)}"><strong>Dein Geschmack</strong>${starsMarkup(id,stars,disabled)}<p data-taste-label>${stars?`${stars} / 5 · ${starLabels[stars-1]}`:'Noch nicht bewertet'}</p><button type="button" data-taste-details="${escape(id)}">Bewertung & Begründung</button></section>`;}
+export function ratingSectionMarkup(id:string,score?:number,disabled=true){return `<section class="rating-actions taste-rating" data-taste-wrap="${escape(id)}"><strong>Dein Geschmack</strong>${starsMarkup(id,score,disabled)}<p data-taste-label>${score===undefined?'Noch nicht bewertet':score+' / 100 · '+scoreLabel(score)}</p><button type="button" data-taste-details="${escape(id)}">Bewertung & Begründung</button></section>`;}
 // Existing actual star ratings are copied in memory, and persisted on the next explicit save.
 // Their original rating time is unknown; no timestamp is invented.
-export function withExistingTasteRatings<T extends {tasteRatings?:TasteRating[];activityStock?:{id:string;sourceId?:string;title:string;kind:string;note:string;url:string;rating?:number}[];routines?:{id:string;title:string;next:string;mood:string;rating?:number}[]}>(state:T):T{
- const rows=[...(state.tasteRatings??[])];
- for(const r of state.activityStock??[]){const id=r.sourceId||'stock:'+r.id;if(r.rating&&!rows.some(x=>x.id===id))rows.push({id,title:r.title,category:r.kind,description:r.note,kind:r.kind,url:r.url,stars:r.rating,reason:'',ratedAt:''});}
- for(const r of state.routines??[]){const id='routine:'+r.id;if(r.rating&&!rows.some(x=>x.id===id))rows.push({id,title:r.title,category:r.mood,description:r.next,kind:'routine',url:'',stars:r.rating,reason:'',ratedAt:''});}
+export function withExistingTasteRatings<T extends {tasteRatings?:TasteRating[];activityStock?:{id:string;sourceId?:string;title:string;kind:string;note:string;url:string;rating?:number;ratingScore?:number}[];routines?:{id:string;title:string;next:string;mood:string;rating?:number;ratingScore?:number}[]}>(state:T):T{
+ const rows=(state.tasteRatings??[]).map(x=>({...x,score:ratingScore(x)}));
+ for(const r of state.activityStock??[]){const id=r.sourceId||'stock:'+r.id;if((r.ratingScore!==undefined||r.rating!==undefined)&&!rows.some(x=>x.id===id))rows.push({id,title:r.title,category:r.kind,description:r.note,kind:r.kind,url:r.url,score:r.ratingScore??legacyStarsToScore(r.rating!),reason:'',ratedAt:''});}
+ for(const r of state.routines??[]){const id='routine:'+r.id;if((r.ratingScore!==undefined||r.rating!==undefined)&&!rows.some(x=>x.id===id))rows.push({id,title:r.title,category:r.mood,description:r.next,kind:'routine',url:'',score:r.ratingScore??legacyStarsToScore(r.rating!),reason:'',ratedAt:''});}
  return {...state,tasteRatings:rows};
 }

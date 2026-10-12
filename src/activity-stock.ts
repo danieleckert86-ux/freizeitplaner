@@ -1,4 +1,4 @@
-import {ratingSectionMarkup} from './taste-profile.ts';
+import {ratingSectionMarkup,validScore,legacyStarsToScore} from './taste-profile.ts';
 import {categoryOf,matchesSetting, type ActivitySetting} from './activity-properties.ts';
 import type {KnownActivity} from './known-activities';
 import type {GuideAnswers} from './activity-guide';
@@ -9,7 +9,7 @@ export const normalizedStockKind=(kind:StockKind)=>kind.startsWith('bike')?'bike
 export const placeOnlyKind=(kind:string)=>['swim','cafe','restaurant','beer-garden'].includes(kind);
 // User-provided source lists, not imported or verified places. No automatic fetch.
 export const stockLists:Partial<Record<StockKind,string>>={restaurant:'https://maps.app.goo.gl/WfdLtvt9Mdo6UJor5',swim:'https://maps.app.goo.gl/8e3gtYTg9j1BvQw98',cafe:'https://maps.app.goo.gl/MFDfsD7oW6aF68Yy6','beer-garden':'https://maps.app.goo.gl/S9TPz1PT38783Roq8'};
-export type StockItem = {id:string;title:string;kind:StockKind;url:string;minutes:number|null;travelMinutes:number|null;distanceKm:number|null;elevationM:number|null;setting:ActivitySetting;energy:string;effort:string;note:string;sourceId?:string;unavailable?:boolean;favorite?:boolean;rating?:number;sourceDetails?:Record<string,unknown>[];importedSourceIds?:string[]};
+export type StockItem = {id:string;title:string;kind:StockKind;url:string;minutes:number|null;travelMinutes:number|null;distanceKm:number|null;elevationM:number|null;setting:ActivitySetting;energy:string;effort:string;note:string;sourceId?:string;unavailable?:boolean;favorite?:boolean;rating?:number;ratingScore?:number;sourceDetails?:Record<string,unknown>[];importedSourceIds?:string[]};
 export type StockFavorite = {suggestionId:string;title:string;category:string;description:string;url:string};
 export type StockDecisions = {ready:boolean;hidden:ReadonlySet<string>;ratings:ReadonlyMap<string,number>};
 const bounded=(v:unknown,max:number)=>v===null||typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=max;
@@ -20,14 +20,14 @@ export function validStockItem(v:unknown):v is StockItem {
   && (stockKinds.some(([id])=>id===a.kind)||['bike-short','bike-long','hike-short','hike-long'].includes(a.kind))&&typeof a.url==='string'&&a.url.length<=2000&&(!a.url||!!safeStockUrl(a.url))
   && bounded(a.minutes,1440)&&(a.minutes===null||Number.isInteger(a.minutes)&&a.minutes>=5)&&bounded(a.travelMinutes,1440)&&(a.travelMinutes===null||Number.isInteger(a.travelMinutes))
   && bounded(a.distanceKm,1000)&&bounded(a.elevationM,10000)&&['inside','outside','both'].includes(a.setting)&&['low','medium','high'].includes(a.energy)&&['spontaneous','prepare','trip'].includes(a.effort)
-  && (a.unavailable===undefined||typeof a.unavailable==='boolean') && (a.favorite===undefined||typeof a.favorite==='boolean') && (a.rating===undefined||Number.isInteger(a.rating)&&a.rating>=1&&a.rating<=5)
+  && (a.unavailable===undefined||typeof a.unavailable==='boolean') && (a.favorite===undefined||typeof a.favorite==='boolean') && (a.ratingScore===undefined||validScore(a.ratingScore)) && (a.rating===undefined||Number.isInteger(a.rating)&&a.rating>=1&&a.rating<=5)
   && typeof a.note==='string'&&a.note.length<=2000&&(a.sourceId===undefined||typeof a.sourceId==='string'&&a.sourceId.length<=200);
 }
-export function withStockRating(row:StockItem,rating:number):StockItem {
- if(!Number.isInteger(rating)||rating<0||rating>5)throw new Error('Invalid rating');
- const next={...row};if(rating===0)delete next.rating;else next.rating=rating;return next;
+export function withStockRating(row:StockItem,score:number|null):StockItem {
+ if(score!==null&&!validScore(score))throw new Error('Invalid rating');
+ const next={...row};delete next.rating;delete next.ratingScore;if(score!==null)next.ratingScore=score;return next;
 }
-const personalPreference=(x:StockItem)=>(x.rating??3)-3;
+const personalPreference=(x:StockItem)=>((x.ratingScore??(x.rating===undefined?50:legacyStarsToScore(x.rating)))-50)/25;
 const stockMinutes=(x:StockItem,a:KnownActivity)=>['swim','cafe','restaurant','beer-garden'].includes(x.kind)?a.minutes:x.minutes;
 export function kindForActivity(a:KnownActivity):StockKind|null {
  if(categoryOf(a)==='movement'){
@@ -106,7 +106,7 @@ const importedDetailsMarkup=(row:StockItem)=> (row.sourceDetails??[]).map(source
  const url=typeof source.url==='string'?safeStockUrl(source.url):source.favorite&&typeof source.favorite==='object'&&typeof (source.favorite as Record<string,unknown>).url==='string'?safeStockUrl((source.favorite as Record<string,unknown>).url as string):'';
  return `<section class="stock-source-details"><h3>Übernommene Informationen</h3>${strings(['description','place','location','why','conditionsStatus','bookingDeadline','time','date']).map(text=>`<p>${e(text)}</p>`).join('')}${meta.length?`<p>${meta.map(e).join(' · ')}</p>`:''}${url&&url!==safeStockUrl(row.url)?`<a href="${e(url)}" target="_blank" rel="noopener noreferrer">Weitere Originalquelle öffnen</a>`:''}</section>`;
 }).join('');
-const ratingMarkup=(row:StockItem,_disabled:string)=>ratingSectionMarkup(row.sourceId||'stock:'+row.id,row.rating);
+const ratingMarkup=(row:StockItem,_disabled:string)=>ratingSectionMarkup(row.sourceId||'stock:'+row.id,row.ratingScore??(row.rating===undefined?undefined:legacyStarsToScore(row.rating)));
 const choices=(pairs:readonly (readonly [string,string])[],selected:string)=>pairs.map(([id,label])=>`<option value="${id}" ${id===selected?'selected':''}>${label}</option>`).join('');
 export function stockMarkup(items:readonly StockItem[],draft:StockItem|null,loaded:boolean,saving:boolean,message:string,viewId:string|null=null,_onlySaved=false):string {
  const {favorites,decisions}=stockSources();const active=usableStock(items,decisions,true);

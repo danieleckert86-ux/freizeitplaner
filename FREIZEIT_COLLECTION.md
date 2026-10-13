@@ -200,3 +200,7 @@ Validierung des erweiterten Standes: 65/65 Tests, TypeScript und Produktionsbuil
 Kino, Streaming sowie Restaurants/Cafés/Biergärten erhalten dieselbe sichtbare collection-fit-Anzeige wie Veranstaltungen und Touren: Punkte / 100 · persönliche Passung. Bestehende adjustedTaste-Auswertung aktualisiert alle Anzeigen beim Laden sowie nach bestätigter Bewertungsänderung. 0 bleibt sichtbar, ungeklärte/importierte Grundpassung bleibt ausdrücklich unbekannt. Keine zweite Formel oder neue Gewichte; eigene Bewertung und gespeicherte öffentliche Grundpassung bleiben getrennt. Keine Änderung an Daten, Recherche, Vormerken oder Übernehmen. Integration/Veröffentlichung durch00.
 
 Validierung: 65/65 Tests, TypeScript und Produktionsbuild bestanden. Isolierte DOM-Prüfung bestätigt die Passung in Kino, Streaming und allen drei Gastronomiegruppen einschließlich einer gespeicherten eigenen 0-Bewertung im Kino. Keine Cloud-Schreibaktionen.
+
+
+## Raus ins Grüne wie die übrigen Entdeckungsreiter · 13.10.2026
+Die Outdoor-Recherche verwendet denselben unabhängigen Abschnitt wie Essen & entdecken, ohne zusätzlichen grünen Außenkasten. Drei Abschnitte stehen untereinander: Fahrradwege, Wanderwege, Spazierwege. Bestehende Gruppen-IDs und Kartenaktionen bleiben erhalten. Die Überschriften bleiben auch bei einer leeren Gruppe sichtbar; ein kurzer Leerhinweis ersetzt keine Recherche und erfindet keine Treffer. Keine Daten-, Bewertungs- oder Rechercheänderung.

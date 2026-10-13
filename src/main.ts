@@ -1,4 +1,4 @@
-import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI} from './taste-ui';
+import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI,openTasteDetails,closeTasteDetails} from './taste-ui';
 import {publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
 import { favoriteArea } from './finder-navigation';
 import { initPlanner } from './planner';
@@ -1023,19 +1023,32 @@ function refreshEventHighlights() {
 }
 
 function quietCardActions() {
-  document.querySelectorAll<HTMLElement>('.item-actions,.lifestyle-actions').forEach(actions => {
+  document.querySelectorAll<HTMLElement>('.item-actions,.lifestyle-actions').forEach(actions=>{
     const primary=actions.querySelector<HTMLElement>('[data-stock-copy],[data-favorite]');
-    if(!primary)return;
-    let more=actions.querySelector<HTMLDetailsElement>(':scope > .card-more');
+    const rating=actions.querySelector<HTMLElement>('[data-taste-wrap]');
+    if(!primary||!rating)return;
+    let more=actions.querySelector<HTMLButtonElement>(':scope > button.card-more');
+    let panel=actions.querySelector<HTMLElement>(':scope > .card-more-panel');
     if(!more){
-      more=document.createElement('details');more.className='card-more';
-      const summary=document.createElement('summary');summary.textContent='Mehr';
-      summary.setAttribute('aria-label','Weitere Aktionen für '+(primary.dataset.title||'diese Idee'));
-      const panel=document.createElement('div');panel.className='card-more-panel';more.append(summary,panel);
+      more=document.createElement('button');more.type='button';more.className='card-more';more.textContent='Mehr';
+      more.setAttribute('aria-label','Bewertung und Details öffnen');more.setAttribute('aria-haspopup','dialog');
+      panel=document.createElement('div');panel.className='card-more-panel';panel.hidden=true;
+      more.addEventListener('click',()=>{
+        const id=actions.querySelector<HTMLElement>('[data-taste-wrap]')?.dataset.tasteWrap;if(!id)return;
+        const extra=document.createElement('div');
+        const card=actions.closest<HTMLElement>('.card,.idea-card,.tour-card,.discovery-item,.lifestyle-card');
+        card?.querySelectorAll('.card-place,.day,.idea-meta,time,.collection-condition').forEach(node=>extra.append(node.cloneNode(true)));
+        const extraActions=document.createElement('div');extraActions.className='taste-detail-actions';
+        [primary,...Array.from(actions.querySelectorAll<HTMLElement>('[data-hide-card]'))].forEach(original=>{
+          const copy=original.cloneNode(true) as HTMLElement;
+          ['data-favorite','data-stock-copy','data-hide-card'].forEach(name=>copy.removeAttribute(name));
+          copy.addEventListener('click',()=>{closeTasteDetails();original.click();});extraActions.append(copy);
+        });
+        extra.append(extraActions);openTasteDetails(id,extra);
+      });
     }
-    const panel=more.querySelector<HTMLElement>('.card-more-panel')!;
-    actions.querySelectorAll<HTMLElement>('.info-link,.rating-actions,[data-hide-card],[data-details]').forEach(child=>{if(child.parentElement!==panel)panel.append(child);});
-    if(actions.children.length!==2||actions.children[0]!==primary||actions.children[1]!==more)actions.replaceChildren(primary,more);
+    actions.querySelectorAll<HTMLElement>('.info-link,.rating-actions,[data-hide-card],[data-details]').forEach(child=>{if(child.parentElement!==panel)panel!.append(child);});
+    if(actions.children.length!==3||actions.children[0]!==primary||actions.children[1]!==more||actions.children[2]!==panel)actions.replaceChildren(primary,more,panel!);
     actions.dataset.quiet='true';
   });
 }

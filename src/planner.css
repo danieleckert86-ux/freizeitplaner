@@ -264,3 +264,11 @@ body:has(.planning-dialog[open]){overflow:hidden}
 #activityStock .stock-edit-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:sticky;bottom:-20px;background:#fff;padding:16px 0 6px;margin-top:16px;border-top:1px solid #e3eae5}
 #activityStock .stock-edit-actions button{min-height:44px;font-size:14px}
 #activityStock .stock-edit-actions .stock-edit-primary{background:#315b43;color:#fff;border-color:#315b43}
+
+/* More opens the shared details/rating dialog directly. */
+.card-more-panel[hidden],.routine-actions[hidden]{display:none!important}
+button.card-more,button.known-more{min-height:44px;padding:8px 14px;border:1px solid #d7e2da;border-radius:10px;background:#fff;color:#315b43;font:inherit;cursor:pointer}
+.taste-extra>p,.taste-extra>div{font-size:14px;line-height:1.55;overflow-wrap:anywhere}
+.taste-detail-actions,.taste-dialog .stock-dialog-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.taste-detail-actions button,.taste-dialog .stock-dialog-actions button{min-height:44px;padding:9px 12px;border:1px solid #d7e2da;border-radius:10px;background:#f0f5f1;color:#315b43;font:inherit;font-size:14px}
+.taste-dialog .card-place,.taste-dialog .day,.taste-dialog time{font-size:13px;margin:8px 0}

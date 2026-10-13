@@ -211,7 +211,8 @@ test('discovery separates cafes, restaurants and beer gardens and identifies lab
 });
 
 
-import {streamingFormat,streamingCardMeta} from '../src/finder-navigation.ts';
+import {streamingFormat,streamingCardMeta,streamingProvider} from '../src/finder-navigation.ts';
+import {recommendationPlace} from '../src/locations.ts';
 test('streaming groups respect confirmed format and leave ambiguous legacy categories unresolved',()=>{
  assert.equal(streamingFormat({mediaType:'film',category:'Serie'}),'film');
  assert.equal(streamingFormat({category:'Serie · Drama'}),'series');
@@ -223,3 +224,15 @@ test('streaming previews omit duration while preserving service and start-date m
  const meta=['Netflix','Seit 01.10.2026','132 min','2.2 h','42 Minuten pro Folge','Laufzeit offen'];
  assert.deepEqual(streamingCardMeta(meta),['Netflix','Seit 01.10.2026']);assert.equal(meta.length,6);
 });
+
+test('media duration filtering also covers cinema and streaming provider uses stored evidence',()=>{
+ assert.deepEqual(streamingCardMeta(['Thalia','1.9 h','115 Minuten','Seit 13.10.','IMDb 7,3/10']),['Thalia','Seit 13.10.','IMDb 7,3/10']);
+ assert.equal(streamingProvider({platform:'Netflix',meta:['ARD Mediathek']}),'Netflix');
+ assert.equal(streamingProvider({platform:'In Quelle prüfen',meta:['ARD Mediathek']}),'ARD Mediathek');
+ assert.equal(streamingProvider({url:'https://www.netflix.com/de/title/123'}),'Netflix');
+ assert.equal(streamingProvider({url:'https://www.zdf.de/serien/a'}),'ZDF Mediathek');
+ assert.equal(streamingProvider({url:'https://netflix.com.example.org/a'}),'Anbieter noch ungeklärt');
+ assert.equal(streamingProvider({url:'invalid'}),'Anbieter noch ungeklärt');
+ assert.equal(recommendationPlace({title:'Film',meta:['Disney+']},'stream'),'Disney+');
+});
+

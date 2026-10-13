@@ -264,3 +264,7 @@ Sprachbeleg werden nicht rückwirkend als deutsch markiert.
 
 ## YouTube-Suche als Trailerersatz · 13.10.2026
 Ohne belegten deutschen Direkttrailer führt Trailer auf YouTube suchen zu einer Suchseite für den konkreten Film-/Serientitel plus trailer deutsch. Auch englische, sprachlich ungeklärte oder ungültige direkte Trailer verwenden diesen Ersatz. Die Suchseite ist kein bestätigter deutscher Trailer und löst keinen automatischen Abruf aus. Belegte deutsche Direktlinks behalten Vorrang. IMDb-Anzeige/-Grenze und Daten unverändert.
+
+
+## Medienkacheln · 13.10.2026
+Streaming zeigt den gespeicherten Anbieter; bei Platzhaltern werden vorhandene Anbieter-Metadaten oder eindeutige Anbieter-Domains verwendet. Ungeklärte Anbieter bleiben ausdrücklich ungeklärt. Laufzeit-Metadaten entfallen für Kino und Streaming einschließlich der Detail-Metadaten, ohne gespeicherte Originaldaten zu ändern. IMDb und Trailer bleiben erhalten.

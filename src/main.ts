@@ -112,7 +112,8 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
     for(const item of items){
       const rec=item as Recommendation & LifestyleRecommendation;
       const id=rec.favorite?.id||rec.id;if(!id)continue;
-      const snapshot={id,title:rec.title,category:rec.favorite?.categoryLabel||rec.badge||rec.type||rec.category||kind,description:rec.description||'',kind,...(rec.mediaType?{mediaType:rec.mediaType}:{}),url:rec.url||'',...(rec.date?{date:rec.date}:{}),...(Number.isFinite(rec.fitScore)?{fitScore:rec.fitScore}:{}),...(rec.imported===undefined?{}:{imported:rec.imported}),facts:[...(rec.facts??[]),...(rec.meta??[])]};
+      const facts=[...(rec.facts??[]),...(rec.meta??[])];
+      const snapshot={id,title:rec.title,category:rec.favorite?.categoryLabel||rec.badge||rec.type||rec.category||kind,description:rec.description||'',kind,...(rec.mediaType?{mediaType:rec.mediaType}:{}),url:rec.url||'',...(rec.date?{date:rec.date}:{}),...(Number.isFinite(rec.fitScore)?{fitScore:rec.fitScore}:{}),...(rec.imported===undefined?{}:{imported:rec.imported}),facts:kind==='cinema'||kind==='stream'?streamingCardMeta(facts):facts};
       tasteItems.set(id,snapshot);registerTasteSuggestion(snapshot);
     }
   }
@@ -193,7 +194,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       '<div class="lifestyle-top"><span class="lifestyle-type">' + categoryIcon(section, item.type) + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(item.badge) + '</span></div>' +
       '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div>' +
       '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item, section) + '<p>' + dataEscape(neutralDescription(item.description).replace(section==='cinema'?/Heute/gi:/$^/g,'Gespeicherte Vorstellung')) + '</p>' +
-      '<div class="lifestyle-meta">' + (section==='stream'?streamingCardMeta(item.meta):item.meta).map(v => '<span>' + dataEscape(v.replace(/^Neu seit (\d{2})\.(\d{2})\.\d{4}$/, "Seit $1.$2.")) + '</span>').join('') +
+      '<div class="lifestyle-meta">' + (section==='stream'||section==='cinema'?streamingCardMeta(item.meta):item.meta).filter(v=>section!=='stream'||v.trim()!==recommendationPlace(item,section)).map(v => '<span>' + dataEscape(v.replace(/^Neu seit (\d{2})\.(\d{2})\.\d{4}$/, "Seit $1.$2.")) + '</span>').join('') +
       (['cinema','stream'].includes(section)?imdbMarkup(item):'') +
       (['cinema','stream'].includes(section)?germanTrailerMarkup(item):'') + '</div>' +
       '<div class="lifestyle-actions"><div class="lifestyle-links"><a class="info-link" href="' + dataEscape(item.url) + '" target="_blank" rel="noopener noreferrer">Mehr erfahren</a></div>' +
@@ -1095,6 +1096,7 @@ document.addEventListener('click',ev=>{
  document.dispatchEvent(new CustomEvent('stock-copy-request',{detail:{favorite,meta:JSON.parse(button.dataset.meta||'[]'),snapshot:JSON.parse(button.dataset.snapshot||'null'),done:(ok:boolean,message:string)=>{button.disabled=ok;button.textContent=ok?'In Orte & Touren gespeichert':'Erneut übernehmen';button.title=message;const status=document.querySelector<HTMLElement>('#stockCopyStatus');if(status)status.textContent=message;}}}));
 });
 void bootstrap();
+
 
 
 

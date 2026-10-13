@@ -1,8 +1,9 @@
-type Located = { title: string; description?: string; location?: string; venue?: string; city?: string; address?: string; badge?: string; facts?: string[]; meta?: string[]; platform?: string };
+import {streamingProvider} from './finder-navigation.ts';
+type Located = { title: string; description?: string; location?: string; venue?: string; city?: string; address?: string; badge?: string; facts?: string[]; meta?: string[]; platform?: string;url?:string };
 const venues = /Grandhotel Cosmopolis|Kresslesmühle|Soho Stage|Sensemble(?: Theater)?|Kulturhaus abraxas|abraxas|Märchenzelt|Schloss Scherneck|Glaspalast(?: Augsburg)?|Brechthaus(?: Augsburg)?|Maximilianmuseum|Provino Club|Ballonfabrik|KAPPENECK|Kantine(?: Augsburg)?|Zeughaus|Gaswerk|CineStar(?: Augsburg)?|CinemaxX(?: Augsburg)?|Thalia(?: Augsburg)?|Stadtmarkt(?: Augsburg)?/gi;
 const towns = /Bad Hindelang|Hinterstein|Eisenburg|Memmingen|Pfronten|Nesselwang|Gundelfingen|Bächingen|Neusäß|Welden|Rehling|Bad Wörishofen|Jakobervorstadt/gi;
 export function recommendationPlace(item: Located, section = ''): string {
-  if (section === 'stream') return 'Zu Hause' + (item.platform ? ' · ' + item.platform : '');
+  if (section === 'stream') return streamingProvider(item);
   const explicit = [item.venue, item.location, item.address, item.city].filter((x): x is string => Boolean(x?.trim()));
   if (explicit.length) return [...new Set(explicit)].join(' · ');
   const meta = [...(item.facts || []), ...(item.meta || [])];
@@ -20,3 +21,4 @@ export function recommendationPlace(item: Located, section = ''): string {
 export function travelNote(item: Located): string {
   return (item.meta || []).find(x => /^Anfahrt\b/i.test(x)) || '';
 }
+

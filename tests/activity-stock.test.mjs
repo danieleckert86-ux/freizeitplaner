@@ -173,7 +173,8 @@ test('ratings are only editable inside details and do not replace favorite state
  const row=idea('rated',{rating:4,favorite:true});
  assert.ok(!stockMarkup([row],null,true,false,'').includes('data-taste-rate="4"'));
  const dialog=stockMarkup([row],null,true,false,'Bewertung gespeichert.',row.id);
- assert.match(dialog,/type="range"/);
+ assert.doesNotMatch(dialog,/type="range"/);
+ assert.match(dialog,/data-taste-details="stock:rated"/);
  assert.match(dialog,/75 \/ 100/);assert.match(dialog,/Bewertung gespeichert/);
  assert.equal(row.favorite,true);
 });
@@ -188,7 +189,7 @@ test('permanent places show no individual duration while routes retain it and ol
  const pool=idea('pool',{kind:'swim',minutes:90}),tour=idea('tour',{kind:'bike',minutes:120});
  assert.ok(!stockMarkup([pool],null,true,false,'').includes('90 Min.'));
  assert.ok(!stockMarkup([pool],null,true,false,'',pool.id).includes('90 Min.'));
- assert.match(stockMarkup([pool],pool,true,false,''),/data-stock-duration hidden/);
+ assert.match(stockMarkup([pool],pool,true,false,''),/data-stock-tour hidden/);
  assert.match(stockMarkup([tour],null,true,false,''),/120 Min\./);
  assert.equal(pool.minutes,90);
 });

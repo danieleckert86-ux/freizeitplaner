@@ -1,4 +1,4 @@
-import {imdbMarkup,mediaRecommendationAllowed} from './media-rating';
+import {imdbMarkup,mediaRecommendationAllowed,germanTrailerMarkup} from './media-rating';
 import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI,openTasteDetails,closeTasteDetails,setTasteArchiveScope} from './taste-ui';
 import {publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
 import { favoriteArea,finderSectionVisible,discoveryFoodKind,discoveryRouteKind,streamingFormat,streamingCardMeta,type NewCategory } from './finder-navigation';
@@ -29,7 +29,7 @@ type Recommendation = {
 type LifestyleRecommendation = {
   id: string; mediaType?: 'film'|'series'; title: string; type: string; description: string; meta: string[];
   fitScore?: number; imported?: boolean; category?:string; favorite?:{id:string;categoryLabel?:string};
-  url: string; badge: string; location?: string; venue?: string; city?: string; address?: string; platform?: string; imdbRating?: number|null; imdbUrl?: string; trailerUrl?: string;
+  url: string; badge: string; location?: string; venue?: string; city?: string; address?: string; platform?: string; imdbRating?: number|null; imdbUrl?: string; trailerUrl?: string; trailerLanguage?: 'de'|'en'|'other';
 };
 
 type StreamRecommendation = LifestyleRecommendation & {
@@ -195,7 +195,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item, section) + '<p>' + dataEscape(neutralDescription(item.description).replace(section==='cinema'?/Heute/gi:/$^/g,'Gespeicherte Vorstellung')) + '</p>' +
       '<div class="lifestyle-meta">' + (section==='stream'?streamingCardMeta(item.meta):item.meta).map(v => '<span>' + dataEscape(v.replace(/^Neu seit (\d{2})\.(\d{2})\.\d{4}$/, "Seit $1.$2.")) + '</span>').join('') +
       (['cinema','stream'].includes(section)?imdbMarkup(item):'') +
-      (item.trailerUrl ? '<a class="trailer-link trailer-meta" href="' + dataEscape(item.trailerUrl) + '" target="_blank" rel="noopener noreferrer">▶ Trailer</a>' : '') + '</div>' +
+      (['cinema','stream'].includes(section)?germanTrailerMarkup(item):'') + '</div>' +
       '<div class="lifestyle-actions"><div class="lifestyle-links"><a class="info-link" href="' + dataEscape(item.url) + '" target="_blank" rel="noopener noreferrer">Mehr erfahren</a></div>' +
       '<div class="lifestyle-card-buttons">' + ratingMarkup(item.id, item.title, section) + (section==='restaurants'?stockCopyMarkup({id:'lifestyle-'+item.id,title:item.title,category:({cafe:'Café',restaurant:'Restaurant','beer-garden':'Biergarten'})[discoveryFoodKind(item)],description:item.description,url:item.url},item.meta,item):lifestyleFavoriteMarkup(item,section)) +
       '<button class="hide-card-btn" type="button" data-hide-card data-id="' + dataEscape(item.id) + '" data-section="' + section + '" data-title="' + dataEscape(item.title) + '">Ausblenden</button></div></div></article>'

@@ -167,3 +167,6 @@ Die bisherigen Sterne werden überall durch einen zugänglichen Schieberegler 0�
 
 ## Kompaktes Bewertungsformular · 12.10.2026
 Der Dialog verwendet einen gemeinsamen Speichern-Button für Punktwert und optionale Begründung. Einmalige Punktanzeige, Begründung bei Bedarf aufklappbar, Quellen/Merkmale/Passung und Entfernen unter Mehr zum Vorschlag. Abbrechen verändert nichts. Nach bestätigtem Speichern schließt der Dialog mit kurzer Rückmeldung; bei Fehler bleibt der Entwurf samt Begründung bearbeitbar. Datenspeicherung und Bewertungsskala unverändert.
+
+## Einheitliche Bewertung und geordneter Ortseditor · 13.10.2026
+Alle Detailansichten zeigen nur den gespeicherten Punktwert und Bewerten/Bewertung ändern. Der einzige Bewertungsdialog bearbeitet Punkte und optionale Begründung gemeinsam. Ein zuvor geöffnetes Detailfenster wird währenddessen geschlossen und anschließend wiederhergestellt; keine zwei gleichzeitig offenen Dialoge. Der Orts-/Toureneditor zeigt Name, Kategorie und Drinnen/Draußen zuerst, Tourdaten nur bei Touren, Link/Notizen sowie Auswahlhilfe/Verfügbarkeit in aufklappbaren Abschnitten. Ein gemeinsamer Speichern-Button und Abbrechen. Geschlossene Felder bleiben im Formular und werden verlustfrei gespeichert. Bewertungen, Original-Snapshots und Cloud-Revisionsschutz bleiben erhalten.

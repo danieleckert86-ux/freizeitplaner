@@ -576,9 +576,9 @@ export function initPlanner(database: SupabaseClient) {
     stockHost.querySelectorAll<HTMLDetailsElement>('.stock-category').forEach(x=>{x.open=openGroups.has(x.dataset.stockCategory);});
     refreshTasteUI();
     const dialog=stockHost.querySelector<HTMLDialogElement>('#stockDialog');
-    if(dialog){dialog.showModal();dialog.addEventListener('cancel',ev=>{ev.preventDefault();if(saving)return;stockDraft=null;stockView=null;renderStock();});}
+    if(dialog){if(!document.querySelector('#tasteRatingDialog[open]'))dialog.showModal();dialog.addEventListener('cancel',ev=>{ev.preventDefault();if(saving)return;stockDraft=null;stockView=null;renderStock();});}
     const kindSelect=stockHost.querySelector<HTMLSelectElement>('#stockForm select[name=kind]');
-    kindSelect?.addEventListener('change',()=>{const durationLabel=stockHost.querySelector<HTMLElement>('[data-stock-duration]');if(durationLabel)durationLabel.hidden=placeOnlyKind(kindSelect.value);});
+    kindSelect?.addEventListener('change',()=>{const tour=stockHost.querySelector<HTMLDetailsElement>('[data-stock-tour]');if(tour){tour.hidden=placeOnlyKind(kindSelect.value);if(!tour.hidden)tour.open=true;}});
     stockHost.querySelector<HTMLFormElement>('#stockForm')?.addEventListener('submit',async ev=>{
       ev.preventDefault();if(!stockDraft||!loaded||saving)return;
       const d=new FormData(ev.currentTarget as HTMLFormElement);

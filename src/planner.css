@@ -240,3 +240,27 @@ body:has(.planning-dialog[open]){overflow:hidden}
 @media(max-width:560px){#activityStock .stock-dialog .planner-form{grid-template-columns:1fr}}
 
 .known-row{grid-template-columns:minmax(0,1fr) auto auto!important}
+
+/* A single rating editor; details only show the saved value. */
+.taste-rating{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.taste-rating>div{min-width:0}
+.taste-rating [data-taste-label]{margin:3px 0!important;font-size:13px}
+.taste-rating [data-taste-details]{min-height:44px}
+/* Editing: essentials first, optional data in quiet sections. */
+#activityStock .stock-dialog .stock-edit-form{display:block;margin:16px 0 0}
+#activityStock .stock-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#activityStock .stock-full{grid-column:1/-1}
+#activityStock .stock-edit-form label{font-size:13px;gap:6px}
+#activityStock .stock-edit-form input,#activityStock .stock-edit-form select,#activityStock .stock-edit-form textarea{font-size:16px;min-height:44px;background:#fff}
+#activityStock .stock-edit-section{border-top:1px solid #e3eae5;margin-top:16px;padding-top:4px}
+#activityStock .stock-edit-section>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px;font-weight:600;list-style:none}
+#activityStock .stock-edit-section>summary::-webkit-details-marker{display:none}
+#activityStock .stock-edit-section>summary:after{content:'＋';font-weight:400;color:#627469}
+#activityStock .stock-edit-section[open]>summary:after{content:'−'}
+#activityStock .stock-edit-section>summary span{font-size:12px;font-weight:400;color:#627469;margin-left:auto}
+#activityStock .stock-edit-section[hidden]{display:none}
+#activityStock .stock-checkbox{display:flex;flex-direction:row;align-items:center;margin-top:4px}
+#activityStock .stock-checkbox input{width:20px;height:20px;min-height:20px;flex:0 0 20px}
+#activityStock .stock-edit-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:sticky;bottom:-20px;background:#fff;padding:16px 0 6px;margin-top:16px;border-top:1px solid #e3eae5}
+#activityStock .stock-edit-actions button{min-height:44px;font-size:14px}
+#activityStock .stock-edit-actions .stock-edit-primary{background:#315b43;color:#fff;border-color:#315b43}

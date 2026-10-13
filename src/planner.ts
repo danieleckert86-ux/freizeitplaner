@@ -320,7 +320,7 @@ export function initPlanner(database: SupabaseClient) {
       registerTasteSuggestion({id:'routine:'+r.id,title:r.title,category:categoryOf(r),description:r.next,kind:'routine',url:'',facts:[r.minutes+' Min.','Energie '+r.energy,'Aufwand '+r.effort,settingOf(r)]});
       registerTasteDetails('routine:'+r.id,()=>{
         const actions=document.createElement('div');actions.className='taste-detail-actions';
-        host.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(original=>{if(original.dataset.id!==r.id||!['editRoutine','deleteRoutine'].includes(original.dataset.action!))return;const copy=original.cloneNode(true) as HTMLButtonElement;copy.removeAttribute('data-action');copy.addEventListener('click',()=>{closeTasteDetails();original.click();});actions.append(copy);});
+        host?.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(original=>{if(original.dataset.id!==r.id||!['editRoutine','deleteRoutine'].includes(original.dataset.action!))return;const copy=original.cloneNode(true) as HTMLButtonElement;copy.removeAttribute('data-action');copy.addEventListener('click',()=>{closeTasteDetails();original.click();});actions.append(copy);});
         return actions;
       });
     }
@@ -610,7 +610,7 @@ export function initPlanner(database: SupabaseClient) {
     });
   }
   async function handleStockAction(b:HTMLButtonElement){
-    if(b.disabled)return;
+    if(!stockHost||b.disabled)return;
     const action=b.dataset.stockAction,id=b.dataset.stockId;
     if(action==='cancel'){if(saving)return;const previous=stockDraft?.id||stockView;stockDraft=null;stockView=null;stockMessage='';renderStock();Array.from(stockHost.querySelectorAll<HTMLButtonElement>('[data-stock-action=details]')).find(b=>b.dataset.stockId===previous)?.focus();return;}
     if(!loaded||saving)return;

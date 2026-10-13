@@ -240,3 +240,24 @@ IMDb-Wertung erscheint noch keine Zahl; es wurden keine neuen Werte recherchiert
 Validierung:69/69 App-Tests, TypeScript und Vite-Build erfolgreich. Grenzwerte
 0/6,99/7,0, unbekannte Werte, deutsche Anzeige und sichere IMDb-Titellinks
 geprüft. Zentrale Projektion/Import-/Fitregeln separat mit isolierten Tests.
+
+
+## Deutsche Trailer bei Kino und Streaming · 13.10.2026
+Kino, Streaming-Filme und Streaming-Serien zeigen Deutscher Trailer, wenn ein
+sicherer HTTPS-Videolink und ausdrücklich trailerLanguage='de' gespeichert sind.
+Ein bloßer Link oder deutscher Videotitel beweist die Sprachfassung nicht.
+Unbekannte/englische Trailer werden nicht als deutsch angezeigt; fehlender
+Trailer ist kein Ausschlussgrund. IMDb-Grenze7,0, persönliche Punkte, gleiche
+Kachelhöhen und die vorhandenen Kartenaktionen bleiben unverändert.
+
+Die Katalogprojektion erhält optionale trailerUrl/trailerLanguage für bestätigte
+deutsche Medien-Trailer. Die bestehende geplante Freizeitsuche übernimmt bei
+regulären Läufen tatsächlich belegte deutsche Trailer, bevorzugt von offiziellen
+Film-/Verleih-/Studio-/Dienstquellen. Kein neuer Suchlauf, keine bezahlte API
+oder produktive Datenänderung. Vor Codeintegration keine unbekannten Felder
+schreiben; die Aufgabe benennt fehlende Schemaunterstützung als Integrationslücke.
+
+71/71 App-Tests, TypeScript und Produktionsbuild. Tests prüfen bestätigte
+Sprache, fehlende/englische Sprache, ungültige Links und sichere HTML-Ausgabe.
+Integration/Veröffentlichung durch00 offen; bisher gespeicherte Trailer ohne
+Sprachbeleg werden nicht rückwirkend als deutsch markiert.

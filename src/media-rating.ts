@@ -14,3 +14,11 @@ export function imdbMarkup(item:{imdbRating?:unknown;imdbUrl?:unknown}){
  const label='IMDb '+rating.toFixed(1).replace('.',',')+'/10',url=imdbTitleUrl(item.imdbUrl);
  return url?`<a class="imdb-rating" href="${escape(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`:`<span class="imdb-rating">${label}</span>`;
 }
+export function germanTrailerMarkup(item:{trailerUrl?:unknown;trailerLanguage?:unknown}){
+ if(item.trailerLanguage!=='de'||typeof item.trailerUrl!=='string')return '';
+ try{
+  const url=new URL(item.trailerUrl);
+  if(url.protocol!=='https:'||url.username||url.password)return '';
+  return `<a class="trailer-link trailer-meta" href="${escape(url.href)}" target="_blank" rel="noopener noreferrer">▶ Deutscher Trailer</a>`;
+ }catch{return '';}
+}

@@ -166,7 +166,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div><h4>' + dataEscape(item.title) + '</h4>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' +
       '<p class="collection-condition">' + dataEscape(item.conditionsStatus||'Vor dem Ausflug Wetter, Sperrungen und Routenverlauf prüfen. Keine aktuelle Freigabe.') + '</p><div class="tour-meta">' + (item.meta ?? []).map(v => '<span' + (/Anfahrt/i.test(v)?' class="travel-detail"':'') + '>' + dataEscape(v) + '</span>').join('') + '</div>' +
       '<div class="item-actions">' + sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, item.category) + stockCopyMarkup({id:item.favorite.id,title:item.title,category:item.favorite.categoryLabel,description:item.description,url:item.favorite.url},item.meta??[],item) + '</div></article>'
-    ).join('');
+    ).join('')+'<p class="collection-empty outdoor-empty" '+(items.length?'hidden':'')+'>Noch keine recherchierten Wege gespeichert.</p>';
   };
   renderTours('#hikeGroup', data.hikes.filter(x=>discoveryRouteKind(x)!=='walk'));
   renderTours('#walkGroup', [...(data.walks??[]),...data.hikes.filter(x=>discoveryRouteKind(x)==='walk')]);
@@ -696,15 +696,15 @@ function renderCurrentFilters() {
   const visibleHikes = hikeCards.filter(isVisible).length;
   const visibleBikes = bikeCards.filter(isVisible).length;
   const visibleWalks=walkCards.filter(isVisible).length;
-  const visibleTours = visibleHikes + visibleBikes + visibleWalks;
   const visibleAll = filterableItems.filter(isVisible).length;
 
   topSection?.classList.toggle('is-hidden', visibleTop === 0);
   weekendSection?.classList.toggle('is-hidden', visibleIdeas === 0);
-  hikeGroup?.classList.toggle('is-hidden', visibleHikes === 0);
-  bikeGroup?.classList.toggle('is-hidden', visibleBikes === 0);
-  document.querySelector('#walkGroup')?.classList.toggle('is-hidden',visibleWalks===0);
-  outdoorSection?.classList.toggle('is-hidden', visibleTours === 0);
+  for(const [group,count] of [[hikeGroup,visibleHikes],[bikeGroup,visibleBikes],[document.querySelector<HTMLElement>('#walkGroup'),visibleWalks]] as const){
+    group?.classList.remove('is-hidden');
+    const empty=group?.querySelector<HTMLElement>('.outdoor-empty');if(empty){empty.hidden=count>0;empty.textContent='Noch keine passenden recherchierten Wege angezeigt.';}
+  }
+  outdoorSection?.classList.remove('is-hidden');
 
   if (statusText) {
     statusText.textContent =

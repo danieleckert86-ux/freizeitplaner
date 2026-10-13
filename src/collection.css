@@ -92,3 +92,5 @@
 .collection-mode .lifestyle-actions[data-quiet]>[data-hide-card]{grid-area:hide!important;margin:0!important}
 .collection-mode .item-actions[data-quiet]>button,
 .collection-mode .lifestyle-actions[data-quiet]>button{min-width:0!important;min-height:44px!important;padding:8px 6px!important;box-sizing:border-box!important;white-space:normal!important;font-size:12px!important;line-height:1.35!important;border:1px solid #d9e3dd!important;border-radius:9px!important}
+
+.taste-archive-comment{margin:5px 0 0;font-size:12px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}

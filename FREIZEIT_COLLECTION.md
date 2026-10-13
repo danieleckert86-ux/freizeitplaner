@@ -176,3 +176,11 @@ Mehr öffnet auf öffentlichen Vorschlägen, Standardaktivitäten sowie Orten/To
 
 ## Kartenaktionen korrigiert · 13.10.2026
 Die frühere collection-mode-CSS-Regel display:flex!important überschrieb hidden an der internen Detailablage. Eine spezifische Hidden-Regel unterdrückt diese Ablage wieder vollständig. Vormerken/Übernehmen, Mehr und Ausblenden stehen in einer gemeinsamen dreispaltigen Aktionszeile. Ausblenden bleibt mit dem ursprünglichen Handler auf der Karte; Beschreibung, Bewertung und Quellen sind über den bestehenden Mehr-Dialog erreichbar. Keine Änderung an Bewertungs-/Ausblendungsdaten.
+
+
+## Getrennte Geschmacksarchive · 13.10.2026
+Die Hauptbereiche heißen Standardaktivitäten und Neues; interne Navigationskennungen und bisherige Direktlinks bleiben kompatibel. Mein Geschmack folgt dem gewählten Bereich bzw. der Auswahl Veranstaltungen, Kino oder Streaming. Es zeigt ausschließlich zugehörige gespeicherte Bewertungen inklusive Kommentar. Mehr öffnet weiterhin den gemeinsamen 0–100-Dialog in 5er-Schritten mit optionaler Begründung; Kino nutzt denselben revisionsgeschützten privaten tasteRatings-Speicher wie die anderen Vorschläge. 0 bleibt eine echte Bewertung, frühere Einträge und fremde Planungsfelder bleiben erhalten. Kein produktiver Testeintrag.
+
+Kino-, Streaming- und Veranstaltungsbeispiele werden in der persönlichen Auswertung getrennt. Bestätigtes mediaType wird aus dem Katalog in den privaten Bewertungs-Snapshot übernommen; Streaming-Filme und -Serien werden getrennt ausgewertet, unbekanntes Format bleibt unbekannt. Ältere Daten ohne mediaType sind weiterhin gültig; eine eindeutige Film-/Serienkategorie kann das Format für den Vergleich bestimmen. Kommentare werden erhalten und im Archiv angezeigt. Die bestehende ChatGPT-Recherche liest tasteRatings samt Gründen nach dem aktuellen src/taste-profile.ts; keine Kommentarwörter als erfundene Inhaltsmerkmale, keine neuen Gewichte. Öffentlicher Katalog und Morgenmail-Grundpassung bleiben unverändert.
+
+Integration/Veröffentlichung durch 00 gemäß bestehendem Repository-Vertrag. Validierung: Tests für kategorienspezifische Archive, getrennte Übertragung ähnlicher Beispiele, Film-/Serienformat, 0-Punkte und Kommentar nach Speichern/Reload, TypeScript und Produktionsbuild.

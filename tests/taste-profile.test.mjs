@@ -52,3 +52,34 @@ test('existing real place stars remain exact and enter the archive without inven
  const next=withExistingTasteRatings(state);assert.equal(next.tasteRatings[0].score,25);assert.equal(next.tasteRatings[0].ratedAt,'');assert.ok(validTasteRating(next.tasteRatings[0]));assert.equal(state.tasteRatings,undefined);assert.deepEqual(next.checks,state.checks);
  assert.equal(withExistingTasteRatings(next).tasteRatings.length,1);
 });
+
+test('archives separate events, cinema, streaming and standard activities without losing stored examples',async()=>{
+ const {tasteArchiveRatings}=await import('../src/taste-profile.ts');
+ const rows=['event','cinema','stream','restaurant','routine'].map((kind,i)=>({...rating(kind,3),kind,score:i*5,reason:'Kommentar '+kind}));
+ assert.deepEqual(tasteArchiveRatings(rows,'event').map(x=>x.id),['event']);
+ assert.deepEqual(tasteArchiveRatings(rows,'cinema').map(x=>x.id),['cinema']);
+ assert.deepEqual(tasteArchiveRatings(rows,'stream').map(x=>x.id),['stream']);
+ assert.deepEqual(tasteArchiveRatings(rows,'standard').map(x=>x.id),['restaurant','routine']);
+ assert.equal(rows.length,5);
+});
+test('cinema score zero, comment and confirmed format survive save and reload',()=>{
+ const film={...item,id:'kino',kind:'cinema',category:'Film · Drama',mediaType:'film'};
+ const state=withTasteRating({tasteRatings:[],checks:['keep']},film,0,'Zu bedrückend für mich');
+ const saved=JSON.parse(JSON.stringify(state));
+ assert.ok(validTasteRating(saved.tasteRatings[0]));
+ assert.equal(saved.tasteRatings[0].score,0);assert.equal(saved.tasteRatings[0].reason,'Zu bedrückend für mich');assert.equal(saved.tasteRatings[0].mediaType,'film');
+ assert.equal(personalTasteFit(film,saved.tasteRatings).score,0);
+ assert.deepEqual(saved.checks,['keep']);
+ assert.equal(validTasteRating({...saved.tasteRatings[0],mediaType:'unknown'}),false);
+});
+test('similar examples cannot cross cinema, streaming, events or streaming formats',()=>{
+ const film={...item,id:'new',title:'Neuer Film',kind:'cinema',category:'Film · Drama',mediaType:'film',description:'Charaktergetrieben, menschlich und witzig',fitScore:85};
+ const examples=[1,2].map(n=>({...film,id:'old'+n,title:'Alter Film '+n,score:100,reason:'Figuren gefallen',ratedAt:'2026-10-13T10:00:00Z'}));
+ assert.ok(personalTasteFit(film,examples).score>85);
+ for(const kind of ['stream','event'])assert.equal(personalTasteFit(film,examples.map(r=>({...r,kind}))).score,85);
+ const streamed={...film,kind:'stream'};
+ assert.equal(personalTasteFit(streamed,examples).score,85);
+ assert.ok(personalTasteFit(streamed,examples.map(r=>({...r,kind:'stream'}))).score>85);
+ assert.equal(personalTasteFit({...streamed,mediaType:'series'},examples.map(r=>({...r,kind:'stream'}))).score,85);
+ assert.equal(personalTasteFit({...streamed,mediaType:undefined,category:'Streaming'},examples.map(r=>({...r,kind:'stream'}))).score,85);
+});

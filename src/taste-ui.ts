@@ -1,9 +1,11 @@
-import {personalTasteFit,starsMarkup,ratingScore,scoreLabel,validScore,ratingSectionMarkup,type TasteRating,type TasteSuggestion} from './taste-profile';
+import {personalTasteFit,starsMarkup,ratingScore,scoreLabel,validScore,ratingSectionMarkup,tasteArchiveRatings,tasteScopeLabels,type TasteScope,type TasteRating,type TasteSuggestion} from './taste-profile';
 const e=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const suggestions=new Map<string,TasteSuggestion>();
 const detailProviders=new Map<string,()=>HTMLElement>();
 export function registerTasteDetails(id:string,provider:()=>HTMLElement){detailProviders.set(id,provider);}
 export function closeTasteDetails(){document.querySelector<HTMLDialogElement>('#tasteRatingDialog')?.close();}
+let archiveScope:TasteScope='standard';
+export function setTasteArchiveScope(scope:TasteScope){if(scope===archiveScope)return;archiveScope=scope;refreshTasteUI();}
 let profileSignature='';
 let returnDialogId='';
 let ratings:TasteRating[]=[],ready=false,busy=false,legacy=new Map<string,number>();
@@ -18,7 +20,9 @@ export function refreshTasteUI(){
  document.querySelectorAll<HTMLElement>('[data-taste-wrap]').forEach(w=>{const id=w.dataset.tasteWrap!,r=tasteRatingById(id),score=r?ratingScore(r):undefined;w.querySelector<HTMLElement>('[data-taste-label]')!.textContent=score!==undefined?score+' / 100':legacy.has(id)?'Frühere Rückmeldung: '+(legacy.get(id)===1?'positiv':'negativ'):'Noch nicht bewertet';const button=w.querySelector<HTMLButtonElement>('[data-taste-details]')!;button.disabled=!ready||busy;button.textContent=score===undefined?'Bewerten':'Bewertung ändern';});
  const host=document.querySelector<HTMLElement>('#tasteArchive');if(!host)return;
  const open=host.querySelector('details')?.open??false;
- host.innerHTML='<details '+(open?'open':'')+'><summary>Mein Geschmack <span>'+ratings.length+' Bewertungen</span></summary><p>Deine Bewertungen bleiben auch nach dem Eventtermin erhalten. 0 = gar nicht · 50 = okay · 100 = genau mein Geschmack. Frühere Sterne: 1/2/3/4/5 → 0/25/50/75/100.</p>'+(!ready?'<p>Geschmacksprofil wird geladen oder ist gerade nicht erreichbar.</p>':ratings.length?'<div class="taste-archive-list">'+ratings.map(r=>'<div class="taste-archive-row"><div><strong>'+e(r.title)+'</strong><small>'+e(r.category)+(r.date?' · '+e(r.date):'')+'</small></div><span>'+ratingScore(r)+' / 100</span><button type="button" data-taste-details="'+e(r.id)+'">Mehr</button></div>').join('')+'</div>':'<p>Noch keine Bewertungen. Bewerte eine Idee unter „Mehr“.</p>')+'</details>';
+ const visible=tasteArchiveRatings(ratings,archiveScope);
+ host.setAttribute('aria-label','Mein Geschmack · '+tasteScopeLabels[archiveScope]);
+ host.innerHTML='<details '+(open?'open':'')+'><summary>Mein Geschmack · '+tasteScopeLabels[archiveScope]+' <span>'+visible.length+' Bewertungen</span></summary><p>0 = gar nicht · 50 = okay · 100 = genau mein Geschmack. Punkte und Kommentare bleiben gespeichert und dienen als persönliche Beispiele für die Suche in dieser Kategorie.</p>'+(!ready?'<p>Geschmacksprofil wird geladen oder ist gerade nicht erreichbar.</p>':visible.length?'<div class="taste-archive-list">'+visible.map(r=>'<div class="taste-archive-row"><div><strong>'+e(r.title)+'</strong><small>'+e(r.category)+(r.date?' · '+e(r.date):'')+'</small>'+(r.reason?'<p class="taste-archive-comment">'+e(r.reason)+'</p>':'')+'</div><span>'+ratingScore(r)+' / 100</span><button type="button" data-taste-details="'+e(r.id)+'">Mehr</button></div>').join('')+'</div>':'<p>Noch keine Bewertungen für '+tasteScopeLabels[archiveScope]+'. Bewerte einen Vorschlag unter „Mehr“ mit Punkten und optionalem Kommentar.</p>')+'</details>';
 }
 function dialogMarkup(item:TasteSuggestion){
  const rating=tasteRatingById(item.id),score=rating?ratingScore(rating):undefined,fit=adjustedTaste(item);
@@ -43,5 +47,5 @@ export function initTasteUI(){
   const item=ratings.find(r=>r.id===id)||suggestions.get(id);if(!item||score!==null&&!validScore(score))return;
   const reason=button.closest('#tasteRatingDialog')?.querySelector<HTMLTextAreaElement>('textarea')?.value??tasteRatingById(id)?.reason??'';void saveRating(item,score,reason);
  });
- document.addEventListener('submit',ev=>{const form=(ev.target as Element).closest<HTMLFormElement>('#tasteReasonForm');if(!form)return;ev.preventDefault();const id=form.closest<HTMLDialogElement>('#tasteRatingDialog')?.dataset.tasteId,score=Number(form.querySelector<HTMLInputElement>('[data-taste-score]')!.value),item=ratings.find(x=>x.id===id)||suggestions.get(id!);if(item&&validScore(score))void saveRating(item,score,String(new FormData(form).get('reason')||''));});
+ document.addEventListener('submit',ev=>{const form=(ev.target as Element).closest<HTMLFormElement>('#tasteReasonForm');if(!form)return;ev.preventDefault();const id=form.closest<HTMLDialogElement>('#tasteRatingDialog')?.dataset.tasteId,score=Number(form.querySelector<HTMLInputElement>('[data-taste-score]')!.value),item=suggestions.get(id!)||ratings.find(x=>x.id===id);if(item&&validScore(score))void saveRating(item,score,String(new FormData(form).get('reason')||''));});
 }

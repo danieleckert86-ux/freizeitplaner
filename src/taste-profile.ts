@@ -1,5 +1,14 @@
 // Private, explicit ratings. The catalogue and its source timestamps stay unchanged.
-export type TasteSuggestion={id:string;title:string;category:string;description:string;kind:string;url:string;date?:string;fitScore?:number;imported?:boolean;closed?:boolean;facts?:string[]};
+export type TasteSuggestion={id:string;title:string;category:string;description:string;kind:string;url:string;mediaType?:'film'|'series';date?:string;fitScore?:number;imported?:boolean;closed?:boolean;facts?:string[]};
+export type TasteScope='standard'|'event'|'cinema'|'stream';
+export const tasteScopeLabels:Record<TasteScope,string>={standard:'Standardaktivitäten',event:'Veranstaltungen',cinema:'Kino',stream:'Streaming'};
+export function tasteScope(x:TasteSuggestion):TasteScope{
+ if(x.kind==='cinema')return 'cinema';
+ if(x.kind==='stream')return 'stream';
+ if(x.kind==='event')return 'event';
+ return 'standard';
+}
+export function tasteArchiveRatings(ratings:readonly TasteRating[],scope:TasteScope){return ratings.filter(r=>tasteScope(r)===scope);}
 export type TasteRating=TasteSuggestion&{score?:number;stars?:number;reason:string;ratedAt:string};
 const escape=(s:string)=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 const normalized=(s:string)=>s.normalize('NFKC').trim().replace(/\s+/g,' ').toLocaleLowerCase('de');
@@ -15,6 +24,7 @@ export function validTasteRating(v:unknown):v is TasteRating{
   &&(x.score!==undefined?validScore(x.score):typeof x.stars==='number'&&Number.isInteger(x.stars)&&x.stars>=1&&x.stars<=5)&&(!x.ratedAt||Number.isFinite(Date.parse(x.ratedAt)))
   &&(x.fitScore===undefined||Number.isFinite(x.fitScore)&&x.fitScore>=0&&x.fitScore<=100)
   &&(x.date===undefined||/^\d{4}-\d{2}-\d{2}$/.test(x.date))
+  &&(x.mediaType===undefined||x.mediaType==='film'||x.mediaType==='series')
   &&(x.facts===undefined||Array.isArray(x.facts)&&x.facts.length<=50&&x.facts.every(f=>typeof f==='string'&&f.length<=1000));
 }
 export function withTasteRating<T extends {tasteRatings?:TasteRating[]}>(state:T,item:TasteSuggestion,score:number|null,reason='',at=new Date().toISOString()):T{
@@ -37,12 +47,20 @@ const facets:[string,RegExp][]=[
 ];
 export function tasteFeatures(x:TasteSuggestion){const text=[x.title,x.category,x.description,...(x.facts??[])].join(' ');return facets.filter(([,p])=>p.test(text)).map(([name])=>name);}
 export function tasteDomain(x:TasteSuggestion){
+ // Explicit catalogue kinds win over descriptive genre words. Cinema feedback
+ // must not train streaming or events; confirmed series and films stay separate.
+ const scope=tasteScope(x);
+ if(scope==='cinema')return 'cinema:film';
+ if(scope==='stream'){
+  const format=x.mediaType??(/\bserie\b|\bserien\b|\bstaffel\b/i.test(x.category)?'series':/\bfilm\b/i.test(x.category)?'film':'unknown');
+  return 'stream:'+format;
+ }
  const text=x.category+' '+x.kind;
- if(/restaurant|café|cafe|biergarten/i.test(text))return 'food';
- if(/hike|bike|wander|radtour|fahrrad/i.test(text))return 'tour';
- if(/cinema|stream|kino|film|serie/i.test(text))return 'film';
- if(/musik|indie|folk|songwriter|konzert|jazz|rock|pop|liedermacher|chanson/i.test(text))return 'music';
- return 'other:'+normalized(x.kind||x.category);
+ const prefix=scope==='event'?'event:':'';
+ if(/restaurant|café|cafe|biergarten/i.test(text))return prefix+'food';
+ if(/hike|bike|wander|radtour|fahrrad/i.test(text))return prefix+'tour';
+ if(/musik|indie|folk|songwriter|konzert|jazz|rock|pop|liedermacher|chanson/i.test(text))return prefix+'music';
+ return prefix+'other:'+normalized(x.kind||x.category);
 }
 const referenceArtist=/^(?:miles hardt|olli schulz|chance pe[nñ]a|annenmaykantereit|danger dan|croixx)$/i;
 export function personalTasteFit(item:TasteSuggestion,ratings:readonly TasteRating[]){
@@ -55,7 +73,7 @@ export function personalTasteFit(item:TasteSuggestion,ratings:readonly TasteRati
  // An artist rated at another concert is a useful direct example, not genre training.
  const same=ratings.filter(r=>tasteDomain(r)===domain&&normalized(r.title)===normalized(item.title)).sort((a,b)=>b.ratedAt.localeCompare(a.ratedAt))[0];
  if(same)return {score:ratingScore(same)!,reason:`Dein bewertetes Beispiel „${same.title}“: ${ratingScore(same)} / 100`,confidence:'reference'};
- const broadMusic=domain==='music'&&features.length===0&&!referenceArtist.test(item.title.trim());
+ const broadMusic=(domain==='music'||domain==='event:music')&&features.length===0&&!referenceArtist.test(item.title.trim());
  const base=broadMusic?Math.min(original,70):original;
  // One artist/place contributes once. Weak shared genre alone never trains a whole genre.
  const unique=new Map<string,TasteRating>();

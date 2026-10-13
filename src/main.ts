@@ -1,4 +1,4 @@
-import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI,openTasteDetails,closeTasteDetails} from './taste-ui';
+import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI,openTasteDetails,closeTasteDetails,setTasteArchiveScope} from './taste-ui';
 import {publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
 import { favoriteArea } from './finder-navigation';
 import { initPlanner } from './planner';
@@ -20,13 +20,13 @@ type Recommendation = {
   day: string; category: string; date: string; title: string; description: string;
   url: string; sourceLabel: string; location?: string; venue?: string; city?: string; address?: string;
   favorite: { id: string; title: string; dayLabel: string; categoryLabel: string; description: string; url: string };
-  id?: string; fitScore?: number; verifiedAt?: string; imported?: boolean; conditionsStatus?: string; bookingDeadline?: string;
+  id?: string; mediaType?: 'film'|'series'; fitScore?: number; verifiedAt?: string; imported?: boolean; conditionsStatus?: string; bookingDeadline?: string;
   dayText?: string; badge?: string; facts?: string[]; why?: string;
   label?: string; meta?: string[]; metaLabel?: string; time?: string;
 };
 
 type LifestyleRecommendation = {
-  id: string; title: string; type: string; description: string; meta: string[];
+  id: string; mediaType?: 'film'|'series'; title: string; type: string; description: string; meta: string[];
   url: string; badge: string; location?: string; venue?: string; city?: string; address?: string; platform?: string; imdbRating?: number; imdbUrl?: string; trailerUrl?: string;
 };
 
@@ -106,7 +106,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
     for(const item of items){
       const rec=item as Recommendation & LifestyleRecommendation;
       const id=rec.favorite?.id||rec.id;if(!id)continue;
-      const snapshot={id,title:rec.title,category:rec.favorite?.categoryLabel||rec.badge||rec.type||rec.category||kind,description:rec.description||'',kind,url:rec.url||'',...(rec.date?{date:rec.date}:{}),...(Number.isFinite(rec.fitScore)?{fitScore:rec.fitScore}:{}),...(rec.imported===undefined?{}:{imported:rec.imported}),facts:[...(rec.facts??[]),...(rec.meta??[])]};
+      const snapshot={id,title:rec.title,category:rec.favorite?.categoryLabel||rec.badge||rec.type||rec.category||kind,description:rec.description||'',kind,...(rec.mediaType?{mediaType:rec.mediaType}:{}),url:rec.url||'',...(rec.date?{date:rec.date}:{}),...(Number.isFinite(rec.fitScore)?{fitScore:rec.fitScore}:{}),...(rec.imported===undefined?{}:{imported:rec.imported}),facts:[...(rec.facts??[]),...(rec.meta??[])]};
       tasteItems.set(id,snapshot);registerTasteSuggestion(snapshot);
     }
   }
@@ -298,6 +298,7 @@ async function bootstrap() {
   const currentKind = document.querySelector<HTMLSelectElement>('#currentKind')!;
   const refreshFinder = () => {
     const current = finderView === 'current';
+    setTasteArchiveScope(current?(currentKind.value==='cinema'?'cinema':currentKind.value==='stream'?'stream':'event'):'standard');
     onlySaved.closest<HTMLElement>('label')!.hidden = !current;
     document.querySelector<HTMLElement>('#currentKindLabel')!.hidden = !current;
     document.querySelector<HTMLElement>('#collectionEvidence')!.hidden = !current;

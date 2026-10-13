@@ -194,3 +194,9 @@ Essen & entdecken gliedert gespeicherte Recherche nach Restaurants, Cafés und B
 Der bestehende ChatGPT-Rechercheauftrag wird um Biergärten sowie Spaziergänge ergänzt; keine neue Aufgabe und kein sofortiger Suchlauf. Der bestehende monatliche breite Tourenrhythmus und alle Sicherheits-/Beleg-/Konfliktregeln bleiben erhalten. Spaziergänge nur mit tatsächlich bestätigtem kompatiblem Speicherpfad aufnehmen; Schema-Lücken als ungeklärt melden, keine Wander- oder Veranstaltungsdaten für einen kurzen Spaziergang erfinden. Integration der Appänderung weiterhin über PR9/00.
 
 Validierung des erweiterten Standes: 65/65 Tests, TypeScript und Produktionsbuild erfolgreich. Isolierte DOM-Prüfung mit simulierten Katalog-/Planungsantworten bestätigt beide Standardreiter, alle fünf Neues-Reiter, die Gastronomiegruppen, Spaziergänge und die richtige Biergarten-Übernahme. Keine Cloud-Schreibaktionen im Test. Bestehender Rechercheauftrag aktualisiert und prompt-/zeitplangleich zurückgelesen.
+
+
+## Persönliche Passung auf allen Recherchekacheln · 13.10.2026
+Kino, Streaming sowie Restaurants/Cafés/Biergärten erhalten dieselbe sichtbare collection-fit-Anzeige wie Veranstaltungen und Touren: Punkte / 100 · persönliche Passung. Bestehende adjustedTaste-Auswertung aktualisiert alle Anzeigen beim Laden sowie nach bestätigter Bewertungsänderung. 0 bleibt sichtbar, ungeklärte/importierte Grundpassung bleibt ausdrücklich unbekannt. Keine zweite Formel oder neue Gewichte; eigene Bewertung und gespeicherte öffentliche Grundpassung bleiben getrennt. Keine Änderung an Daten, Recherche, Vormerken oder Übernehmen. Integration/Veröffentlichung durch00.
+
+Validierung: 65/65 Tests, TypeScript und Produktionsbuild bestanden. Isolierte DOM-Prüfung bestätigt die Passung in Kino, Streaming und allen drei Gastronomiegruppen einschließlich einer gespeicherten eigenen 0-Bewertung im Kino. Keine Cloud-Schreibaktionen.

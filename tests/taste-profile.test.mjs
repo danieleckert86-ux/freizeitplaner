@@ -59,7 +59,8 @@ test('archives separate events, cinema, streaming and standard activities withou
  assert.deepEqual(tasteArchiveRatings(rows,'event').map(x=>x.id),['event']);
  assert.deepEqual(tasteArchiveRatings(rows,'cinema').map(x=>x.id),['cinema']);
  assert.deepEqual(tasteArchiveRatings(rows,'stream').map(x=>x.id),['stream']);
- assert.deepEqual(tasteArchiveRatings(rows,'standard').map(x=>x.id),['restaurant','routine']);
+ assert.deepEqual(tasteArchiveRatings(rows,'standard').map(x=>x.id),['routine']);
+ assert.deepEqual(tasteArchiveRatings(rows,'food').map(x=>x.id),['restaurant']);
  assert.equal(rows.length,5);
 });
 test('cinema score zero, comment and confirmed format survive save and reload',()=>{
@@ -82,4 +83,12 @@ test('similar examples cannot cross cinema, streaming, events or streaming forma
  assert.ok(personalTasteFit(streamed,examples.map(r=>({...r,kind:'stream'}))).score>85);
  assert.equal(personalTasteFit({...streamed,mediaType:'series'},examples.map(r=>({...r,kind:'stream'}))).score,85);
  assert.equal(personalTasteFit({...streamed,mediaType:undefined,category:'Streaming'},examples.map(r=>({...r,kind:'stream'}))).score,85);
+});
+
+test('food and outdoor discovery archives use existing place and route ratings',async()=>{
+ const {tasteArchiveRatings}=await import('../src/taste-profile.ts');
+ const rows=['restaurant','cafe','beer-garden','hike','bike','walk','routine'].map(kind=>({...rating(kind,4),kind}));
+ assert.deepEqual(tasteArchiveRatings(rows,'food').map(x=>x.kind),['restaurant','cafe','beer-garden']);
+ assert.deepEqual(tasteArchiveRatings(rows,'outdoor').map(x=>x.kind),['hike','bike','walk']);
+ assert.deepEqual(tasteArchiveRatings(rows,'standard').map(x=>x.kind),['routine']);
 });

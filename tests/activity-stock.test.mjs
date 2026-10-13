@@ -111,8 +111,8 @@ test('unknown travel no longer blocks a concrete selection',()=>{
 // Nature of the suggestion controls its home, independent of its saved state.
 import {favoriteArea} from '../src/finder-navigation.ts';
 test('permanent places and routes stay distinct from time-bound programs',()=>{
- for(const kind of ['Wandern','Fahrrad','Restaurant','Café','Wellness'])assert.equal(favoriteArea(kind),'ideas');
- for(const kind of ['Kino','Streaming','Musik','Kultur'])assert.equal(favoriteArea(kind),'current');
+ for(const kind of ['Wellness','Schwimmen','Kajak'])assert.equal(favoriteArea(kind),'ideas');
+ for(const kind of ['Kino','Streaming','Musik','Kultur','Wandern','Fahrrad','Restaurant','Café','Biergarten','Spaziergang'])assert.equal(favoriteArea(kind),'current');
  assert.equal(favoriteArea('Essen','2026-10-20'),'current');
 });
 test('stock collection stays visible independently of legacy favorite flags',()=>{
@@ -192,4 +192,20 @@ test('permanent places show no individual duration while routes retain it and ol
  assert.match(stockMarkup([pool],pool,true,false,''),/data-stock-tour hidden/);
  assert.match(stockMarkup([tour],null,true,false,''),/120 Min\./);
  assert.equal(pool.minutes,90);
+});
+
+
+import {finderSectionVisible,discoveryFoodKind,discoveryRouteKind} from '../src/finder-navigation.ts';
+test('standard navigation shows only its two private collection tabs; discovery is under Neues',()=>{
+ const sections=['planning','stock','events','movies','restaurants','outdoor'];
+ for(const tab of ['planning','stock'])assert.deepEqual(sections.filter(s=>finderSectionVisible(s,false,'events',tab)),[tab]);
+ for(const [category,section] of [['events','events'],['cinema','movies'],['stream','movies'],['restaurants','restaurants'],['outdoor','outdoor']])assert.deepEqual(sections.filter(s=>finderSectionVisible(s,true,category,'planning')),[section]);
+});
+test('discovery separates cafes, restaurants and beer gardens and identifies labelled walks',()=>{
+ assert.equal(discoveryFoodKind({type:'Café / Frühstück'}),'cafe');
+ assert.equal(discoveryFoodKind({type:'Restaurant · Biergarten'}),'beer-garden');
+ assert.equal(discoveryFoodKind({type:'Restaurant'}),'restaurant');
+ assert.equal(discoveryRouteKind({kind:'hike',category:'Spaziergang am Lech'}),'walk');
+ assert.equal(discoveryRouteKind({kind:'bike',category:'Radtour'}),'bike');
+ assert.equal(discoveryRouteKind({kind:'hike',category:'Wanderung'}),'hike');
 });

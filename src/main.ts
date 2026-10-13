@@ -1,3 +1,4 @@
+import {imdbMarkup,mediaRecommendationAllowed} from './media-rating';
 import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI,openTasteDetails,closeTasteDetails,setTasteArchiveScope} from './taste-ui';
 import {publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
 import { favoriteArea,finderSectionVisible,discoveryFoodKind,discoveryRouteKind,streamingFormat,streamingCardMeta,type NewCategory } from './finder-navigation';
@@ -28,7 +29,7 @@ type Recommendation = {
 type LifestyleRecommendation = {
   id: string; mediaType?: 'film'|'series'; title: string; type: string; description: string; meta: string[];
   fitScore?: number; imported?: boolean; category?:string; favorite?:{id:string;categoryLabel?:string};
-  url: string; badge: string; location?: string; venue?: string; city?: string; address?: string; platform?: string; imdbRating?: number; imdbUrl?: string; trailerUrl?: string;
+  url: string; badge: string; location?: string; venue?: string; city?: string; address?: string; platform?: string; imdbRating?: number|null; imdbUrl?: string; trailerUrl?: string;
 };
 
 type StreamRecommendation = LifestyleRecommendation & {
@@ -103,7 +104,10 @@ function tourAttributes(item: Recommendation) {
   return ' data-flexible-tour="'+String(!fixed)+'" data-tour-minutes="'+String(Math.round(minutes))+'"';
 }
 
+const excludedMediaIds=new Set<string>();
 function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<string>()) {
+  excludedMediaIds.clear();
+  for(const item of [...(data.cinema??[]),...(data.stream??[])])if(!mediaRecommendationAllowed(item)){excludedMediaIds.add(item.id);excludedMediaIds.add('lifestyle-'+item.id);}
   for(const [kind,items] of Object.entries({event:[...data.top,...data.ideas,...data.discoveries],hike:data.hikes,bike:data.bikes,walk:data.walks??[],restaurant:data.restaurants??[],cinema:data.cinema??[],stream:data.stream??[]})){
     for(const item of items){
       const rec=item as Recommendation & LifestyleRecommendation;
@@ -184,13 +188,13 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   const renderLifestyle = (selector: string, items: LifestyleRecommendation[], section: 'restaurants' | 'cinema' | 'stream') => {
     const list = document.querySelector<HTMLElement>(selector);
     if (!list) return;
-    list.innerHTML = items.filter(item => !hiddenIds.has(item.id)).map(item =>
+    list.innerHTML = items.filter(item => !hiddenIds.has(item.id)&&(section==='restaurants'||mediaRecommendationAllowed(item))).map(item =>
       '<article class="lifestyle-card" data-lifestyle-id="' + dataEscape(item.id) + '">' +
       '<div class="lifestyle-top"><span class="lifestyle-type">' + categoryIcon(section, item.type) + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(item.badge) + '</span></div>' +
       '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div>' +
       '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item, section) + '<p>' + dataEscape(neutralDescription(item.description).replace(section==='cinema'?/Heute/gi:/$^/g,'Gespeicherte Vorstellung')) + '</p>' +
       '<div class="lifestyle-meta">' + (section==='stream'?streamingCardMeta(item.meta):item.meta).map(v => '<span>' + dataEscape(v.replace(/^Neu seit (\d{2})\.(\d{2})\.\d{4}$/, "Seit $1.$2.")) + '</span>').join('') +
-      (item.imdbRating ? '<a class="imdb-rating" href="' + dataEscape(item.imdbUrl || item.url) + '" target="_blank" rel="noopener noreferrer">IMDb ' + dataEscape(item.imdbRating.toFixed(1).replace('.', ',')) + '</a>' : '') +
+      (['cinema','stream'].includes(section)?imdbMarkup(item):'') +
       (item.trailerUrl ? '<a class="trailer-link trailer-meta" href="' + dataEscape(item.trailerUrl) + '" target="_blank" rel="noopener noreferrer">▶ Trailer</a>' : '') + '</div>' +
       '<div class="lifestyle-actions"><div class="lifestyle-links"><a class="info-link" href="' + dataEscape(item.url) + '" target="_blank" rel="noopener noreferrer">Mehr erfahren</a></div>' +
       '<div class="lifestyle-card-buttons">' + ratingMarkup(item.id, item.title, section) + (section==='restaurants'?stockCopyMarkup({id:'lifestyle-'+item.id,title:item.title,category:({cafe:'Café',restaurant:'Restaurant','beer-garden':'Biergarten'})[discoveryFoodKind(item)],description:item.description,url:item.url},item.meta,item):lifestyleFavoriteMarkup(item,section)) +
@@ -199,7 +203,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   };
   for(const [selector,kind] of [['#restaurantList','restaurant'],['#cafeList','cafe'],['#beerGardenList','beer-garden']])renderLifestyle(selector,(data.restaurants??[]).filter(x=>discoveryFoodKind(x)===kind),'restaurants');
   renderLifestyle('#cinemaList', data.cinema ?? [], 'cinema');
-  const streamItems=(data.stream ?? []).filter(item => {
+  const streamItems=(data.stream ?? []).filter(mediaRecommendationAllowed).filter(item => {
     const age = (Date.now() - new Date(item.releaseDate + 'T00:00:00').getTime()) / 86400000;
     return !Number.isFinite(age) || age >= 0;
   });
@@ -778,7 +782,7 @@ function renderFavorites() {
   favoritesList.innerHTML = '';
 
   const renderedIds=new Set(Array.from(document.querySelectorAll<HTMLButtonElement>('[data-favorite]')).filter(b=>!!b.closest<HTMLElement>('.view-section:not([hidden])')).map(b=>b.dataset.id));
-  const filtered = favorites.filter(item => favoriteArea(item.category,savedEventDates.get(item.suggestionId)) === finderView && !renderedIds.has(item.suggestionId) && (finderView==='ideas'||currentKind.value==='events'&&!/kino|stream/i.test(item.category)||currentKind.value==='cinema'&&/kino/i.test(item.category)||currentKind.value==='stream'&&/stream/i.test(item.category)));
+  const filtered = favorites.filter(item => !excludedMediaIds.has(item.suggestionId) && favoriteArea(item.category,savedEventDates.get(item.suggestionId)) === finderView && !renderedIds.has(item.suggestionId) && (finderView==='ideas'||currentKind.value==='events'&&!/kino|stream/i.test(item.category)||currentKind.value==='cinema'&&/kino/i.test(item.category)||currentKind.value==='stream'&&/stream/i.test(item.category)));
 
   favoritesEmpty.hidden = filtered.length > 0;
   favoritesEmpty.textContent = 'Hier sind noch keine weiteren Vorschläge vorgemerkt.';
@@ -1091,6 +1095,7 @@ document.addEventListener('click',ev=>{
  document.dispatchEvent(new CustomEvent('stock-copy-request',{detail:{favorite,meta:JSON.parse(button.dataset.meta||'[]'),snapshot:JSON.parse(button.dataset.snapshot||'null'),done:(ok:boolean,message:string)=>{button.disabled=ok;button.textContent=ok?'In Orte & Touren gespeichert':'Erneut übernehmen';button.title=message;const status=document.querySelector<HTMLElement>('#stockCopyStatus');if(status)status.textContent=message;}}}));
 });
 void bootstrap();
+
 
 
 

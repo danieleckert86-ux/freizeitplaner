@@ -212,3 +212,31 @@ Streaming zeigt Filme und Serien als getrennte Abschnitte. Bestätigtes mediaTyp
 Alle Recherchekacheln für Veranstaltungen, Kino, Streaming, Gastronomie und Outdoor verwenden dieselbe Höhe von 280px und eine unten ausgerichtete Aktionszeile. Lange Titel/Ortsangaben sind in der Vorschau auf zwei Zeilen begrenzt; volle Angaben bleiben unter Mehr erhalten. Keine Änderung an Recherche, Bewertungen, Vormerken, Übernehmen oder gespeicherten Daten. Integration durch00.
 
 Validierung: 67/67 Tests, TypeScript und Produktionsbuild bestanden. Isolierte DOM-Prüfung bestätigt Film-/Seriengruppen, separate ungeklärte Formate, entfernte Laufzeit bei erhaltenem Dienst-/Datumsmeta und 280px als berechnete Kachelhöhe aller geprüften Recherchearten. Persönliche 0-Bewertung und Aktionen bleiben erhalten; keine Cloud-Schreibaktionen.
+
+
+
+## IMDb bei Kino und Streaming · 13.10.2026
+Verfügbare numerische IMDb-Wertungen (0–10) erscheinen als IMDb 7,3/10 auf
+Kino- und Streamingkacheln. Ein bestätigter HTTPS-IMDb-Titellink wird verlinkt;
+ohne passenden IMDb-Link erscheint die Zahl als Text, nicht als irreführender
+Link zur Kino-/Dienstseite. Die IMDb-Zahl bleibt getrennt von der persönlichen
+0–100-Bewertung und Passung. Keine IMDb-Schätzung aus Geschmack/Text.
+
+Bekannte Wertungen unter7,0 sind aus Kino-/Streaming-Vorschlägen ausgeschlossen,
+auch im ungeklärten Streamingformat und bei der erneuten Anzeige vorgemerkter
+Titel mit verfügbarer niedriger Wertung. Exakt7,0 bleibt erlaubt. Fehlende,
+null oder ungültige Werte werden nicht zu0 und sind kein Ausschlussgrund.
+Gespeicherte Titel, Vormerkungen, Bewertungen und Geschmacksarchive werden
+nicht gelöscht. Keine neue Recherche, neue Quellenzeit oder Datenbankmigration.
+
+Die gemeinsame Katalogprojektion erhält optional imdbRating/imdbUrl; bisher
+wurden diese bereits in der App vorhandenen Felder dort weggelassen. Bestehende
+Bestände ohne IMDb-Feld bleiben lesbar. Die bestehende Freizeitsuche erhält
+ dieselbe harte Grenze für bekannte Werte und speichert belegte Werte bei ihren
+regulären Läufen; keine neue Aufgabe, kein Sofortlauf und keine bezahlte API.
+Codeintegration/Veröffentlichung durch00 erforderlich. Ohne gespeicherte
+IMDb-Wertung erscheint noch keine Zahl; es wurden keine neuen Werte recherchiert.
+
+Validierung:69/69 App-Tests, TypeScript und Vite-Build erfolgreich. Grenzwerte
+0/6,99/7,0, unbekannte Werte, deutsche Anzeige und sichere IMDb-Titellinks
+geprüft. Zentrale Projektion/Import-/Fitregeln separat mit isolierten Tests.

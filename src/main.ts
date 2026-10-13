@@ -1039,7 +1039,7 @@ function quietCardActions() {
         const card=actions.closest<HTMLElement>('.card,.idea-card,.tour-card,.discovery-item,.lifestyle-card');
         card?.querySelectorAll('.card-place,.day,.idea-meta,time,.collection-condition').forEach(node=>extra.append(node.cloneNode(true)));
         const extraActions=document.createElement('div');extraActions.className='taste-detail-actions';
-        [primary,...Array.from(actions.querySelectorAll<HTMLElement>('[data-hide-card]'))].forEach(original=>{
+        [primary].forEach(original=>{
           const copy=original.cloneNode(true) as HTMLElement;
           ['data-favorite','data-stock-copy','data-hide-card'].forEach(name=>copy.removeAttribute(name));
           copy.addEventListener('click',()=>{closeTasteDetails();original.click();});extraActions.append(copy);
@@ -1047,8 +1047,10 @@ function quietCardActions() {
         extra.append(extraActions);openTasteDetails(id,extra);
       });
     }
-    actions.querySelectorAll<HTMLElement>('.info-link,.rating-actions,[data-hide-card],[data-details]').forEach(child=>{if(child.parentElement!==panel)panel!.append(child);});
-    if(actions.children.length!==3||actions.children[0]!==primary||actions.children[1]!==more||actions.children[2]!==panel)actions.replaceChildren(primary,more,panel!);
+    actions.querySelectorAll<HTMLElement>('.info-link,.rating-actions,[data-details]').forEach(child=>{if(child.parentElement!==panel)panel!.append(child);});
+    const hide=actions.querySelector<HTMLElement>('[data-hide-card]');
+    const children=[primary,more,...(hide?[hide]:[]),panel!];
+    if(actions.children.length!==children.length||children.some((child,i)=>actions.children[i]!==child))actions.replaceChildren(...children);
     actions.dataset.quiet='true';
   });
 }

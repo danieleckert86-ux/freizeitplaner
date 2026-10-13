@@ -173,3 +173,6 @@ Alle Detailansichten zeigen nur den gespeicherten Punktwert und Bewerten/Bewertu
 
 ## Direkter Mehr-Dialog · 13.10.2026
 Mehr öffnet auf öffentlichen Vorschlägen, Standardaktivitäten sowie Orten/Touren unmittelbar den gemeinsamen Dialog mit 0–100-Bewertung, optionaler Begründung, Beschreibung, Metadaten, Originalquelle und vorhandenen Quellen-Snapshots. Die Informationen sind direkt aufgeklappt; kein vorgelagertes Aktionsmenü und kein zweites Bewertungsfenster. Bearbeiten, Entfernen, Vormerken/Übernehmen und Ausblenden verwenden weiter die bestehenden Aktionen. Aktuelle Vorschlagsdetails haben beim Öffnen Vorrang vor alten Bewertungs-Snapshots; archivierte Beispiele bleiben verfügbar. Bewertungs- und Datenspeicherung unverändert, keine Recherche oder Mail.
+
+## Kartenaktionen korrigiert · 13.10.2026
+Die frühere collection-mode-CSS-Regel display:flex!important überschrieb hidden an der internen Detailablage. Eine spezifische Hidden-Regel unterdrückt diese Ablage wieder vollständig. Vormerken/Übernehmen, Mehr und Ausblenden stehen in einer gemeinsamen dreispaltigen Aktionszeile. Ausblenden bleibt mit dem ursprünglichen Handler auf der Karte; Beschreibung, Bewertung und Quellen sind über den bestehenden Mehr-Dialog erreichbar. Keine Änderung an Bewertungs-/Ausblendungsdaten.

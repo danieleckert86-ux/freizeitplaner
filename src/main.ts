@@ -1,6 +1,6 @@
 import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI,openTasteDetails,closeTasteDetails,setTasteArchiveScope} from './taste-ui';
 import {publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
-import { favoriteArea } from './finder-navigation';
+import { favoriteArea,finderSectionVisible,discoveryFoodKind,discoveryRouteKind,type NewCategory } from './finder-navigation';
 import { initPlanner } from './planner';
 import { neutralDescription } from './wording';
 import { categoryIcon } from './category-icons';
@@ -43,6 +43,7 @@ type RecommendationData = {
   ideas: Recommendation[];
   hikes: Recommendation[];
   bikes: Recommendation[];
+  walks?: Recommendation[];
   discoveries: Recommendation[];
   restaurants: LifestyleRecommendation[];
   cinema: LifestyleRecommendation[];
@@ -102,7 +103,7 @@ function tourAttributes(item: Recommendation) {
 }
 
 function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<string>()) {
-  for(const [kind,items] of Object.entries({event:[...data.top,...data.ideas,...data.discoveries],hike:data.hikes,bike:data.bikes,restaurant:data.restaurants??[],cinema:data.cinema??[],stream:data.stream??[]})){
+  for(const [kind,items] of Object.entries({event:[...data.top,...data.ideas,...data.discoveries],hike:data.hikes,bike:data.bikes,walk:data.walks??[],restaurant:data.restaurants??[],cinema:data.cinema??[],stream:data.stream??[]})){
     for(const item of items){
       const rec=item as Recommendation & LifestyleRecommendation;
       const id=rec.favorite?.id||rec.id;if(!id)continue;
@@ -166,7 +167,8 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       '<div class="item-actions">' + sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, item.category) + stockCopyMarkup({id:item.favorite.id,title:item.title,category:item.favorite.categoryLabel,description:item.description,url:item.favorite.url},item.meta??[],item) + '</div></article>'
     ).join('');
   };
-  renderTours('#hikeGroup', data.hikes);
+  renderTours('#hikeGroup', data.hikes.filter(x=>discoveryRouteKind(x)!=='walk'));
+  renderTours('#walkGroup', [...(data.walks??[]),...data.hikes.filter(x=>discoveryRouteKind(x)==='walk')]);
   renderTours('#bikeGroup', data.bikes);
 
   const discoveries = document.querySelector<HTMLElement>('#discoveries > .discovery-timeline');
@@ -189,11 +191,11 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       (item.imdbRating ? '<a class="imdb-rating" href="' + dataEscape(item.imdbUrl || item.url) + '" target="_blank" rel="noopener noreferrer">IMDb ' + dataEscape(item.imdbRating.toFixed(1).replace('.', ',')) + '</a>' : '') +
       (item.trailerUrl ? '<a class="trailer-link trailer-meta" href="' + dataEscape(item.trailerUrl) + '" target="_blank" rel="noopener noreferrer">▶ Trailer</a>' : '') + '</div>' +
       '<div class="lifestyle-actions"><div class="lifestyle-links"><a class="info-link" href="' + dataEscape(item.url) + '" target="_blank" rel="noopener noreferrer">Mehr erfahren</a></div>' +
-      '<div class="lifestyle-card-buttons">' + ratingMarkup(item.id, item.title, section) + (section==='restaurants'?stockCopyMarkup({id:'lifestyle-'+item.id,title:item.title,category:/caf[eé]/i.test(item.type)?'Café':'Restaurant',description:item.description,url:item.url},item.meta,item):lifestyleFavoriteMarkup(item,section)) +
+      '<div class="lifestyle-card-buttons">' + ratingMarkup(item.id, item.title, section) + (section==='restaurants'?stockCopyMarkup({id:'lifestyle-'+item.id,title:item.title,category:({cafe:'Café',restaurant:'Restaurant','beer-garden':'Biergarten'})[discoveryFoodKind(item)],description:item.description,url:item.url},item.meta,item):lifestyleFavoriteMarkup(item,section)) +
       '<button class="hide-card-btn" type="button" data-hide-card data-id="' + dataEscape(item.id) + '" data-section="' + section + '" data-title="' + dataEscape(item.title) + '">Ausblenden</button></div></div></article>'
     ).join('');
   };
-  renderLifestyle('#restaurantList', data.restaurants ?? [], 'restaurants');
+  for(const [selector,kind] of [['#restaurantList','restaurant'],['#cafeList','cafe'],['#beerGardenList','beer-garden']])renderLifestyle(selector,(data.restaurants??[]).filter(x=>discoveryFoodKind(x)===kind),'restaurants');
   renderLifestyle('#cinemaList', data.cinema ?? [], 'cinema');
   renderLifestyle('#streamList', (data.stream ?? []).filter(item => {
     const age = (Date.now() - new Date(item.releaseDate + 'T00:00:00').getTime()) / 86400000;
@@ -294,13 +296,19 @@ async function bootstrap() {
   initPlanner(supabase);
 
   let finderView: 'ideas' | 'current' = 'ideas';
+  let standardTab:'planning'|'stock'='planning';
   const onlySaved = document.querySelector<HTMLInputElement>('#onlySaved')!;
   const currentKind = document.querySelector<HTMLSelectElement>('#currentKind')!;
   const refreshFinder = () => {
     const current = finderView === 'current';
-    setTasteArchiveScope(current?(currentKind.value==='cinema'?'cinema':currentKind.value==='stream'?'stream':'event'):'standard');
-    onlySaved.closest<HTMLElement>('label')!.hidden = !current;
-    document.querySelector<HTMLElement>('#currentKindLabel')!.hidden = !current;
+    setTasteArchiveScope(current?(currentKind.value==='cinema'?'cinema':currentKind.value==='stream'?'stream':currentKind.value==='restaurants'?'food':currentKind.value==='outdoor'?'outdoor':'event'):'standard');
+    document.querySelector<HTMLElement>('#standardTabs')!.hidden=current;
+    document.querySelector<HTMLElement>('#newTabs')!.hidden=!current;
+    document.querySelectorAll<HTMLButtonElement>('[data-standard-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.standardTab===standardTab)));
+    document.querySelectorAll<HTMLButtonElement>('[data-new-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.newTab===currentKind.value)));
+    const savedFilter=current&&['events','cinema','stream'].includes(currentKind.value);
+    onlySaved.closest<HTMLElement>('label')!.hidden = !savedFilter;
+    document.querySelector<HTMLElement>('#currentKindLabel')!.hidden = true;
     document.querySelector<HTMLElement>('#collectionEvidence')!.hidden = !current;
     document.querySelectorAll<HTMLButtonElement>('[data-main-view]').forEach(b => {
       const active = b.dataset.mainView === finderView;
@@ -308,14 +316,14 @@ async function bootstrap() {
     });
     document.querySelectorAll<HTMLElement>('[data-app-view]').forEach(section => {
       const kind=section.dataset.appView;
-      section.hidden = !(current ? kind==='events' && currentKind.value==='events' || kind==='movies' && currentKind.value!=='events' : ['planning','stock','outdoor','restaurants'].includes(kind||''));
-      if(kind==='favorites')section.hidden=!current||!onlySaved.checked;
+      section.hidden = !finderSectionVisible(kind||'',current,currentKind.value as NewCategory,standardTab);
+      if(kind==='favorites')section.hidden=!savedFilter||!onlySaved.checked;
     });
     document.querySelectorAll<HTMLButtonElement>('[data-media-tab]').forEach(b=>b.classList.toggle('active',b.dataset.mediaTab===currentKind.value));
     document.querySelectorAll<HTMLElement>('[data-media-panel]').forEach(panel=>{panel.hidden=panel.dataset.mediaPanel!==currentKind.value;panel.classList.toggle('active',!panel.hidden);});
     document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));
-    document.querySelectorAll<HTMLElement>('.tour-card,.lifestyle-card').forEach(card=>{card.hidden=current&&onlySaved.checked&&!card.querySelector('[data-favorite].saved');});
-    document.dispatchEvent(new CustomEvent('finder-saved-filter',{detail:current&&onlySaved.checked}));
+    document.querySelectorAll<HTMLElement>('.tour-card,.lifestyle-card').forEach(card=>{card.hidden=savedFilter&&onlySaved.checked&&!card.querySelector('[data-favorite].saved');});
+    document.dispatchEvent(new CustomEvent('finder-saved-filter',{detail:savedFilter&&onlySaved.checked}));
   };
   const setAppView = (view: string) => {
     finderView=['current','events','movies'].includes(view)?'current':'ideas';
@@ -329,6 +337,8 @@ async function bootstrap() {
   document.addEventListener('finder-current',()=>setAppView('current'));
   onlySaved.addEventListener('change',()=>{refreshFinder();renderFavorites();});
   currentKind.addEventListener('change',()=>{refreshFinder();renderFavorites();});
+  document.querySelectorAll<HTMLButtonElement>('[data-standard-tab]').forEach(b=>b.addEventListener('click',()=>{standardTab=b.dataset.standardTab as 'planning'|'stock';refreshFinder();}));
+  document.querySelectorAll<HTMLButtonElement>('[data-new-tab]').forEach(b=>b.addEventListener('click',()=>{currentKind.value=b.dataset.newTab!;currentKind.dispatchEvent(new Event('change'));}));
 
 const favoritesList = document.querySelector<HTMLElement>('#favoritesList');
 const favoritesEmpty = document.querySelector<HTMLElement>('#favoritesEmpty');
@@ -403,6 +413,7 @@ const filterableItems = Array.from(document.querySelectorAll<HTMLElement>('.filt
 const topCards = Array.from(document.querySelectorAll<HTMLElement>('#topCards .filterable'));
 const ideaCards = Array.from(document.querySelectorAll<HTMLElement>('#alternativeList .filterable'));
 const hikeCards = Array.from(document.querySelectorAll<HTMLElement>('#hikeGroup .filterable'));
+const walkCards=Array.from(document.querySelectorAll<HTMLElement>('#walkGroup .filterable'));
 const bikeCards = Array.from(document.querySelectorAll<HTMLElement>('#bikeGroup .filterable'));
 
 const topSection = document.querySelector<HTMLElement>('#topSection');
@@ -682,13 +693,15 @@ function renderCurrentFilters() {
   const visibleIdeas = ideaCards.filter(isVisible).length;
   const visibleHikes = hikeCards.filter(isVisible).length;
   const visibleBikes = bikeCards.filter(isVisible).length;
-  const visibleTours = visibleHikes + visibleBikes;
+  const visibleWalks=walkCards.filter(isVisible).length;
+  const visibleTours = visibleHikes + visibleBikes + visibleWalks;
   const visibleAll = filterableItems.filter(isVisible).length;
 
   topSection?.classList.toggle('is-hidden', visibleTop === 0);
   weekendSection?.classList.toggle('is-hidden', visibleIdeas === 0);
   hikeGroup?.classList.toggle('is-hidden', visibleHikes === 0);
   bikeGroup?.classList.toggle('is-hidden', visibleBikes === 0);
+  document.querySelector('#walkGroup')?.classList.toggle('is-hidden',visibleWalks===0);
   outdoorSection?.classList.toggle('is-hidden', visibleTours === 0);
 
   if (statusText) {

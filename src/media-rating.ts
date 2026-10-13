@@ -14,11 +14,17 @@ export function imdbMarkup(item:{imdbRating?:unknown;imdbUrl?:unknown}){
  const label='IMDb '+rating.toFixed(1).replace('.',',')+'/10',url=imdbTitleUrl(item.imdbUrl);
  return url?`<a class="imdb-rating" href="${escape(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`:`<span class="imdb-rating">${label}</span>`;
 }
-export function germanTrailerMarkup(item:{trailerUrl?:unknown;trailerLanguage?:unknown}){
- if(item.trailerLanguage!=='de'||typeof item.trailerUrl!=='string')return '';
- try{
-  const url=new URL(item.trailerUrl);
-  if(url.protocol!=='https:'||url.username||url.password)return '';
-  return `<a class="trailer-link trailer-meta" href="${escape(url.href)}" target="_blank" rel="noopener noreferrer">▶ Deutscher Trailer</a>`;
- }catch{return '';}
+export function youtubeTrailerSearchUrl(title:unknown):string {
+ if(typeof title!=='string'||!title.trim())return '';
+ return 'https://www.youtube.com/results?search_query='+encodeURIComponent(title.trim()+' trailer deutsch');
+}
+export function germanTrailerMarkup(item:{title?:unknown;trailerUrl?:unknown;trailerLanguage?:unknown}){
+ if(item.trailerLanguage==='de'&&typeof item.trailerUrl==='string'){
+  try{
+   const url=new URL(item.trailerUrl);
+   if(url.protocol==='https:'&&!url.username&&!url.password)return `<a class="trailer-link trailer-meta" href="${escape(url.href)}" target="_blank" rel="noopener noreferrer">▶ Deutscher Trailer</a>`;
+  }catch{}
+ }
+ const search=youtubeTrailerSearchUrl(item.title);
+ return search?`<a class="trailer-link trailer-meta" href="${escape(search)}" target="_blank" rel="noopener noreferrer">▶ Trailer auf YouTube suchen</a>`:'';
 }

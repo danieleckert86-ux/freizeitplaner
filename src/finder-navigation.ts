@@ -17,3 +17,11 @@ export function favoriteArea(category:string,date?:string):'ideas'|'current' {
  const c=category.toLocaleLowerCase('de');
  return /wellness|schwimm|kajak|camper/.test(c)?'ideas':'current';
 }
+
+export function streamingFormat(x:{mediaType?:'film'|'series';category?:string;type?:string;favorite?:{categoryLabel?:string}}):'film'|'series'|'unknown'{
+ if(x.mediaType)return x.mediaType;
+ const text=[x.category,x.type,x.favorite?.categoryLabel].join(' ');
+ const film=/\bfilme?\b|\bkinofilme?\b/i.test(text),series=/\bserie\b|\bserien\b|\bstaffel\b/i.test(text);
+ return film!==series?(film?'film':'series'):'unknown';
+}
+export function streamingCardMeta(meta:readonly string[]){return meta.filter(v=>!/(?:\b\d+(?:[.,:]\d+)?\s*(?:min(?:uten)?\b|h\b|std\.?\b|stunden?\b)|laufzeit|spieldauer)/i.test(v));}

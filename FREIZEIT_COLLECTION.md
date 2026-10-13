@@ -204,3 +204,11 @@ Validierung: 65/65 Tests, TypeScript und Produktionsbuild bestanden. Isolierte D
 
 ## Raus ins Grüne wie die übrigen Entdeckungsreiter · 13.10.2026
 Die Outdoor-Recherche verwendet denselben unabhängigen Abschnitt wie Essen & entdecken, ohne zusätzlichen grünen Außenkasten. Drei Abschnitte stehen untereinander: Fahrradwege, Wanderwege, Spazierwege. Bestehende Gruppen-IDs und Kartenaktionen bleiben erhalten. Die Überschriften bleiben auch bei einer leeren Gruppe sichtbar; ein kurzer Leerhinweis ersetzt keine Recherche und erfindet keine Treffer. Keine Daten-, Bewertungs- oder Rechercheänderung.
+
+
+## Streaminggruppen und einheitliche Kachelhöhe · 13.10.2026
+Streaming zeigt Filme und Serien als getrennte Abschnitte. Bestätigtes mediaType hat Vorrang; ältere eindeutige Film-/Serienkategorien dienen als kompatibler Fallback. Unbekannte oder widersprüchliche Typen bleiben unter Format noch ungeklärt, ohne Inhalte zu erfinden. Laufzeitmetadaten entfallen ausschließlich auf Streaming-Vorschaukacheln; die Originaldaten und Details bleiben erhalten.
+
+Alle Recherchekacheln für Veranstaltungen, Kino, Streaming, Gastronomie und Outdoor verwenden dieselbe Höhe von 280px und eine unten ausgerichtete Aktionszeile. Lange Titel/Ortsangaben sind in der Vorschau auf zwei Zeilen begrenzt; volle Angaben bleiben unter Mehr erhalten. Keine Änderung an Recherche, Bewertungen, Vormerken, Übernehmen oder gespeicherten Daten. Integration durch00.
+
+Validierung: 67/67 Tests, TypeScript und Produktionsbuild bestanden. Isolierte DOM-Prüfung bestätigt Film-/Seriengruppen, separate ungeklärte Formate, entfernte Laufzeit bei erhaltenem Dienst-/Datumsmeta und 280px als berechnete Kachelhöhe aller geprüften Recherchearten. Persönliche 0-Bewertung und Aktionen bleiben erhalten; keine Cloud-Schreibaktionen.

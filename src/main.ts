@@ -1,6 +1,6 @@
 import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI,openTasteDetails,closeTasteDetails,setTasteArchiveScope} from './taste-ui';
 import {publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
-import { favoriteArea,finderSectionVisible,discoveryFoodKind,discoveryRouteKind,type NewCategory } from './finder-navigation';
+import { favoriteArea,finderSectionVisible,discoveryFoodKind,discoveryRouteKind,streamingFormat,streamingCardMeta,type NewCategory } from './finder-navigation';
 import { initPlanner } from './planner';
 import { neutralDescription } from './wording';
 import { categoryIcon } from './category-icons';
@@ -27,7 +27,7 @@ type Recommendation = {
 
 type LifestyleRecommendation = {
   id: string; mediaType?: 'film'|'series'; title: string; type: string; description: string; meta: string[];
-  fitScore?: number; imported?: boolean;
+  fitScore?: number; imported?: boolean; category?:string; favorite?:{id:string;categoryLabel?:string};
   url: string; badge: string; location?: string; venue?: string; city?: string; address?: string; platform?: string; imdbRating?: number; imdbUrl?: string; trailerUrl?: string;
 };
 
@@ -189,7 +189,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       '<div class="lifestyle-top"><span class="lifestyle-type">' + categoryIcon(section, item.type) + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(item.badge) + '</span></div>' +
       '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div>' +
       '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item, section) + '<p>' + dataEscape(neutralDescription(item.description).replace(section==='cinema'?/Heute/gi:/$^/g,'Gespeicherte Vorstellung')) + '</p>' +
-      '<div class="lifestyle-meta">' + item.meta.map(v => '<span>' + dataEscape(v.replace(/^Neu seit (\d{2})\.(\d{2})\.\d{4}$/, "Seit $1.$2.")) + '</span>').join('') +
+      '<div class="lifestyle-meta">' + (section==='stream'?streamingCardMeta(item.meta):item.meta).map(v => '<span>' + dataEscape(v.replace(/^Neu seit (\d{2})\.(\d{2})\.\d{4}$/, "Seit $1.$2.")) + '</span>').join('') +
       (item.imdbRating ? '<a class="imdb-rating" href="' + dataEscape(item.imdbUrl || item.url) + '" target="_blank" rel="noopener noreferrer">IMDb ' + dataEscape(item.imdbRating.toFixed(1).replace('.', ',')) + '</a>' : '') +
       (item.trailerUrl ? '<a class="trailer-link trailer-meta" href="' + dataEscape(item.trailerUrl) + '" target="_blank" rel="noopener noreferrer">▶ Trailer</a>' : '') + '</div>' +
       '<div class="lifestyle-actions"><div class="lifestyle-links"><a class="info-link" href="' + dataEscape(item.url) + '" target="_blank" rel="noopener noreferrer">Mehr erfahren</a></div>' +
@@ -199,10 +199,12 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   };
   for(const [selector,kind] of [['#restaurantList','restaurant'],['#cafeList','cafe'],['#beerGardenList','beer-garden']])renderLifestyle(selector,(data.restaurants??[]).filter(x=>discoveryFoodKind(x)===kind),'restaurants');
   renderLifestyle('#cinemaList', data.cinema ?? [], 'cinema');
-  renderLifestyle('#streamList', (data.stream ?? []).filter(item => {
+  const streamItems=(data.stream ?? []).filter(item => {
     const age = (Date.now() - new Date(item.releaseDate + 'T00:00:00').getTime()) / 86400000;
     return !Number.isFinite(age) || age >= 0;
-  }), 'stream');
+  });
+  for(const [selector,format] of [['#streamFilmList','film'],['#streamSeriesList','series'],['#streamUnknownList','unknown']])renderLifestyle(selector,streamItems.filter(x=>streamingFormat(x)===format),'stream');
+  document.querySelector<HTMLElement>('#streamUnknownGroup')!.hidden=!streamItems.some(x=>!hiddenIds.has(x.id)&&streamingFormat(x)==='unknown');
 }
 
 let stockRatingsAvailable=false;

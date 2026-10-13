@@ -97,3 +97,13 @@
 .collection-mode .lifestyle-card .collection-fit{align-self:flex-start;margin:4px 0;padding:3px 8px;font-size:10px}
 
 .finder-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 18px}.finder-tabs[hidden]{display:none!important}.finder-tabs button{padding:10px 12px;min-height:44px;background:#f4f7f4;border:1px solid #dce5df;border-radius:10px;color:#52675e;font-size:13px}.finder-tabs button[aria-pressed=true]{background:#315b43;color:white;border-color:#315b43}
+
+/* Shared recommendation height and bottom-aligned actions in every discovery category. */
+.collection-mode .tour-list,.collection-mode .lifestyle-grid,.collection-mode .discovery-timeline{grid-auto-rows:280px!important;align-items:stretch!important}
+.collection-mode .tour-card,.collection-mode .lifestyle-card,.collection-mode .discovery-item{display:flex!important;flex-direction:column!important;height:280px!important;min-height:280px!important;box-sizing:border-box!important}
+.collection-mode .discovery-item>div{display:flex!important;flex-direction:column!important;flex:1!important;min-height:0}
+.collection-mode .tour-card .item-actions[data-quiet],.collection-mode .lifestyle-card .lifestyle-actions[data-quiet],.collection-mode .discovery-item .item-actions[data-quiet]{margin-top:auto!important}
+.collection-mode .tour-card h4,.collection-mode .lifestyle-card h3,.collection-mode .discovery-item h3{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;flex-shrink:0}
+.collection-mode .card-place span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.collection-mode .lifestyle-meta{margin-top:6px!important}
+.collection-mode .outdoor-empty{align-self:start;grid-column:1/-1}

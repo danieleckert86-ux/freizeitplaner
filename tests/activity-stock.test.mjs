@@ -209,3 +209,17 @@ test('discovery separates cafes, restaurants and beer gardens and identifies lab
  assert.equal(discoveryRouteKind({kind:'bike',category:'Radtour'}),'bike');
  assert.equal(discoveryRouteKind({kind:'hike',category:'Wanderung'}),'hike');
 });
+
+
+import {streamingFormat,streamingCardMeta} from '../src/finder-navigation.ts';
+test('streaming groups respect confirmed format and leave ambiguous legacy categories unresolved',()=>{
+ assert.equal(streamingFormat({mediaType:'film',category:'Serie'}),'film');
+ assert.equal(streamingFormat({category:'Serie · Drama'}),'series');
+ assert.equal(streamingFormat({favorite:{categoryLabel:'Film · Tragikomödie'}}),'film');
+ assert.equal(streamingFormat({category:'Filme & Serien'}),'unknown');
+ assert.equal(streamingFormat({type:'Streaming'}),'unknown');
+});
+test('streaming previews omit duration while preserving service and start-date metadata',()=>{
+ const meta=['Netflix','Seit 01.10.2026','132 min','2.2 h','42 Minuten pro Folge','Laufzeit offen'];
+ assert.deepEqual(streamingCardMeta(meta),['Netflix','Seit 01.10.2026']);assert.equal(meta.length,6);
+});

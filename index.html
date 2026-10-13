@@ -126,21 +126,21 @@
       </div>
     </section>
 
-    <section class="independent-section view-section" data-app-view="outdoor" id="outdoorSection" aria-labelledby="outdoorHeading">
+    <section class="independent-section finder-section view-section" data-app-view="outdoor" id="outdoorSection" aria-labelledby="outdoorHeading">
       <div class="section-head"><div><p class="section-kicker">Draußen</p><h2 id="outdoorHeading">Raus ins Grüne</h2><p class="section-note">Neue passende Fahrrad-, Wander- und Spazierwege entdecken und bei Interesse in Orte &amp; Touren übernehmen. Wegcharakter und aktuelle Bedingungen getrennt prüfen.</p></div></div>
-      <div class="outdoor-group" id="bikeGroup"><h3>Fahrradwege</h3><div class="tour-list"></div></div>
-      <div class="outdoor-group" id="hikeGroup"><h3>Wanderwege</h3><div class="tour-list"></div></div>
-      <div class="outdoor-group" id="walkGroup"><h3>Spazierwege</h3><div class="tour-list"></div></div>
+      <div class="outdoor-group" id="bikeGroup"><h3 class="finder-group-heading">Fahrradwege</h3><div class="tour-list"></div></div>
+      <div class="outdoor-group" id="hikeGroup"><h3 class="finder-group-heading">Wanderwege</h3><div class="tour-list"></div></div>
+      <div class="outdoor-group" id="walkGroup"><h3 class="finder-group-heading">Spazierwege</h3><div class="tour-list"></div></div>
     </section>
 
-    <section class="independent-section view-section" data-app-view="restaurants" id="restaurants" aria-labelledby="restaurantsHeading">
+    <section class="independent-section finder-section view-section" data-app-view="restaurants" id="restaurants" aria-labelledby="restaurantsHeading">
       <div class="section-head">
         <div><p class="section-kicker">Essen &amp; entdecken</p><h2 id="restaurantsHeading">Essen &amp; entdecken</h2><p class="section-note">Passende Cafés, Restaurants und Biergärten in Augsburg entdecken – auch bewährte Lokale, mit konkret belegter vegetarischer Auswahl.</p></div>
       </div>
-      <h3>Restaurants</h3><div class="lifestyle-grid" id="restaurantList"></div><h3>Cafés</h3><div class="lifestyle-grid" id="cafeList"></div><h3>Biergärten</h3><div class="lifestyle-grid" id="beerGardenList"></div>
+      <h3 class="finder-group-heading">Restaurants</h3><div class="lifestyle-grid" id="restaurantList"></div><h3 class="finder-group-heading">Cafés</h3><div class="lifestyle-grid" id="cafeList"></div><h3 class="finder-group-heading">Biergärten</h3><div class="lifestyle-grid" id="beerGardenList"></div>
     </section>
 
-    <section class="independent-section view-section" data-app-view="movies" id="movies" aria-labelledby="moviesHeading">
+    <section class="independent-section finder-section view-section" data-app-view="movies" id="movies" aria-labelledby="moviesHeading">
       <div class="section-head">
         <div><p class="section-kicker">Für Leinwand &amp; Sofa</p><h2 id="moviesHeading">Filme &amp; Serien</h2><p class="section-note">Aktuelles Augsburger Kinoprogramm und neue Streaming-Titel passend zu deinem Geschmack.</p></div>
       </div>
@@ -148,22 +148,22 @@
         <button class="media-tab active" type="button" data-media-tab="cinema">Kino</button>
         <button class="media-tab" type="button" data-media-tab="stream">Stream</button>
       </div>
-      <div class="media-panel active" data-media-panel="cinema"><p class="media-note">Gespeicherter Kinoprogrammstand. Vorstellungsdatum und Verfügbarkeit vor dem Besuch prüfen.</p><div class="lifestyle-grid" id="cinemaList"></div></div>
-      <div class="media-panel" data-media-panel="stream" hidden><p class="media-note">Gesammelte Film- und Serienideen. Aktuelle Verfügbarkeit beim Anbieter prüfen.</p><div id="streamList"><h3>Filme</h3><div class="lifestyle-grid" id="streamFilmList"></div><h3>Serien</h3><div class="lifestyle-grid" id="streamSeriesList"></div><section id="streamUnknownGroup" hidden><h3>Format noch ungeklärt</h3><div class="lifestyle-grid" id="streamUnknownList"></div></section></div></div>
+      <div class="media-panel active" data-media-panel="cinema"><h3 class="finder-group-heading">Kinofilme</h3><p class="media-note">Gespeicherter Kinoprogrammstand. Vorstellungsdatum und Verfügbarkeit vor dem Besuch prüfen.</p><div class="lifestyle-grid" id="cinemaList"></div></div>
+      <div class="media-panel" data-media-panel="stream" hidden><p class="media-note">Gesammelte Film- und Serienideen. Aktuelle Verfügbarkeit beim Anbieter prüfen.</p><div id="streamList"><h3 class="finder-group-heading">Filme</h3><div class="lifestyle-grid" id="streamFilmList"></div><h3 class="finder-group-heading">Serien</h3><div class="lifestyle-grid" id="streamSeriesList"></div><section id="streamUnknownGroup" hidden><h3 class="finder-group-heading">Format noch ungeklärt</h3><div class="lifestyle-grid" id="streamUnknownList"></div></section></div></div>
     </section>
 
-    <section class="panel discovery-panel view-section" data-app-view="events" id="discoveries" aria-labelledby="discoveriesHeading">
+    <section class="independent-section finder-section discovery-panel view-section" data-app-view="events" id="discoveries" aria-labelledby="discoveriesHeading">
       <div class="section-head">
         <div>
           <h2 id="discoveriesHeading">Veranstaltungen</h2>
         </div>
       </div>
       <div id="eventHighlights" class="event-highlights" hidden>
-        <h3>Deine Top 3</h3>
+        <h3 class="finder-group-heading">Deine Top 3</h3>
         <p class="event-highlights-note">Die beste Geschmackspassung unter den kommenden Events · nächste 90 Tage.</p>
         <div id="topEventList" class="discovery-timeline"></div>
       </div>
-      <h3 class="event-list-heading">Weitere Events</h3>
+      <h3 class="event-list-heading finder-group-heading">Weitere Events</h3>
       <label class="event-period-picker">Zeitraum
         <select id="eventPeriod" aria-label="Veranstaltungszeitraum">
           <option value="all">Nächste 90 Tage</option>

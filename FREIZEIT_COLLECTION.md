@@ -268,3 +268,7 @@ Ohne belegten deutschen Direkttrailer führt Trailer auf YouTube suchen zu einer
 
 ## Medienkacheln · 13.10.2026
 Streaming zeigt den gespeicherten Anbieter; bei Platzhaltern werden vorhandene Anbieter-Metadaten oder eindeutige Anbieter-Domains verwendet. Ungeklärte Anbieter bleiben ausdrücklich ungeklärt. Laufzeit-Metadaten entfallen für Kino und Streaming einschließlich der Detail-Metadaten, ohne gespeicherte Originaldaten zu ändern. IMDb und Trailer bleiben erhalten.
+
+
+## Einheitliche Reiter · 13.10.2026
+Die Reiter unter Neues verwenden Raus ins Grüne als Layoutreferenz: einheitliche Bereichsüberschrift, Gruppenüberschriften wie Fahrradwege, Abstände und zweispaltige Listen (mobil einspaltig). Kino und Streaming erhalten passende Bereichstitel. Top-3-Auswahl und alle gespeicherten Entscheidungen bleiben erhalten.

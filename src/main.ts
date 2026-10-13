@@ -310,6 +310,7 @@ async function bootstrap() {
   const currentKind = document.querySelector<HTMLSelectElement>('#currentKind')!;
   const refreshFinder = () => {
     const current = finderView === 'current';
+    document.querySelector<HTMLElement>('#moviesHeading')!.textContent=currentKind.value==='stream'?'Streaming':'Kino';
     setTasteArchiveScope(current?(currentKind.value==='cinema'?'cinema':currentKind.value==='stream'?'stream':currentKind.value==='restaurants'?'food':currentKind.value==='outdoor'?'outdoor':'event'):'standard');
     document.querySelector<HTMLElement>('#standardTabs')!.hidden=current;
     document.querySelector<HTMLElement>('#newTabs')!.hidden=!current;

@@ -236,3 +236,25 @@ test('media duration filtering also covers cinema and streaming provider uses st
  assert.equal(recommendationPlace({title:'Film',meta:['Disney+']},'stream'),'Disney+');
 });
 
+
+import {googleMapsPlaceUrl,foodPlace} from '../src/locations.ts';
+test('food place links use public Maps search with exact title and available address',()=>{
+ const x={title:'Friedrich · Café & Bistro',location:'Hessingstraße 17, Augsburg',url:'https://bistro-friedrich.de/'};
+ const before=JSON.stringify(x),u=new URL(googleMapsPlaceUrl(x));
+ assert.equal(u.origin,'https://www.google.com');assert.equal(u.pathname,'/maps/search/');assert.equal(u.searchParams.get('api'),'1');assert.equal(u.searchParams.get('query'),'Friedrich · Café & Bistro, Hessingstraße 17, Augsburg');assert.equal(JSON.stringify(x),before);
+ assert.equal(new URL(googleMapsPlaceUrl({title:'Café Flora'})).searchParams.get('query'),'Café Flora, Augsburg');
+ for(const category of ['Restaurant','Café','Biergarten','Bistro'])assert.equal(foodPlace({category}),true);
+ assert.equal(foodPlace({kind:'cinema',category:'Kino'}),false);
+});
+test('existing Maps links are kept and lookalike or credential-bearing links are not used',()=>{
+ for(const url of ['https://maps.app.goo.gl/example','https://www.google.de/maps/place/Cafe'])assert.equal(googleMapsPlaceUrl({title:'Ort',url}),url);
+ for(const url of ['https://www.google.com.evil.test/maps/place/a','javascript:alert(1)','https://name:secret@www.google.com/maps/a'])assert.equal(new URL(googleMapsPlaceUrl({title:'Ort',url})).searchParams.get('query'),'Ort, Augsburg');
+});
+test('restaurant cafe and beer garden stock details open Maps without modifying saved homepage',()=>{
+ for(const kind of ['restaurant','cafe','beer-garden']){
+  const x=idea('food',{kind,title:'Testort',url:'https://restaurant.example/',sourceDetails:[{url:'https://other.example/',description:'Speisekarte'}]});const before=JSON.stringify(x);
+  const html=stockMarkup([x],null,true,false,'',x.id);
+  assert.match(html,/Google Maps öffnen/);assert.match(html,/google\.com\/maps\/search/);assert.ok(!html.includes('href="https://restaurant.example/"'));assert.ok(!html.includes('href="https://other.example/"'));assert.equal(JSON.stringify(x),before);
+ }
+ const route=idea('route');assert.match(stockMarkup([route],null,true,false,'',route.id),/href="https:\/\/example.org\/route"/);
+});

@@ -5,7 +5,7 @@ import { favoriteArea,finderSectionVisible,discoveryFoodKind,discoveryRouteKind,
 import { initPlanner } from './planner';
 import { neutralDescription } from './wording';
 import { categoryIcon } from './category-icons';
-import { recommendationPlace, travelNote } from './locations';
+import { recommendationPlace, travelNote, googleMapsPlaceUrl, foodPlace } from './locations';
 import './styles.css';
 import './collection.css';
 import {upcomingEvents,eventView,catalogueFitLabel,collectionSourceStates,researchTime} from './collection';
@@ -198,7 +198,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       '<div class="lifestyle-meta">' + (section==='stream'||section==='cinema'?streamingCardMeta(item.meta):item.meta).filter(v=>section!=='stream'||v.trim()!==recommendationPlace(item,section)).map(v => '<span>' + dataEscape(v.replace(/^Neu seit (\d{2})\.(\d{2})\.\d{4}$/, "Seit $1.$2.")) + '</span>').join('') +
       (['cinema','stream'].includes(section)?imdbMarkup(item):'') +
       (['cinema','stream'].includes(section)?germanTrailerMarkup(item):'') + '</div>' +
-      '<div class="lifestyle-actions"><div class="lifestyle-links"><a class="info-link" href="' + dataEscape(item.url) + '" target="_blank" rel="noopener noreferrer">Mehr erfahren</a></div>' +
+      '<div class="lifestyle-actions"><div class="lifestyle-links"><a class="info-link" href="' + dataEscape(section==='restaurants'?googleMapsPlaceUrl(item):item.url) + '" target="_blank" rel="noopener noreferrer">'+(section==='restaurants'?'Google Maps öffnen':'Mehr erfahren')+'</a></div>' +
       '<div class="lifestyle-card-buttons">' + ratingMarkup(item.id, item.title, section) + (section==='restaurants'?stockCopyMarkup({id:'lifestyle-'+item.id,title:item.title,category:({cafe:'Café',restaurant:'Restaurant','beer-garden':'Biergarten'})[discoveryFoodKind(item)],description:item.description,url:item.url},item.meta,item):lifestyleFavoriteMarkup(item,section)) +
       '<button class="hide-card-btn" type="button" data-hide-card data-id="' + dataEscape(item.id) + '" data-section="' + section + '" data-title="' + dataEscape(item.title) + '">Ausblenden</button></div></div></article>'
     ).join('');
@@ -800,7 +800,7 @@ function renderFavorites() {
       '<p>' + escapeHtml(neutralDescription(item.description)) + '</p>' +
       '</div>' +
       '<div class="favorite-actions">' +
-      '<a class="info-link" href="' + escapeAttr(item.url) + '" target="_blank" rel="noopener noreferrer">Originalquelle</a>' +
+      '<a class="info-link" href="' + escapeAttr(foodPlace(item)?googleMapsPlaceUrl(item):item.url) + '" target="_blank" rel="noopener noreferrer">'+(foodPlace(item)?'Google Maps öffnen':'Originalquelle')+'</a>' +
       '<button class="remove-favorite" type="button" data-remove="' + escapeAttr(item.id) + '">Entfernen</button>' +
       '</div>';
     favoritesList.appendChild(row);

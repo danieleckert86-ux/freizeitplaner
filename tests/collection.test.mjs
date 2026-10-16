@@ -126,3 +126,8 @@ test('source attempts display Berlin daylight and standard time without changing
  assert.match(researchTime('2026-11-16T10:00:00Z'),/11:00.*Berlin/);
  assert.equal(researchTime('broken'),'unbekannt');
 });
+
+test('a real HTTP failure stays failed even when its URL remains pending',()=>{
+ const s=collectionSourceStates([{id:'x',hours:120}],[{id:'x',status:'failed',checkedAt:'',error:'catalog_direct_http_403',pendingUrls:['https://example.com']}])[0];
+ assert.equal(s.state,'failed');assert.match(s.label,/HTTP 403/);assert.equal(s.pending,1);
+});

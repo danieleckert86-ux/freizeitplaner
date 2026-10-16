@@ -31,7 +31,7 @@ export type CollectionSourceCheck={id:string;status:string;checkedAt:string;atte
 export function collectionSourceStates(sources:{id:string;hours:number}[],checks:CollectionSourceCheck[],now=Date.now()){
  return sources.map(source=>{
   const check=checks.find(c=>c.id===source.id),age=now-Date.parse(check?.checkedAt||'');
-  const partial=!!check&&(check.error?.startsWith('partial:')||check.error==='catalog_source_in_progress'||check.error==='catalog_listing_pagination'||!!check.pendingUrls?.length);
+  const partial=!!check&&(check.error?.startsWith('partial:')||check.error==='catalog_source_in_progress'||check.error==='catalog_listing_pagination'||!check.error&&!!check.pendingUrls?.length);
   const state=!check?'missing':partial?'partial':check.status!=='checked'?'failed':!Number.isFinite(age)||age < -60000||age>source.hours*3600000?'stale':'checked';
   const labels={missing:'noch nicht geprüft',failed:'Prüfung fehlgeschlagen',stale:'Prüfung veraltet',checked:'geprüft',partial:'Prüfung unvollständig'};
   const directReasons:Record<string,string>={catalog_source_in_progress:'Weitere Detailseiten stehen noch aus',catalog_attempt_started:'Abruf begonnen; noch kein Ergebnis',catalog_event_fields_missing:'Datum, Beginn oder Spielort fehlen',catalog_listing_unrecognized:'Programmstruktur nicht erkannt',catalog_listing_pagination:'Weitere Programmseiten noch ungeprüft',catalog_direct_timeout:'Originalseite antwortet nicht rechtzeitig',catalog_direct_robots_unavailable:'Zugriffsregeln nicht abrufbar',catalog_direct_access_restricted:'Quellenzugriff beschränkt',catalog_detail_redirect_unresolved:'Weiterleitung liefert keine eindeutige Eventseite',catalog_direct_unsafe_url:'Weiterleitung außerhalb der erlaubten Originalquelle'};

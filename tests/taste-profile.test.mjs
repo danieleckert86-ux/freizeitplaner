@@ -92,3 +92,9 @@ test('food and outdoor discovery archives use existing place and route ratings',
  assert.deepEqual(tasteArchiveRatings(rows,'outdoor').map(x=>x.kind),['hike','bike','walk']);
  assert.deepEqual(tasteArchiveRatings(rows,'standard').map(x=>x.kind),['routine']);
 });
+
+test('flat route evidence matches whole words rather than Leben',()=>{
+ const x={...item,kind:'stream',description:'Das Leben neben dem Krankenhaus',title:'Neues Leben',category:'Serie'};
+ assert.ok(!tasteFeatures(x).includes('flache Strecke'));
+ for(const description of ['flach','flache Strecke','ebener Weg','auf ebenen Wegen'])assert.ok(tasteFeatures({...x,kind:'walk',description}).includes('flache Strecke'));
+});

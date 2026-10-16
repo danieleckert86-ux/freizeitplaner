@@ -113,3 +113,16 @@ test('event controls restore hidden cards and filter top picks through the actua
  saved.checked=false;refresh();assert.equal(top.children.length,2);assert.equal(rows[2].hidden,true);
  period.value='today';rows[0].dataset.date='2026-10-17';refresh();assert.equal(block.hidden,true);assert.equal(empty.hidden,false);
 });
+
+test('partial research preserves fetch evidence, pending work and failures separately',()=>{
+ const source={id:'p',hours:120},check={id:'p',status:'failed',checkedAt:'',error:'partial: September nicht abgedeckt',attemptedAt:'2026-10-16T10:00Z',lastSuccessfulFetchAt:'2026-10-16T10:01Z',pendingUrls:['https://example.com/a'],details:{returned:30,attempted:4,accepted:2}};
+ const before=JSON.stringify(check),s=collectionSourceStates([source],[check])[0];
+ assert.equal(s.state,'partial');assert.match(s.label,/September/);assert.equal(s.pending,1);assert.equal(s.attempted,4);assert.equal(s.lastSuccessfulFetchAt,check.lastSuccessfulFetchAt);assert.equal(JSON.stringify(check),before);
+});
+
+import {researchTime} from '../src/collection.ts';
+test('source attempts display Berlin daylight and standard time without changing stored timestamps',()=>{
+ assert.match(researchTime('2026-10-16T10:00:00Z'),/12:00.*Berlin/);
+ assert.match(researchTime('2026-11-16T10:00:00Z'),/11:00.*Berlin/);
+ assert.equal(researchTime('broken'),'unbekannt');
+});

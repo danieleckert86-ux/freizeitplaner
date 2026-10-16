@@ -22,3 +22,18 @@ export function travelNote(item: Located): string {
   return (item.meta || []).find(x => /^Anfahrt\b/i.test(x)) || '';
 }
 
+
+export function foodPlace(item:{kind?:string;category?:string}){
+ return ['restaurant','cafe','beer-garden'].includes(item.kind||'')||/^(?:restaurant|bistro|caf[eé]|biergarten)(?:$|\b|\s|[·/&])/i.test(item.category||'');
+}
+/** Presentation link only: preserve original research URLs and private snapshots. */
+export function googleMapsPlaceUrl(item:Located):string{
+ try{
+  const u=new URL(item.url||'');
+  if(u.protocol==='https:'&&!u.username&&!u.password&&((['www.google.com','google.com','www.google.de','google.de'].includes(u.hostname)&&u.pathname.startsWith('/maps'))||['maps.google.com','maps.google.de','maps.app.goo.gl'].includes(u.hostname)||u.hostname==='goo.gl'&&u.pathname.startsWith('/maps')))return u.href;
+ }catch{ /* Build a public place search when no Maps link is stored. */ }
+ const detail=[item.address,item.location,item.venue,item.city].filter((v):v is string=>!!v?.trim());
+ if(!detail.length){const fact=(item.facts||[]).find(v=>/(?:straße|strasse|str\.|gasse|platz)\s*\d|\bAugsburg\b/i.test(v));if(fact)detail.push(fact);}
+ const query=[item.title,...(detail.length?detail:['Augsburg'])].map(v=>v.trim()).filter(Boolean).join(', ');
+ return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(query);
+}

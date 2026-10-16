@@ -47,7 +47,14 @@ const facets:[string,RegExp][]=[
  ['vegetarische Auswahl',/vegetar|vegan/i],['individuelles Konzept',/inhabergeführt|individuell|charaktervoll/i],['Frühstück und Brunch',/frühstück|brunch/i],['asiatische Küche',/asiatisch|vietnames|thai|japanisch|indisch/i],['italienische Küche',/italienisch|pizza/i],
  ['starke Figuren',/charaktergetrieben|starke\w*\s+figuren|persönliche\w*\s+geschichten/i],['menschlicher Ton',/menschlich|warmherzig/i],['witzig',/witzig|komödie|comedy/i],['Saunalandschaft',/saunalandschaft|aufguss|aufgüsse/i]
 ];
-export function tasteFeatures(x:TasteSuggestion){const text=[x.title,x.category,x.description,...(x.facts??[])].join(' ');return facets.filter(([,p])=>p.test(text)).map(([name])=>name);}
+const routeFacets=new Set(['ruhige Tour','Aussicht','Rundtour','flache Strecke','feste Wege']);
+export function tasteFeatures(x:TasteSuggestion){
+ const text=[x.title,x.category,x.description,...(x.facts??[])].join(' '),outdoor=tasteScope(x)==='outdoor';
+ return facets.filter(([name,p])=>(outdoor||!routeFacets.has(name))&&p.test(text)
+  &&!(name==='Rundtour'&&/\b(?:kein(?:e|en|er|es)?|nicht(?:\s+als)?)\s+rund(?:tour|weg|wanderung)\b/i.test(text))
+  &&!(name==='flache Strecke'&&/\b(?:nicht|kein(?:e|en|er|es)?)\s+(?:flach(?:e|en|er|es)?|eben(?:e|en|er|es)?)\b/i.test(text)))
+  .map(([name])=>name);
+}
 export function tasteDomain(x:TasteSuggestion){
  // Explicit catalogue kinds win over descriptive genre words. Cinema feedback
  // must not train streaming or events; confirmed series and films stay separate.

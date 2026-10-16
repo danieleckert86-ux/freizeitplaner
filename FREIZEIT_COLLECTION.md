@@ -1,5 +1,33 @@
 # Freizeitvorrat statt Wochenplaner
 
+## Wanderanzeige und Spaziergangspräferenz · 16.10.2026
+
+Unter Neues/Raus ins Grüne werden Wanderungen nur mit belegten 500–900
+Höhenmetern einschließlich beider Grenzen angezeigt. Auch alte Importe mit
+Höhenangaben ausschließlich in `meta` durchlaufen diese Anzeigeprüfung.
+Fehlende oder widersprüchliche Höhenangaben bleiben ungeklärt. Ist kein
+passender Eintrag vorhanden, nennt die App den fehlenden Wunschbereich.
+Spaziergänge bekommen keine Wander-Untergrenze. Katalogbestand, gespeicherte
+Touren unter Orte & Touren, Merkliste, Bewertungen und Quellenzeiten bleiben
+unverändert; dies ist eine Anzeigeprüfung, keine neue Quellenverifizierung.
+
+Die tatsächliche Katalogprüfung vom 16.10.2026 (Revision22) enthielt als hikes
+nur die alten Importe Bad Hindelang–Hinterstein/Zipfelsfall (273hm) und Rund
+ums Lauberhart/Eisenburg (109hm). Die strukturierte ascent-Angabe war jeweils
+null, die Zahl stand im Import-Metatext. Neue geprüfte Touren mit 500–900hm
+fehlten; die bisherige Anzeige hatte diese Altimporte ungefiltert übernommen.
+
+Die bestehende Freizeitsuche priorisiert nun ausdrücklich Spaziergänge im
+Stadtgebiet Augsburg. Autofahrten kommen ausschließlich für besonders lohnende
+Wege im bisherigen engen Suchraum infrage, maximal30Minuten einfach ab dem
+öffentlichen Augsburger Referenzpunkt. Mehrwert, Startlage und Autofahrzeit
+müssen belegt werden; unbekannte Anfahrt gilt nicht als Freigabe. Der aktuelle
+tägliche Aufgabenplan und der wöchentliche Tourenschwerpunkt am Donnerstag
+bleiben erhalten. Keine neue Suche, private Datenänderung oder Testmail durch
+diese Korrektur. Integration und Veröffentlichung der App durch00.
+
+Prüfung:88/88 Tests, TypeScript und Produktionsbuild erfolgreich.
+
 Die bestehende App zeigt Events, Touren & Ideen und Gemerkt. Die tägliche Morgenmail wählt im Code höchstens drei Tipps aus gespeicherten belegten Inhalten. Favoriten, Bewertungen, ausgeblendete Ideen, Routinen und Kalenderdaten bleiben in den bisherigen Supabase-Tabellen; keine Datenrücksetzung und keine neue Schreibberechtigung.
 
 Events haben einen 90-Tage-Horizont, Fitscore vor Termin, Filter heute/Woche/Wochenende/30/90 Tage. Unbekannte Passung bleibt unbekannt. Wanderungen/Fahrradtouren sind dauerhafte Sammlung; grundsätzliche Passung und konkrete Wetter-/Sperr-/Routeneignung bleiben getrennt. Ungeprüfte Importtouren sind keine sicheren Ausflugsempfehlungen. Restaurants, Kino und Streaming bleiben gespeichert; aktuelle Verfügbarkeit beim Anbieter prüfen. Scheitert das Laden der Ausschlüsse, werden keine versteckten Ideen wiederhergestellt.

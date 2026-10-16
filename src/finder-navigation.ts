@@ -11,6 +11,17 @@ export function discoveryRouteKind(x:{kind?:string;category?:string;label?:strin
  if(x.kind==='walk'||/spazier|walking/i.test([x.category,x.label].join(' ')))return 'walk';
  return x.kind==='bike'?'bike':'hike';
 }
+/** Discovery filter only. Saved stock, ratings and source evidence are untouched. */
+export function hikeMatchesProfile(x:{ascent?:number|null;meta?:readonly string[]}):boolean{
+ if(x.ascent!==undefined&&x.ascent!==null)return Number.isFinite(x.ascent)&&x.ascent>=500&&x.ascent<=900;
+ // Older imported routes carry elevation only in metadata. Never read distance,
+ // driving time or the first number in a description as elevation gain.
+ const values=(x.meta??[]).flatMap(text=>{
+  const m=text.trim().match(/^(\d+(?:[.,]\d+)?)\s*(?:hm|höhenmeter)$/i);
+  return m?[Number(m[1].replace(',','.'))]:[];
+ });
+ return values.length>0&&values.every(v=>v===values[0])&&values[0]>=500&&values[0]<=900;
+}
 // Saved discovery belongs to Neues even when it is an evergreen route or place.
 export function favoriteArea(category:string,date?:string):'ideas'|'current' {
  if(date&&/^\d{4}-\d{2}-\d{2}$/.test(date))return 'current';

@@ -1,7 +1,7 @@
 import {imdbMarkup,mediaRecommendationAllowed,germanTrailerMarkup} from './media-rating';
 import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI,openTasteDetails,closeTasteDetails,setTasteArchiveScope} from './taste-ui';
 import {publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
-import { favoriteArea,finderSectionVisible,discoveryFoodKind,discoveryRouteKind,streamingFormat,streamingCardMeta,type NewCategory } from './finder-navigation';
+import { favoriteArea,finderSectionVisible,discoveryFoodKind,discoveryRouteKind,hikeMatchesProfile,streamingFormat,streamingCardMeta,type NewCategory } from './finder-navigation';
 import { initPlanner } from './planner';
 import { neutralDescription } from './wording';
 import { categoryIcon } from './category-icons';
@@ -10,6 +10,8 @@ import './styles.css';
 import './collection.css';
 import {upcomingEvents,eventView,catalogueFitLabel,collectionSourceStates,researchTime} from './collection';
 import { createClient } from '@supabase/supabase-js';
+
+const hikeEmptyMessage='Noch keine Wanderungen mit belegten 500–900 Höhenmetern gespeichert. Bereits gemerkte Touren bleiben erhalten.';
 
 const supabase = createClient(
   'https://mcpkvssierkwmueekyec.supabase.co',
@@ -162,7 +164,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
     '<div class="item-actions">' + sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, 'weekend') + favoriteMarkup(item, true) + '</div></div></article>'
   ).join('');
 
-  const renderTours = (selector: string, items: Recommendation[]) => {
+  const renderTours = (selector: string, items: Recommendation[], emptyMessage='Noch keine recherchierten Wege gespeichert.') => {
     const list = document.querySelector<HTMLElement>(selector + ' .tour-list');
     if (!list) return;
     list.innerHTML = items.sort((a,b)=>(b.fitScore||0)-(a.fitScore||0)).map(item =>
@@ -171,9 +173,9 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div><h4>' + dataEscape(item.title) + '</h4>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' +
       '<p class="collection-condition">' + dataEscape(item.conditionsStatus||'Vor dem Ausflug Wetter, Sperrungen und Routenverlauf prüfen. Keine aktuelle Freigabe.') + '</p><div class="tour-meta">' + (item.meta ?? []).map(v => '<span' + (/Anfahrt/i.test(v)?' class="travel-detail"':'') + '>' + dataEscape(v) + '</span>').join('') + '</div>' +
       '<div class="item-actions">' + sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, item.category) + stockCopyMarkup({id:item.favorite.id,title:item.title,category:item.favorite.categoryLabel,description:item.description,url:item.favorite.url},item.meta??[],item) + '</div></article>'
-    ).join('')+'<p class="collection-empty outdoor-empty" '+(items.length?'hidden':'')+'>Noch keine recherchierten Wege gespeichert.</p>';
+    ).join('')+'<p class="collection-empty outdoor-empty" '+(items.length?'hidden':'')+'>'+dataEscape(emptyMessage)+'</p>';
   };
-  renderTours('#hikeGroup', data.hikes.filter(x=>discoveryRouteKind(x)!=='walk'));
+  renderTours('#hikeGroup', data.hikes.filter(x=>discoveryRouteKind(x)!=='walk'&&hikeMatchesProfile(x)), hikeEmptyMessage);
   renderTours('#walkGroup', [...(data.walks??[]),...data.hikes.filter(x=>discoveryRouteKind(x)==='walk')]);
   renderTours('#bikeGroup', data.bikes);
 
@@ -711,7 +713,7 @@ function renderCurrentFilters() {
   weekendSection?.classList.toggle('is-hidden', visibleIdeas === 0);
   for(const [group,count] of [[hikeGroup,visibleHikes],[bikeGroup,visibleBikes],[document.querySelector<HTMLElement>('#walkGroup'),visibleWalks]] as const){
     group?.classList.remove('is-hidden');
-    const empty=group?.querySelector<HTMLElement>('.outdoor-empty');if(empty){empty.hidden=count>0;empty.textContent='Noch keine passenden recherchierten Wege angezeigt.';}
+    const empty=group?.querySelector<HTMLElement>('.outdoor-empty');if(empty){empty.hidden=count>0;empty.textContent=group===hikeGroup&&hikeCards.length===0?hikeEmptyMessage:'Noch keine passenden recherchierten Wege angezeigt.';}
   }
   outdoorSection?.classList.remove('is-hidden');
 

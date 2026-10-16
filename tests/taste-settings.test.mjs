@@ -20,3 +20,7 @@ test('personal claims require evidence and the exact saved profile version',()=>
  assert.equal(currentAssessment('id','film',{film:{...p,updatedAt:'2026-10-17T00:00:00Z'}},{id:a}),null);
  assert.equal(validTasteAssessments({id:{...a,sourceUrls:[]}}),false);
 });
+test('food projection routes café and beer garden to their own profile',()=>{
+ assert.equal(profileKeyFor({kind:'restaurant',category:'Café · Frühstück'}),'cafe');
+ assert.equal(profileKeyFor({kind:'restaurant',category:'Biergarten'}),'beerGarden');
+});

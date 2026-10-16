@@ -12,7 +12,7 @@ let profileSignature='';
 let returnDialogId='';
 let ratings:TasteRating[]=[],ready=false,busy=false,legacy=new Map<string,number>();
 export function registerTasteSuggestion(item:TasteSuggestion){suggestions.set(item.id,item);}
-export const tasteRatingMarkup=(id:string)=>'<span data-taste-wrap="'+e(id)+'"><button type="button" data-taste-details="'+e(id)+'">Mehr</button></span>';
+export const tasteRatingMarkup=(id:string)=>'<span hidden class="rating-actions" data-taste-wrap="'+e(id)+'"></span>';
 void ratingSectionMarkup;
 export function setLegacyTasteRatings(value:Map<string,number>){legacy=new Map(value);void legacy;refreshTasteUI();}
 export function tasteRatingById(id:string){return ratings.find(x=>x.id===id);}

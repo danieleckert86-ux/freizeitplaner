@@ -43,7 +43,7 @@ const facets:[string,RegExp][]=[
  ['Humor und Melancholie',/humor|melanchol|nachdenklich|emotional/i],
  ['persönliches Konzertformat',/wohnzimmerkonzert|klein\w*\s+(?:konzert|bühne|location)|intim\w*\s+(?:konzert|atmosphäre)/i],
  ['Nachwuchs und Support',/nachwuchskünstler|nachwuchsband|support[\s-]*act|debütkonzert/i],
- ['ruhige Tour',/ruhig|einsam|wenig touristisch/i],['Aussicht',/aussicht|panorama/i],['Rundtour',/rundtour|rundwander|rundweg/i],['flache Strecke',/flach|eben/i],['feste Wege',/asphalt|befestigt|feste\w*\s+wege/i],
+ ['ruhige Tour',/ruhig|einsam|wenig touristisch/i],['Aussicht',/aussicht|panorama/i],['Rundtour',/rundtour|rundwander|rundweg/i],['flache Strecke',/\b(?:flach(?:e|en|er|es)?|eben(?:e|en|er|es)?)\b/i],['feste Wege',/asphalt|befestigt|feste\w*\s+wege/i],
  ['vegetarische Auswahl',/vegetar|vegan/i],['individuelles Konzept',/inhabergeführt|individuell|charaktervoll/i],['Frühstück und Brunch',/frühstück|brunch/i],['asiatische Küche',/asiatisch|vietnames|thai|japanisch|indisch/i],['italienische Küche',/italienisch|pizza/i],
  ['starke Figuren',/charaktergetrieben|starke\w*\s+figuren|persönliche\w*\s+geschichten/i],['menschlicher Ton',/menschlich|warmherzig/i],['witzig',/witzig|komödie|comedy/i],['Saunalandschaft',/saunalandschaft|aufguss|aufgüsse/i]
 ];

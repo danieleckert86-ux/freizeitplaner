@@ -276,3 +276,9 @@ Die Reiter unter Neues verwenden Raus ins Grüne als Layoutreferenz: einheitlich
 
 ## Eventfilter und Sortierung · 16.10.2026
 Zeitraum gilt gemeinsam für Top 3 und weitere Events, einschließlich Nur vorgemerkt. Top 3 bleiben die stärksten belegten persönlichen Passungen im ausgewählten Zeitraum. Weitere Events lassen sich nach Datum (zuerst nächster Termin, danach Uhrzeit) oder persönlicher Passung sortieren; unbekannte Passung steht hinter bekannten Scores. Ein gemeinsamer Refresh erhält alle Karten, damit Wechsel von Heute zu 90 Tage und erneute Bewertung nicht Events verlieren. Die Hidden-Regel gewinnt gegen die feste Flex-Kartenhöhe. Keine neuen Recherchen, Änderungen an Nutzerentscheidungen oder neue Mail.
+
+## Passung und Recherchetransparenz · 16.10.2026
+
+Flache Strecke wird nur aus ganzen Beschreibungswörtern wie „flache“/„ebenen“ erkannt, nicht aus „Leben“ oder „neben“. Bestehende 0–100-Bewertungen und Gründe werden ausschließlich gelesen. Persönliche Passung ist eine Rangfolge, keine Wahrscheinlichkeit; die Kachel erläutert dies im Detailhinweis.
+
+Quellenanzeige unterscheidet Teilprüfung (expliziter partial-Grund/offene Detailseiten) von tatsächlichem Abruffehler, vollständiger, fehlender und veralteter Prüfung. Letzter erfolgreicher Abruf und aktueller Versuch bleiben getrennt; UTC wird nur für die Anzeige nach Europe/Berlin umgerechnet. Vorhandene erhaltene/bearbeitete/übernommene Zahlen und offene Detailseiten werden gezeigt. Ergänzte öffentliche Quellen werden vom gemeinsamen Katalog gelesen. Kein eigener Worker, keine neue Statuskennung im gespeicherten Katalog und keine privaten Schreibaktionen.

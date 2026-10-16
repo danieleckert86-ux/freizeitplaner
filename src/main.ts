@@ -8,7 +8,7 @@ import { categoryIcon } from './category-icons';
 import { recommendationPlace, travelNote } from './locations';
 import './styles.css';
 import './collection.css';
-import {upcomingEvents,eventView,catalogueFitLabel,collectionSourceStates} from './collection';
+import {upcomingEvents,eventView,catalogueFitLabel,collectionSourceStates,researchTime} from './collection';
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -123,7 +123,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   if(evidence){
     const states=collectionSourceStates(data.catalogSources||[],data.catalogChecks||[]);
     const rechecks=(data.catalogChecks||[]).filter(c=>c.id.startsWith('recheck/'));
-    evidence.innerHTML=states.length?'<summary>Quellen geprüft: '+states.filter(c=>c.state==='checked').length+'/'+states.length+'</summary><p>Speicherstand der Sammlung und tatsächliche Quellenprüfung sind getrennt. Importierte Ideen sind noch nicht verifiziert.</p><ul>'+states.map(c=>'<li>'+dataEscape(c.id)+' · '+dataEscape(c.label)+(c.checkedAt?' · letzte erfolgreiche Prüfung: '+dataEscape(c.checkedAt.slice(0,10)):'')+'</li>').join('')+'</ul>'+(rechecks.length?'<p>Einzelprüfungen: '+rechecks.filter(c=>c.status==='checked').length+' erfolgreich, '+rechecks.filter(c=>c.status!=='checked').length+' fehlgeschlagen. Eine Einzelprüfung ersetzt keinen vollständigen Quellenlauf.</p>':''):'<summary>Recherchestand</summary><p>Vorhandene Ideensammlung. Einzelne Quellenprüfungen sind für diesen Datenstand noch nicht dokumentiert.</p>';
+    evidence.innerHTML=states.length?'<summary>Quellen geprüft: '+states.filter(c=>c.state==='checked').length+'/'+states.length+'</summary><p>Speicherstand der Sammlung und tatsächliche Quellenprüfung sind getrennt. Importierte Ideen sind noch nicht verifiziert.</p><ul>'+states.map(c=>'<li>'+dataEscape(c.id)+' · '+dataEscape(c.label)+((c.lastSuccessfulFetchAt||(c.state==='checked'?c.checkedAt:''))?' · letzter erfolgreicher Abruf: '+dataEscape(researchTime(c.lastSuccessfulFetchAt||c.checkedAt)):'')+(c.attemptedAt?' · letzter Versuch: '+dataEscape(researchTime(c.attemptedAt)):'')+(c.returned!==null?' · erhalten: '+c.returned:'')+(c.attempted!==null?' · bearbeitet: '+c.attempted:'')+(c.accepted!==null?' · übernommen: '+c.accepted:'')+(c.pending?' · offene Detailseiten: '+c.pending:'')+'</li>').join('')+'</ul>'+(rechecks.length?'<p>Einzelprüfungen: '+rechecks.filter(c=>c.status==='checked').length+' erfolgreich, '+rechecks.filter(c=>c.status!=='checked').length+' fehlgeschlagen. Eine Einzelprüfung ersetzt keinen vollständigen Quellenlauf.</p>':''):'<summary>Recherchestand</summary><p>Vorhandene Ideensammlung. Einzelne Quellenprüfungen sind für diesen Datenstand noch nicht dokumentiert.</p>';
   }
 
   for(const item of [...data.top,...data.ideas,...data.discoveries])if(/^\d{4}-\d{2}-\d{2}$/.test(item.date))savedEventDates.set(item.favorite.id,item.date);
@@ -233,7 +233,7 @@ function applyPersonalTasteScores(){
     if(!id)return;
     const item=tasteItems.get(id);if(!item)return;
     const fit=adjustedTaste(item),label=card.querySelector<HTMLElement>('.collection-fit');
-    if(label){label.textContent=fit.score===null?'Passung noch nicht bewertet':`${fit.score} / 100 · persönliche Passung`;label.title=fit.reason;}
+    if(label){label.textContent=fit.score===null?'Passung noch nicht bewertet':`${fit.score} / 100 · persönliche Passung`;label.title=fit.reason+' · Rangfolge nach Geschmack; keine Wahrscheinlichkeit und keine Termin- oder Sicherheitsfreigabe.';}
     if(card.classList.contains('discovery-item'))card.dataset.fitScore=fit.score===null?'':String(fit.score);
   });
   refreshEventHighlights();

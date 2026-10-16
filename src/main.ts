@@ -146,7 +146,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   const top = document.querySelector<HTMLElement>('#topCards');
   if (top) top.innerHTML = data.top.map(item =>
     '<article class="card filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '">' +
-    '<div class="card-top"><span class="day">' + dataEscape(item.dayText) + '</span><span class="badge">' + categoryIcon(item.category, item.badge || item.title) + dataEscape(item.badge) + '</span></div>' +
+    '<div class="card-top"><span class="day">' + dataEscape(item.dayText) + '</span><span class="badge">' + categoryIcon(item.category, item.badge || item.title) + dataEscape(/passung/i.test(item.badge||'')?'Inhaltlich vorgeprüft':item.badge) + '</span></div>' +
     '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' +
     '<div class="facts">' + (item.facts ?? []).map(v => '<span>' + dataEscape(v) + '</span>').join('') + '</div>' +
     '<div class="why">' + dataEscape(neutralDescription(item.why)) + '</div><div class="card-actions item-actions">' +
@@ -192,7 +192,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
     if (!list) return;
     list.innerHTML = items.filter(item => !hiddenIds.has(item.id)&&(section==='restaurants'||mediaRecommendationAllowed(item))).map(item =>
       '<article class="lifestyle-card" data-lifestyle-id="' + dataEscape(item.id) + '">' +
-      '<div class="lifestyle-top"><span class="lifestyle-type">' + categoryIcon(section, item.type) + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(item.badge) + '</span></div>' +
+      '<div class="lifestyle-top"><span class="lifestyle-type">' + categoryIcon(section, item.type) + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(/passung/i.test(item.badge||'')?'Inhaltlich vorgeprüft':item.badge) + '</span></div>' +
       '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div>' +
       '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item, section) + '<p>' + dataEscape(neutralDescription(item.description).replace(section==='cinema'?/Heute/gi:/$^/g,'Gespeicherte Vorstellung')) + '</p>' +
       '<div class="lifestyle-meta">' + (section==='stream'||section==='cinema'?streamingCardMeta(item.meta):item.meta).filter(v=>section!=='stream'||v.trim()!==recommendationPlace(item,section)).map(v => '<span>' + dataEscape(v.replace(/^Neu seit (\d{2})\.(\d{2})\.\d{4}$/, "Seit $1.$2.")) + '</span>').join('') +

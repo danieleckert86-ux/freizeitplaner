@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {upcomingEvents,topTasteEvents,eventInPeriod,catalogueFitLabel} from '../src/collection.ts';
+import {upcomingEvents,topTasteEvents,eventInPeriod,catalogueFitLabel,eventView} from '../src/collection.ts';
 import {collectionSourceStates} from '../src/collection.ts';
 test('source evidence shows missing, failed and stale separately and never substitutes collection save time',()=>{
  const now=Date.parse('2026-10-10T05:00:00Z');
@@ -55,4 +55,61 @@ test('taste top three automatically replace the weakest event when a better new 
 test('top taste excludes unknown imports, cancelled, expired, distant and hidden events; deduplicates and allows fewer than three',()=>{
  const rows=[{id:'ok',title:'Good',date:'2026-10-12',fitScore:70},{id:'duplicate',title:' good ',date:'2026-10-12',fitScore:60},{id:'unknown',title:'Unknown',date:'2026-10-12'},{id:'import',title:'Import',date:'2026-10-12',fitScore:100,imported:true},{id:'closed',title:'Closed',date:'2026-10-12',fitScore:99,closed:true},{id:'past',title:'Past',date:'2026-10-10',fitScore:99},{id:'far',title:'Far',date:'2027-03-01',fitScore:99},{id:'hidden',title:'Hidden',date:'2026-10-12',fitScore:99}];
  assert.deepEqual(topTasteEvents(rows,'2026-10-11',new Set(['hidden'])).map(x=>x.id),['ok']);
+});
+
+test('period filtering includes top picks and repeated changes restore the eligible cards',()=>{
+ const today='2026-10-16';
+ const rows=[{id:'top-far',title:'Far',date:'2026-12-01',fitScore:100},{id:'fri',title:'Friday',date:today,fitScore:80},{id:'sat',title:'Saturday',date:'2026-10-17',fitScore:85},{id:'sun',title:'Sunday',date:'2026-10-18',fitScore:90},{id:'mon',title:'Monday',date:'2026-10-19',fitScore:95}];
+ const ids=v=>[...v.highlights,...v.others].map(x=>x.id).sort();
+ assert.deepEqual(ids(eventView(rows,today,'weekend')),['fri','sat','sun']);
+ assert.deepEqual(ids(eventView(rows,today,'today')),['fri']);
+ assert.deepEqual(ids(eventView(rows,today,'week')),['fri','sat','sun']);
+ assert.deepEqual(ids(eventView(rows,today,'month')),['fri','mon','sat','sun']);
+ assert.deepEqual(ids(eventView(rows,today,'all')),['fri','mon','sat','sun','top-far']);
+ assert.equal(eventInPeriod('2027-02-01',today,'all'),false);
+ assert.equal(eventInPeriod('bad',today,'all'),false);
+ assert.deepEqual(ids(eventView(rows,today,'weekend')),['fri','sat','sun']);
+});
+test('remaining events sort by date or personal fit; ties and unknown scores stay deterministic without mutation',()=>{
+ const rows=[{id:'t1',title:'Top1',date:'2026-10-21',fitScore:100},{id:'t2',title:'Top2',date:'2026-10-22',fitScore:99},{id:'t3',title:'Top3',date:'2026-10-23',fitScore:98},{id:'near',title:'Near',date:'2026-10-16',time:'20:00',fitScore:50},{id:'far',title:'Far',date:'2026-10-20',fitScore:80},{id:'early',title:'Earlier',date:'2026-10-16',time:'18:00'},{id:'zero',title:'Zero',date:'2026-10-17',fitScore:0}];
+ const before=JSON.stringify(rows);
+ assert.deepEqual(eventView(rows,'2026-10-16','all','date').others.map(x=>x.id),['early','near','zero','far']);
+ assert.deepEqual(eventView(rows,'2026-10-16','all','fit').others.map(x=>x.id),['far','near','zero','early']);
+ assert.deepEqual(eventView(rows,'2026-10-16','all','fit').highlights.map(x=>x.id),['t1','t2','t3']);
+ assert.equal(JSON.stringify(rows),before);
+});
+test('saved-only and empty periods apply to both highlights and remaining list',()=>{
+ const rows=[{id:'a',title:'A',date:'2026-10-17',fitScore:90,saved:true},{id:'b',title:'B',date:'2026-10-17',fitScore:95,saved:false}];
+ assert.deepEqual(eventView(rows,'2026-10-16','weekend','fit',true).highlights.map(x=>x.id),['a']);
+ assert.deepEqual(eventView(rows,'2026-10-16','today'),{highlights:[],others:[]});
+ assert.equal(rows.length,2);
+ assert.equal(eventInPeriod('2026-10-18','2026-10-18','weekend'),true);
+ assert.equal(eventInPeriod('2026-10-16','2026-10-18','weekend'),false);
+ assert.equal(eventInPeriod('2026-10-23','2026-10-19','weekend'),true);
+});
+
+import {readFileSync} from 'node:fs';
+import vm from 'node:vm';
+import ts from 'typescript';
+test('event controls restore hidden cards and filter top picks through the actual DOM controller',()=>{
+ const card=(id,date,fitScore,saved=false)=>({dataset:{date,fitScore:String(fitScore),eventTime:'19:00'},hidden:false,attrs:{},classes:new Set(),querySelector(selector){return selector==='h3'?{textContent:id}:selector==='[data-favorite].saved'&&saved?{}:null;},classList:{toggle(){}},setAttribute(k,v){this.attrs[k]=v;}});
+ const rows=[card('Friday','2026-10-16',80,true),card('Saturday','2026-10-17',90),card('December','2026-12-01',100)];
+ for(const c of rows)c.classList.toggle=(k,v)=>v?c.classes.add(k):c.classes.delete(k);
+ const list=()=>({children:[],append(c){if(c.parentElement){const old=c.parentElement.children;old.splice(old.indexOf(c),1);}this.children.push(c);c.parentElement=this;}});
+ const top=list(),rest=list(),block={hidden:true},empty={hidden:true},period={value:'all'},sort={value:'date'},saved={checked:false};
+ rows.forEach(c=>rest.append(c));
+ const nodes={'#topEventList':top,'#discoveries > .discovery-timeline':rest,'#eventHighlights':block,'#eventsEmpty':empty,'#eventPeriod':period,'#eventSort':sort,'#onlySaved':saved};
+ const document={querySelector:s=>nodes[s],querySelectorAll:()=>[...top.children,...rest.children]};
+ const source=readFileSync(new URL('../src/main.ts',import.meta.url),'utf8');
+ const body=source.slice(source.indexOf('function refreshEventHighlights()'),source.indexOf('function quietCardActions()'));
+ class FixedDate extends Date{constructor(value){super(value??'2026-10-16T10:00:00Z');}}
+ const context={document,eventView,Date:FixedDate,Intl};
+ vm.createContext(context);vm.runInContext(ts.transpileModule(body,{compilerOptions:{target:ts.ScriptTarget.ES2020}}).outputText,context);
+ const refresh=()=>vm.runInContext('refreshEventHighlights()',context);
+ refresh();assert.equal(top.children.length,3);
+ period.value='today';refresh();assert.deepEqual(top.children.map(c=>c.querySelector('h3').textContent),['Friday']);assert.equal(rows[2].hidden,true);assert.equal(rows[2].classes.has('is-hidden'),true);
+ period.value='all';refresh();assert.equal(top.children.length,3);assert.equal(rows[2].hidden,false);assert.equal(rows[2].attrs['aria-hidden'],'false');
+ period.value='weekend';saved.checked=true;refresh();assert.deepEqual(top.children.map(c=>c.querySelector('h3').textContent),['Friday']);
+ saved.checked=false;refresh();assert.equal(top.children.length,2);assert.equal(rows[2].hidden,true);
+ period.value='today';rows[0].dataset.date='2026-10-17';refresh();assert.equal(block.hidden,true);assert.equal(empty.hidden,false);
 });

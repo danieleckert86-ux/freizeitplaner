@@ -12,7 +12,17 @@ export function eventInPeriod(date:string,today:string,period:string){
  const sunday=new Date(today+'T12:00:00Z');sunday.setUTCDate(sunday.getUTCDate()+(7-sunday.getUTCDay())%7);
  const weekEnd=sunday.toISOString().slice(0,10);const friday=new Date(sunday);friday.setUTCDate(friday.getUTCDate()-2);
  const month=new Date(today+'T12:00:00Z');month.setUTCDate(month.getUTCDate()+30);
- return date>=today&&(period==='today'?date===today:period==='week'?date<=weekEnd:period==='weekend'?date>=friday.toISOString().slice(0,10)&&date<=weekEnd:period==='month'?date<=month.toISOString().slice(0,10):true);
+ const horizon=new Date(today+'T12:00:00Z');horizon.setUTCDate(horizon.getUTCDate()+90);
+ return /^\d{4}-\d{2}-\d{2}$/.test(date)&&date>=today&&date<=horizon.toISOString().slice(0,10)&&(period==='today'?date===today:period==='week'?date<=weekEnd:period==='weekend'?date>=friday.toISOString().slice(0,10)&&date<=weekEnd:period==='month'?date<=month.toISOString().slice(0,10):true);
+}
+export type EventSort='date'|'fit';
+export function eventView<T extends CollectionItem & {saved?:boolean}>(items:T[],today:string,period='all',sort:EventSort='date',savedOnly=false){
+ const visible=upcomingEvents(items,today,new Set()).filter(x=>eventInPeriod(x.date||'',today,period)&&(!savedOnly||x.saved));
+ const highlights=topTasteEvents(visible,today,new Set()),top=new Set(highlights);
+ const score=(x:T)=>!x.imported&&Number.isFinite(x.fitScore)?x.fitScore!:-1;
+ const byDate=(a:T,b:T)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||'')||a.title.localeCompare(b.title,'de');
+ const others=visible.filter(x=>!top.has(x)).sort((a,b)=>sort==='fit'?score(b)-score(a)||byDate(a,b):byDate(a,b)||score(b)-score(a));
+ return {highlights,others};
 }
 export function catalogueFitLabel(item:CollectionItem){
  return !item.imported&&Number.isFinite(item.fitScore)?`${Math.round(item.fitScore!)} / 100 · passt grundsätzlich`:'Passung noch nicht bewertet';

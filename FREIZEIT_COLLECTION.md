@@ -272,3 +272,7 @@ Streaming zeigt den gespeicherten Anbieter; bei Platzhaltern werden vorhandene A
 
 ## Einheitliche Reiter · 13.10.2026
 Die Reiter unter Neues verwenden Raus ins Grüne als Layoutreferenz: einheitliche Bereichsüberschrift, Gruppenüberschriften wie Fahrradwege, Abstände und zweispaltige Listen (mobil einspaltig). Kino und Streaming erhalten passende Bereichstitel. Top-3-Auswahl und alle gespeicherten Entscheidungen bleiben erhalten.
+
+
+## Eventfilter und Sortierung · 16.10.2026
+Zeitraum gilt gemeinsam für Top 3 und weitere Events, einschließlich Nur vorgemerkt. Top 3 bleiben die stärksten belegten persönlichen Passungen im ausgewählten Zeitraum. Weitere Events lassen sich nach Datum (zuerst nächster Termin, danach Uhrzeit) oder persönlicher Passung sortieren; unbekannte Passung steht hinter bekannten Scores. Ein gemeinsamer Refresh erhält alle Karten, damit Wechsel von Heute zu 90 Tage und erneute Bewertung nicht Events verlieren. Die Hidden-Regel gewinnt gegen die feste Flex-Kartenhöhe. Keine neuen Recherchen, Änderungen an Nutzerentscheidungen oder neue Mail.

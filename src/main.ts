@@ -233,7 +233,8 @@ function applyPersonalTasteScores(){
     if(!id)return;
     const item=tasteItems.get(id);if(!item)return;
     const fit=adjustedTaste(item),label=card.querySelector<HTMLElement>('.collection-fit');
-    if(label){label.textContent=fit.score===null?'Passung noch nicht bewertet':`${fit.score} / 100 · persönliche Passung`;label.title=fit.reason+' · Rangfolge nach Geschmack; keine Wahrscheinlichkeit und keine Termin- oder Sicherheitsfreigabe.';}
+    card.dataset.profileRejected=String(fit.confidence==='rejected');
+    if(label){let explanation=card.querySelector<HTMLElement>('.profile-fit-reason');if(!explanation){explanation=document.createElement('p');explanation.className='profile-fit-reason';label.after(explanation);}explanation.textContent=fit.reason;label.textContent=fit.confidence==='strong'?'Starke persönliche Passung':fit.confidence==='qualified'?'Passend mit Vorbehalt':fit.confidence==='rejected'?'Passt derzeit nicht zum Profil':'Profilabgleich ausstehend';label.title=fit.reason+' · Rangfolge nach Geschmack; keine Wahrscheinlichkeit und keine Termin- oder Sicherheitsfreigabe.';}
     if(card.classList.contains('discovery-item'))card.dataset.fitScore=fit.score===null?'':String(fit.score);
   });
   refreshEventHighlights();
@@ -1064,7 +1065,7 @@ function quietCardActions() {
     let panel=actions.querySelector<HTMLElement>(':scope > .card-more-panel');
     if(!more){
       more=document.createElement('button');more.type='button';more.className='card-more';more.textContent='Mehr';
-      more.setAttribute('aria-label','Bewertung und Details öffnen');more.setAttribute('aria-haspopup','dialog');
+      more.setAttribute('aria-label','Details zum Vorschlag öffnen');more.setAttribute('aria-haspopup','dialog');
       panel=document.createElement('div');panel.className='card-more-panel';panel.hidden=true;
       more.addEventListener('click',()=>{
         const id=actions.querySelector<HTMLElement>('[data-taste-wrap]')?.dataset.tasteWrap;if(!id)return;

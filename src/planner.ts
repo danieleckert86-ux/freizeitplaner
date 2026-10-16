@@ -1,3 +1,5 @@
+import {validTasteProfiles,validTasteAssessments,type TasteProfiles,type TasteAssessments,type ProfileKey,type TasteProfile} from './taste-settings';
+import {publishTasteSettings} from './taste-settings-ui';
 import {withTasteRating,validTasteRating,withExistingTasteRatings,type TasteRating,type TasteSuggestion} from './taste-profile';
 import {publishTasteProfile,registerTasteSuggestion,tasteRatingMarkup,refreshTasteUI,registerTasteDetails,openTasteDetails,closeTasteDetails} from './taste-ui';
 import {withMapsStock} from './maps-stock';
@@ -16,7 +18,7 @@ type Slot = { id: string; date: string; start: string; end: string; energy: stri
 type Entry = { id: string; title: string; url: string; date: string; start: string; end: string; slotId: string; status: string; createdAt: string; proposedAt: string; organizedAt: string; doneAt: string; note: string; next: string; routineId?: string; source?: string };
 type Routine = KnownActivity;
 type Dinner = {id:string;date:string;recipeId:string;title:string};
-type State = { tasteRatings?:TasteRating[]; stockMapsVersion?:number; activityStock?:StockItem[]; knownActivitiesVersion?:number; dinners?: Dinner[]; routines?: Routine[]; version: 1; appointments: Appointment[]; slots: Slot[]; entries: Entry[]; checks: string[]; googleDeleteSeries?: string[]; googleSync?: { lastSuccess: string; error?: string } };
+type State = { tasteProfiles?:TasteProfiles; tasteAssessments?:TasteAssessments; tasteRatings?:TasteRating[]; stockMapsVersion?:number; activityStock?:StockItem[]; knownActivitiesVersion?:number; dinners?: Dinner[]; routines?: Routine[]; version: 1; appointments: Appointment[]; slots: Slot[]; entries: Entry[]; checks: string[]; googleDeleteSeries?: string[]; googleSync?: { lastSuccess: string; error?: string } };
 type Idea = { title: string; url: string; next: string; outdoor: boolean; minutes?: number; source?: string; routineId?: string; date?: string; start?: string; tourKind?: string; flexible?: boolean };
 const defaultRoutines = (): Routine[] => [
   {id:'walk',title:'Spazieren durch die Stadt',minutes:45,energy:'low',mood:'outdoor',effort:'spontaneous',outdoor:true,next:'Eine gemeinsame Runde zu Beginn des Zeitfensters vorschlagen.'},
@@ -50,6 +52,8 @@ function validState(v: unknown): v is State {
   return (s.stockMapsVersion === undefined || s.stockMapsVersion === 1) && (s.knownActivitiesVersion === undefined || s.knownActivitiesVersion === 1) && s.version === 1 && Array.isArray(s.appointments) && Array.isArray(s.slots) && Array.isArray(s.entries) && Array.isArray(s.checks)
     && (s.routines === undefined || Array.isArray(s.routines) && s.routines.every(r => strings(r,['id','title','energy','mood','effort','next']) && Number.isInteger(r.minutes) && r.minutes >= 5 && r.minutes <= 1440 && typeof r.outdoor === 'boolean' && ['low','medium','high'].includes(r.energy) && ['outdoor','movement','food','culture'].includes(r.mood) && ['spontaneous','prepare','trip'].includes(r.effort) && validActivityProperties(r) && (r.ratingScore===undefined||Number.isInteger(r.ratingScore)&&r.ratingScore>=0&&r.ratingScore<=100&&r.ratingScore%5===0) && (r.rating===undefined||Number.isInteger(r.rating)&&r.rating>=1&&r.rating<=5)))
     && (s.activityStock===undefined||Array.isArray(s.activityStock)&&s.activityStock.length<=500&&s.activityStock.every(validStockItem)&&new Set(s.activityStock.map(x=>x.id)).size===s.activityStock.length)
+    && (s.tasteProfiles===undefined||validTasteProfiles(s.tasteProfiles))
+    && (s.tasteAssessments===undefined||validTasteAssessments(s.tasteAssessments))
     && (s.tasteRatings===undefined||Array.isArray(s.tasteRatings)&&s.tasteRatings.length<=2000&&s.tasteRatings.every(validTasteRating)&&new Set(s.tasteRatings.map(r=>r.id)).size===s.tasteRatings.length)
     && (s.googleDeleteSeries === undefined || Array.isArray(s.googleDeleteSeries) && s.googleDeleteSeries.every(id => typeof id === 'string'))
     && (s.googleSync === undefined || !!s.googleSync && typeof s.googleSync.lastSuccess === 'string' && (!s.googleSync.lastSuccess || !isNaN(Date.parse(s.googleSync.lastSuccess))) && (s.googleSync.error === undefined || typeof s.googleSync.error === 'string'))
@@ -83,7 +87,7 @@ export function initPlanner(database: SupabaseClient) {
   let stockView:string|null=null;
   let onlySaved=false;
   document.addEventListener('finder-saved-filter',ev=>{onlySaved=(ev as CustomEvent<boolean>).detail; if(!isEditing())render();});
-  const isEditing = () => !!document.querySelector('#tasteRatingDialog[open]') || !!document.activeElement?.matches('[data-taste-score]') || !!stockDraft || !!stockView || !!dinnerDate || !!calendarEdit || !!dragging || !!draft || !!pendingIdea || host?.contains(document.activeElement) && ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName || '');
+  const isEditing = () => !!document.querySelector('#tasteProfileDialog[open]') || !!document.querySelector('#tasteRatingDialog[open]') || !!document.activeElement?.matches('[data-taste-score]') || !!stockDraft || !!stockView || !!dinnerDate || !!calendarEdit || !!dragging || !!draft || !!pendingIdea || host?.contains(document.activeElement) && ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName || '');
   let week = day(today()).getUTCDay() === 0 ? addDays(monday(today()),7) : monday(today());
   let activeDate = today();
   let openSection = '';
@@ -338,6 +342,7 @@ export function initPlanner(database: SupabaseClient) {
   function render() {
     if(!host)return;
     publishTasteProfile(state.tasteRatings??[],loaded);
+    publishTasteSettings(state.tasteProfiles??{},state.tasteAssessments??{},loaded);
     const focused=document.activeElement as HTMLElement | null;
     if((draft||pendingIdea)&&focused?.dataset.action&&!focused.closest('.planning-dialog'))dialogReturn=`[data-action="${CSS.escape(focused.dataset.action)}"][data-id="${CSS.escape(focused.dataset.id||'')}"]`;
     if(!inWeek(activeDate)&&!draft&&!pendingIdea)activeDate=inWeek(today())?today():week;
@@ -550,6 +555,15 @@ export function initPlanner(database: SupabaseClient) {
       b.disabled=!loaded||saving||!!exists;b.textContent=exists?'In Orte & Touren gespeichert':'In Orte & Touren übernehmen';
     });
   }
+  document.addEventListener('taste-profile-request',async ev=>{
+    const {key,profile,expectedUpdatedAt,done}=(ev as CustomEvent<{key:ProfileKey;profile:TasteProfile;expectedUpdatedAt:string|null;done:(ok:boolean,message:string)=>void}>).detail;
+    if(!loaded||saving){done(false,'Die Sammlung wird noch geladen oder gespeichert.');return;}
+    const ok=await mutate(()=>{
+      if((state.tasteProfiles?.[key]?.updatedAt??null)!==expectedUpdatedAt)throw Error('Profile changed');
+      state.tasteProfiles={...state.tasteProfiles,[key]:profile};
+    },'Geschmacksprofil gespeichert. Die Recherche verwendet diese Fassung; frühere Abgleiche werden als veraltet erkannt.');
+    done(ok,message);
+  });
   document.addEventListener('taste-rating-request',async ev=>{
     const {item,score,reason,done}=(ev as CustomEvent<{item:TasteSuggestion;score:number|null;reason:string;done:(ok:boolean,message:string)=>void}>).detail;
     if(!loaded||saving){done(false,'Die Sammlung wird noch geladen oder gespeichert. Bitte kurz warten.');return;}

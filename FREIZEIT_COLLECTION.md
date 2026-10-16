@@ -287,3 +287,15 @@ Nach der Liveprüfung: Tourenmerkmale sind auf Outdoor-Beispiele begrenzt. Ein K
 
 ## Google Maps für Gastronomie · 16.10.2026
 Restaurant-/Bistro-, Café- und Biergarten-Links öffnen Google Maps statt der Homepage: in Neues, Bewertungsdetails, Vormerkungen und Ortsdetails im Vorrat. Bereits gespeicherte sichere Maps-Ortslinks bleiben erhalten; andernfalls wird eine kostenlose Maps-Ortsuche aus Name und vorhandener Adresse/Ort gebildet, bei unbekannter Lage mit Augsburg als Suchkontext. Keine erfundenen Place-IDs oder Geocoding-Aufrufe. Originalbelege, gespeicherte URLs, private Einträge und Bewertungen werden nicht umgeschrieben. Andere Kategorien behalten ihre bisherigen Links.
+
+## Geschmacksprofile statt neuer Einzelbewertungen (16.10.2026)
+Private `personal_planning.payload.tasteProfiles` speichert Wünsche, Ausnahmen und
+Beispiele je Kategorie. `film` gilt für Kino und Streamingfilme, `series` für Serien.
+Aktuelle Nutzervorgaben sind initial hinterlegt; Bearbeiten/Speichern nutzt den vorhandenen
+Revisionsschutz. Bewertungen bleiben im Archiv; keine neuen Slider auf Kacheln/Details.
+`src/taste-settings.ts` definiert den additiven Vertrag. Die geplante Recherche liest die
+aktuellen Profile und schreibt nur private `tasteAssessments` mit versioniertem Inhaltsbeleg.
+Kein Browser-KI-Aufruf, keine erfundene automatische Freitextgewichtung. Ein Profilwechsel
+macht alte Abgleiche ausstehend. App zeigt starke Passung, mit Vorbehalt oder offen; negative
+Abgleiche bleiben gespeichert und werden als Empfehlung verborgen. Quellenbelege und
+Katalog-Grundpunkte werden dabei nicht verändert. Neue Medien benötigen bestätigte IMDb >=7,8.

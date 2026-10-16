@@ -169,13 +169,13 @@ test('rated pools use the standard swim duration without inventing a duration fo
  assert.deepEqual(matchingStock(a,[place],{...emptyGuideAnswers(),minutes:60},decisions()),[]);
  assert.equal(place.minutes,null);
 });
-test('ratings are only editable inside details and do not replace favorite state',()=>{
+test('stock details retain data without rating controls or changing favorites',()=>{
  const row=idea('rated',{rating:4,favorite:true});
  assert.ok(!stockMarkup([row],null,true,false,'').includes('data-taste-rate="4"'));
  const dialog=stockMarkup([row],null,true,false,'Bewertung gespeichert.',row.id);
  assert.doesNotMatch(dialog,/type="range"/);
- assert.match(dialog,/data-taste-details="stock:rated"/);
- assert.match(dialog,/75 \/ 100/);assert.match(dialog,/Bewertung gespeichert/);
+ assert.doesNotMatch(dialog,/data-taste-details|data-taste-score/);
+ assert.match(dialog,/Bewertung gespeichert/);
  assert.equal(row.favorite,true);
 });
 

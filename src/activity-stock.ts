@@ -107,7 +107,8 @@ const importedDetailsMarkup=(row:StockItem)=> (row.sourceDetails??[]).map(source
  const url=typeof source.url==='string'?safeStockUrl(source.url):source.favorite&&typeof source.favorite==='object'&&typeof (source.favorite as Record<string,unknown>).url==='string'?safeStockUrl((source.favorite as Record<string,unknown>).url as string):'';
  return `<section class="stock-source-details"><h3>Übernommene Informationen</h3>${strings(['description','place','location','why','conditionsStatus','bookingDeadline','time','date']).map(text=>`<p>${e(text)}</p>`).join('')}${meta.length?`<p>${meta.map(e).join(' · ')}</p>`:''}${!foodPlace(row)&&url&&url!==safeStockUrl(row.url)?`<a href="${e(url)}" target="_blank" rel="noopener noreferrer">Weitere Originalquelle öffnen</a>`:''}</section>`;
 }).join('');
-const ratingMarkup=(row:StockItem,_disabled:string)=>ratingSectionMarkup(row.sourceId||'stock:'+row.id,row.ratingScore??(row.rating===undefined?undefined:legacyStarsToScore(row.rating)));
+const ratingMarkup=(_row:StockItem,_disabled:string)=>'';
+void ratingSectionMarkup;
 const choices=(pairs:readonly (readonly [string,string])[],selected:string)=>pairs.map(([id,label])=>`<option value="${id}" ${id===selected?'selected':''}>${label}</option>`).join('');
 export function stockMarkup(items:readonly StockItem[],draft:StockItem|null,loaded:boolean,saving:boolean,message:string,viewId:string|null=null,_onlySaved=false):string {
  const {favorites,decisions}=stockSources();const active=usableStock(items,decisions,true);

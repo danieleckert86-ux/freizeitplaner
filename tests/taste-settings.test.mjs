@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {defaultTasteProfiles,validTasteProfiles,validTasteAssessments,profileKeyFor,currentAssessment} from '../src/taste-settings.ts';
+test('confirmed profiles preserve nuanced positive references and separate formats',()=>{
+ assert.equal(validTasteProfiles(defaultTasteProfiles),true);
+ assert.equal(profileKeyFor({kind:'cinema',category:''}),'film');
+ assert.equal(profileKeyFor({kind:'stream',mediaType:'film',category:''}),'film');
+ assert.equal(profileKeyFor({kind:'stream',mediaType:'series',category:''}),'series');
+ assert.equal(profileKeyFor({kind:'stream',category:''}),null);
+ assert.match(defaultTasteProfiles.series.examples,/Love: intelligent und witzig/);
+ assert.match(defaultTasteProfiles.series.examples,/Modern Family: entspannte Unterhaltung/);
+ assert.equal(validTasteProfiles({film:{wishes:'x',avoid:'',examples:'',updatedAt:'bad'}}),false);
+});
+test('personal claims require evidence and the exact saved profile version',()=>{
+ const p=defaultTasteProfiles.film;
+ const a={profileKey:'film',profileUpdatedAt:p.updatedAt,status:'strong',reason:'Figuren und Humor',caveat:'',reviewedAt:p.updatedAt,sourceUrls:['https://example.org/review']};
+ assert.equal(validTasteAssessments({id:a}),true);
+ assert.equal(currentAssessment('id','film',{film:p},{id:a}),a);
+ assert.equal(currentAssessment('id','series',{film:p},{id:a}),null);
+ assert.equal(currentAssessment('id','film',{film:{...p,updatedAt:'2026-10-17T00:00:00Z'}},{id:a}),null);
+ assert.equal(validTasteAssessments({id:{...a,sourceUrls:[]}}),false);
+});

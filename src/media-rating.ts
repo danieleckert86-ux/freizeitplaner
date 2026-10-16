@@ -2,7 +2,7 @@ export function imdbRating(value:unknown):number|null {
  return typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=10?value:null;
 }
 export function mediaRecommendationAllowed(item:{imdbRating?:unknown}){
- const rating=imdbRating(item.imdbRating);return rating===null||rating>=7;
+ const rating=imdbRating(item.imdbRating);return rating!==null&&rating>=7.8;
 }
 export function imdbTitleUrl(value:unknown):string {
  if(typeof value!=='string')return '';

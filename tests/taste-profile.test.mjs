@@ -98,3 +98,14 @@ test('flat route evidence matches whole words rather than Leben',()=>{
  assert.ok(!tasteFeatures(x).includes('flache Strecke'));
  for(const description of ['flach','flache Strecke','ebener Weg','auf ebenen Wegen'])assert.ok(tasteFeatures({...x,kind:'walk',description}).includes('flache Strecke'));
 });
+
+test('route features belong to outdoor examples, not concerts or media',()=>{
+ const description='Ruhige Tour mit Aussicht, Rundtour auf flachen festen Wegen';
+ for(const kind of ['event','stream','cinema','restaurant'])assert.ok(!tasteFeatures({...item,kind,description}).some(f=>['ruhige Tour','Aussicht','Rundtour','flache Strecke','feste Wege'].includes(f)));
+ assert.ok(tasteFeatures({...item,kind:'walk',description}).includes('Rundtour'));
+});
+test('explicitly negated loop and flatness facts cannot train positive route preferences',()=>{
+ const x={...item,kind:'walk',title:'Spazierweg',category:'Spazierweg',description:'Eine Strecke, keine Rundtour; nicht eben.'};
+ assert.ok(!tasteFeatures(x).includes('Rundtour'));assert.ok(!tasteFeatures(x).includes('flache Strecke'));
+ assert.ok(tasteFeatures({...x,description:'Rundtour auf ebenen Wegen'}).includes('Rundtour'));
+});

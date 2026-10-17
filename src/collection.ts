@@ -1,5 +1,5 @@
 import {eventSection} from './finder-navigation.ts';
-export type CollectionItem={title:string;category?:string;date?:string;time?:string;fitScore?:number;favorite?:{id:string};id?:string;verifiedAt?:string;imported?:boolean;closed?:boolean|null};
+export type CollectionItem={title:string;location?:string;category?:string;date?:string;time?:string;fitScore?:number;favorite?:{id:string};id?:string;verifiedAt?:string;imported?:boolean;closed?:boolean|null};
 export function upcomingEvents<T extends CollectionItem>(items:T[],today:string,hidden:Set<string>):T[]{
  const max=new Date(today+'T12:00:00Z');max.setUTCDate(max.getUTCDate()+90);const last=max.toISOString().slice(0,10);
  const seen=new Set<string>();
@@ -7,7 +7,11 @@ export function upcomingEvents<T extends CollectionItem>(items:T[],today:string,
 }
 /** Ranked independently of the list's period filter; unknown taste is never a top pick. */
 export function topTasteEvents<T extends CollectionItem>(items:T[],today:string,hidden:Set<string>):T[]{
- return upcomingEvents(items.filter(x=>!x.imported&&Number.isFinite(x.fitScore)&&x.fitScore!>=0&&x.fitScore!<=100),today,hidden).slice(0,3);
+ const groups=new Set<string>();
+ return upcomingEvents(items.filter(x=>!x.imported&&Number.isFinite(x.fitScore)&&x.fitScore!>=0&&x.fitScore!<=100),today,hidden).filter(x=>{
+  const key=[x.title,x.location||''].map(v=>v.normalize('NFKC').toLocaleLowerCase('de').replace(/[^\p{L}\p{N}]+/gu,' ').trim()).join('|');
+  if(groups.has(key))return false;groups.add(key);return true;
+ }).slice(0,3);
 }
 export function eventInPeriod(date:string,today:string,period:string){
  const sunday=new Date(today+'T12:00:00Z');sunday.setUTCDate(sunday.getUTCDate()+(7-sunday.getUTCDay())%7);

@@ -157,3 +157,8 @@ test('cabaret and literature keep cultural priority over incidental music or jaz
  const music=[{title:'Song Slam',category:'Song Slam · Konzert',date:'2026-11-01',fitScore:90},{title:'Band',category:'Indie-Folk Konzert',date:'2026-11-01',fitScore:89}];
  assert.equal(eventView(music,'2026-10-17','all','date',false,'music').highlights.length,2);
 });
+
+test('Top 3 use distinct formats while second performance remains visible',()=>{
+ const rows=[{title:'Designmarkt',location:'Gaswerk',date:'2026-10-18',fitScore:99},{title:'Designmarkt',location:'Gaswerk',date:'2026-10-19',fitScore:98},{title:'Lesung',date:'2026-10-20',fitScore:95},{title:'Kabarett',date:'2026-10-21',fitScore:94}];
+ const view=eventView(rows,'2026-10-18');assert.deepEqual(view.highlights.map(x=>x.title),['Designmarkt','Lesung','Kabarett']);assert.equal(view.others[0].date,'2026-10-19');
+});

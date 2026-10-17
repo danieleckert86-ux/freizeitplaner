@@ -26,7 +26,10 @@ const foodOld=rec('food-old','restaurant',{openingDate:'2026-08-17',openingCity:
 Object.assign(food,{openingDate:'2026-10-01',openingCity:'Augsburg',openingSourceUrl:'https://example.org/opening'});
 Object.assign(qualified,{openingDate:'2026-10',openingCity:'Augsburg',openingSourceUrl:'https://example.org/opening'});
 delete assessments[food.id];
-const data={schemaVersion:2,dataUpdated:at,weekendRange:'Fixture',weatherDays:[],top:[],ideas:[],discoveries:[approved,pending],restaurants:[food,qualified,foodOld],cinema:[],stream:[stream,expired],hikes:[hike,low],bikes:[],walks:[],catalogChecks:[],catalogSources:[]};
+const cultureExtra=Array.from({length:3},(_,i)=>rec('culture-'+i,'event',{category:'Lesung'}));
+const music=Array.from({length:4},(_,i)=>rec('music-'+i,'event',{category:'Indie-Konzert'}));
+for(const item of music)assessments[item.id].profileKey='music';
+const data={schemaVersion:2,dataUpdated:at,weekendRange:'Fixture',weatherDays:[],top:[],ideas:[],discoveries:[approved,pending,...cultureExtra,...music],restaurants:[food,qualified,foodOld],cinema:[],stream:[stream,expired],hikes:[hike,low],bikes:[],walks:[],catalogChecks:[],catalogSources:[]};
 const personal={version:1,appointments:[],slots:[],entries:[],checks:[],routines:[],activityStock:[],tasteProfiles:profiles,tasteAssessments:assessments};
 let writes=0;
 await page.route('**/*',async route=>{
@@ -44,6 +47,19 @@ try{
  const visible=title=>page.getByRole('heading',{name:title,exact:true});
  await visible('event-approved').waitFor({state:'visible'});
  assert.equal(await visible('event-pending').isVisible(),false);
+ assert.equal(await page.locator('#topEventList .discovery-item:visible').count(),3);
+ assert.equal(await visible('music-0').isVisible(),false);
+ assert.equal(await page.locator('[data-profile-edit=music]').count(),0);
+ await page.locator('[data-new-tab=music]').click();
+ await visible('music-0').waitFor({state:'visible'});
+ assert.equal(await visible('event-approved').isVisible(),false);
+ assert.equal(await page.locator('#topEventList .discovery-item:visible').count(),3);
+ assert.equal(await page.locator('#discoveries > .discovery-timeline .discovery-item:visible').count(),1);
+ assert.equal(await page.locator('[data-profile-edit=culture]').count(),0);
+ assert.equal(await page.locator('[data-profile-edit=music]').count(),1);
+ await page.locator('[data-new-tab=events]').click();
+ await visible('event-approved').waitFor({state:'visible'});
+ assert.equal(await page.locator('#topEventList .discovery-item:visible').count(),3);
  await page.locator('[data-new-tab="restaurants"]').click();
  await visible('food-approved').waitFor({state:'visible'});
  assert.equal(await page.locator('#restaurants .taste-profile-panel:visible').count(),0);
@@ -68,5 +84,5 @@ try{
  await page.waitForTimeout(100);
  assert.equal(await visible('hike-approved').isVisible(),false);
  assert.deepEqual(errors,[]);assert.equal(writes,0);
- console.log(JSON.stringify({browser:'passed',strongOnly:true,foodOpeningsWithoutTaste:true,stream60Days:true,hikeBounds:true,profileChange:true,consoleErrors:errors,writes}));
+ console.log(JSON.stringify({browser:'passed',strongOnly:true,foodOpeningsWithoutTaste:true,separateMusicCultureTop3:true,stream60Days:true,hikeBounds:true,profileChange:true,consoleErrors:errors,writes}));
 }finally{await browser.close();}

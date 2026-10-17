@@ -1,4 +1,5 @@
-export type CollectionItem={title:string;date?:string;time?:string;fitScore?:number;favorite?:{id:string};id?:string;verifiedAt?:string;imported?:boolean;closed?:boolean|null};
+import {eventSection} from './finder-navigation.ts';
+export type CollectionItem={title:string;category?:string;date?:string;time?:string;fitScore?:number;favorite?:{id:string};id?:string;verifiedAt?:string;imported?:boolean;closed?:boolean|null};
 export function upcomingEvents<T extends CollectionItem>(items:T[],today:string,hidden:Set<string>):T[]{
  const max=new Date(today+'T12:00:00Z');max.setUTCDate(max.getUTCDate()+90);const last=max.toISOString().slice(0,10);
  const seen=new Set<string>();
@@ -16,8 +17,8 @@ export function eventInPeriod(date:string,today:string,period:string){
  return /^\d{4}-\d{2}-\d{2}$/.test(date)&&date>=today&&date<=horizon.toISOString().slice(0,10)&&(period==='today'?date===today:period==='week'?date<=weekEnd:period==='weekend'?date>=friday.toISOString().slice(0,10)&&date<=weekEnd:period==='month'?date<=month.toISOString().slice(0,10):true);
 }
 export type EventSort='date'|'fit';
-export function eventView<T extends CollectionItem & {saved?:boolean}>(items:T[],today:string,period='all',sort:EventSort='date',savedOnly=false){
- const visible=upcomingEvents(items,today,new Set()).filter(x=>eventInPeriod(x.date||'',today,period)&&(!savedOnly||x.saved));
+export function eventView<T extends CollectionItem & {saved?:boolean}>(items:T[],today:string,period='all',sort:EventSort='date',savedOnly=false,section?:'music'|'events'){
+ const visible=upcomingEvents(items.filter(x=>!section||eventSection(x)===section),today,new Set()).filter(x=>eventInPeriod(x.date||'',today,period)&&(!savedOnly||x.saved));
  const highlights=topTasteEvents(visible,today,new Set()),top=new Set(highlights);
  const score=(x:T)=>!x.imported&&Number.isFinite(x.fitScore)?x.fitScore!:-1;
  const byDate=(a:T,b:T)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||'')||a.title.localeCompare(b.title,'de');

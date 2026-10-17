@@ -241,7 +241,7 @@ function applyPersonalTasteScores(){
     if(allowed)card.style.removeProperty('display');else card.style.setProperty('display','none','important');
     if(facts.kind==='restaurant')return;
     if(label){let explanation=card.querySelector<HTMLElement>('.profile-fit-reason');if(!explanation){explanation=document.createElement('p');explanation.className='profile-fit-reason';label.after(explanation);}explanation.textContent=fit.reason;label.textContent=fit.confidence==='strong'?'Passt zu deinem Geschmack':fit.confidence==='qualified'?'Passend mit Vorbehalt':fit.confidence==='rejected'?'Passt derzeit nicht zum Profil':'Profilabgleich ausstehend';label.title=fit.reason+' · Rangfolge nach Geschmack; keine Wahrscheinlichkeit und keine Termin- oder Sicherheitsfreigabe.';}
-    if(card.classList.contains('discovery-item'))card.dataset.fitScore=fit.score===null?'':String(fit.score);
+    if(card.classList.contains('discovery-item'))card.dataset.fitScore=allowed&&!item.imported&&Number.isFinite(item.fitScore)?String(item.fitScore):'';
   });
   for(const selector of ['#cinemaList','#streamFilmList','#streamSeriesList','#restaurantList','#cafeList','#beerGardenList','#hikeGroup .tour-list','#bikeGroup .tour-list','#walkGroup .tour-list']){
     const list=document.querySelector<HTMLElement>(selector);if(!list)continue;
@@ -327,12 +327,12 @@ async function bootstrap() {
   const refreshFinder = () => {
     const current = finderView === 'current';
     document.querySelector<HTMLElement>('#moviesHeading')!.textContent=currentKind.value==='stream'?'Streaming':'Kino';
-    setTasteArchiveScope(current?(currentKind.value==='cinema'?'cinema':currentKind.value==='stream'?'stream':currentKind.value==='restaurants'?'food':currentKind.value==='outdoor'?'outdoor':'event'):'standard');
+    setTasteArchiveScope(current?(currentKind.value==='music'?'music':currentKind.value==='cinema'?'cinema':currentKind.value==='stream'?'stream':currentKind.value==='restaurants'?'food':currentKind.value==='outdoor'?'outdoor':'event'):'standard');
     document.querySelector<HTMLElement>('#standardTabs')!.hidden=current;
     document.querySelector<HTMLElement>('#newTabs')!.hidden=!current;
     document.querySelectorAll<HTMLButtonElement>('[data-standard-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.standardTab===standardTab)));
     document.querySelectorAll<HTMLButtonElement>('[data-new-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.newTab===currentKind.value)));
-    const savedFilter=current&&['events','cinema','stream'].includes(currentKind.value);
+    const savedFilter=current&&['events','music','cinema','stream'].includes(currentKind.value);
     onlySaved.closest<HTMLElement>('label')!.hidden = !savedFilter;
     document.querySelector<HTMLElement>('#currentKindLabel')!.hidden = true;
     document.querySelector<HTMLElement>('#collectionEvidence')!.hidden = !current;
@@ -806,7 +806,7 @@ function renderFavorites() {
     return !!facts&&!!candidate&&recommendationAllowed(facts,profileAssessment(candidate));
 
   };
-  const filtered = favorites.filter(item => favoriteMediaAllowed(item) && !excludedMediaIds.has(item.suggestionId) && favoriteArea(item.category,savedEventDates.get(item.suggestionId)) === finderView && !renderedIds.has(item.suggestionId) && (finderView==='ideas'||currentKind.value==='events'&&!/kino|stream/i.test(item.category)||currentKind.value==='cinema'&&/kino/i.test(item.category)||currentKind.value==='stream'&&/stream/i.test(item.category)));
+  const filtered = favorites.filter(item => favoriteMediaAllowed(item) && !excludedMediaIds.has(item.suggestionId) && favoriteArea(item.category,savedEventDates.get(item.suggestionId)) === finderView && !renderedIds.has(item.suggestionId) && (finderView==='ideas'||['events','music'].includes(currentKind.value)&&! /kino|stream/i.test(item.category)&&(/musik|konzert|indie|folk|songwriter|rock|pop|jazz/i.test(item.category)===(currentKind.value==='music'))||currentKind.value==='cinema'&&/kino/i.test(item.category)||currentKind.value==='stream'&&/stream/i.test(item.category)));
 
   favoritesEmpty.hidden = filtered.length > 0;
   favoritesEmpty.textContent = 'Hier sind noch keine weiteren Vorschläge vorgemerkt.';
@@ -1060,7 +1060,12 @@ function refreshEventHighlights() {
   const period=document.querySelector<HTMLSelectElement>('#eventPeriod')?.value||'all';
   const sort=document.querySelector<HTMLSelectElement>('#eventSort')?.value==='fit'?'fit':'date';
   const savedOnly=!!document.querySelector<HTMLInputElement>('#onlySaved')?.checked;
-  const view=eventView(cards.filter(card=>card.dataset.profileRejected!=='true').map(card=>({card,title:card.querySelector('h3')?.textContent||'',date:card.dataset.date,time:card.dataset.eventTime,fitScore:card.dataset.fitScore?Number(card.dataset.fitScore):undefined,saved:!!card.querySelector('[data-favorite].saved')})),today,period,sort,savedOnly);
+  const section=document.querySelector<HTMLSelectElement>('#currentKind')?.value==='music'?'music':'events';
+  const heading=section==='music'?'Musik & Konzerte':'Kultur & Veranstaltungen';
+  document.querySelector<HTMLElement>('#discoveriesHeading')!.textContent=heading;
+  block.querySelector('h3')!.textContent='Deine Top 3 · '+heading;
+  document.querySelector<HTMLElement>('#discoveries .event-list-heading')!.textContent=section==='music'?'Weitere Konzerte':'Weitere Kulturveranstaltungen';
+  const view=eventView(cards.filter(card=>card.dataset.profileRejected!=='true').map(card=>({card,category:card.dataset.category,title:card.querySelector('h3')?.textContent||'',date:card.dataset.date,time:card.dataset.eventTime,fitScore:card.dataset.fitScore?Number(card.dataset.fitScore):undefined,saved:!!card.querySelector('[data-favorite].saved')})),today,period,sort,savedOnly,section);
   const visible=new Set([...view.highlights,...view.others].map(x=>x.card));
   for(const card of cards){
     delete card.dataset.topEvent;
@@ -1073,7 +1078,7 @@ function refreshEventHighlights() {
   for(const {card} of view.others)rest.append(card);
   block.hidden=view.highlights.length===0;
   const empty=document.querySelector<HTMLElement>('#eventsEmpty');
-  if(empty)empty.hidden=visible.size>0;
+  if(empty){empty.hidden=visible.size>0;empty.textContent='Aktuell keine '+heading+' mit bestätigter persönlicher Passung im gewählten Zeitraum.';}
 }
 
 function quietCardActions() {

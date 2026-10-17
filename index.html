@@ -33,9 +33,9 @@
       <button class="section-nav-btn active" type="button" data-main-view="ideas" data-view="ideas">Standardaktivitäten</button>
       <button class="section-nav-btn" type="button" data-main-view="current" data-view="current">Neues</button>
     </nav>
-    <div class="finder-toolbar"><label><input id="onlySaved" type="checkbox"> Nur vorgemerkt</label><label id="currentKindLabel" hidden>Aktuelle Angebote<select id="currentKind"><option value="events">Veranstaltungen</option><option value="cinema">Kino</option><option value="stream">Streaming</option><option value="restaurants">Essen &amp; entdecken</option><option value="outdoor">Raus ins Grüne</option></select></label></div>
+    <div class="finder-toolbar"><label><input id="onlySaved" type="checkbox"> Nur vorgemerkt</label><label id="currentKindLabel" hidden>Aktuelle Angebote<select id="currentKind"><option value="events">Kultur &amp; Veranstaltungen</option><option value="music">Musik &amp; Konzerte</option><option value="cinema">Kino</option><option value="stream">Streaming</option><option value="restaurants">Essen &amp; entdecken</option><option value="outdoor">Raus ins Grüne</option></select></label></div>
     <nav id="standardTabs" class="finder-tabs" aria-label="Standardaktivitäten auswählen"><button type="button" data-standard-tab="planning" aria-pressed="true">Standardaktivitäten</button><button type="button" data-standard-tab="stock" aria-pressed="false">Orte &amp; Touren</button></nav>
-    <nav id="newTabs" class="finder-tabs" hidden aria-label="Neues entdecken"><button type="button" data-new-tab="events" aria-pressed="true">Veranstaltungen</button><button type="button" data-new-tab="cinema" aria-pressed="false">Kino</button><button type="button" data-new-tab="stream" aria-pressed="false">Streaming</button><button type="button" data-new-tab="restaurants" aria-pressed="false">Essen &amp; entdecken</button><button type="button" data-new-tab="outdoor" aria-pressed="false">Raus ins Grüne</button></nav>
+    <nav id="newTabs" class="finder-tabs" hidden aria-label="Neues entdecken"><button type="button" data-new-tab="events" aria-pressed="true">Kultur &amp; Veranstaltungen</button><button type="button" data-new-tab="music" aria-pressed="false">Musik &amp; Konzerte</button><button type="button" data-new-tab="cinema" aria-pressed="false">Kino</button><button type="button" data-new-tab="stream" aria-pressed="false">Streaming</button><button type="button" data-new-tab="restaurants" aria-pressed="false">Essen &amp; entdecken</button><button type="button" data-new-tab="outdoor" aria-pressed="false">Raus ins Grüne</button></nav>
     <p id="tasteStatus" class="planner-small" role="status" aria-live="polite"></p><section id="tasteArchive" class="taste-archive" aria-label="Mein Geschmack"></section>
     <p id="stockCopyStatus" class="planner-small" role="status" aria-live="polite"></p>
     <details id="collectionEvidence" class="collection-source-status"><summary>Recherchestand</summary></details>
@@ -155,7 +155,7 @@
     <section class="independent-section finder-section discovery-panel view-section" data-app-view="events" id="discoveries" aria-labelledby="discoveriesHeading">
       <div class="section-head">
         <div>
-          <h2 id="discoveriesHeading">Veranstaltungen</h2>
+          <h2 id="discoveriesHeading">Kultur &amp; Veranstaltungen</h2>
         </div>
       </div>
       <div class="event-controls">
@@ -172,7 +172,7 @@
       </div>
       <div id="eventHighlights" class="event-highlights" hidden>
         <h3 class="finder-group-heading">Deine Top 3</h3>
-        <p class="event-highlights-note">Die beste Geschmackspassung im gewählten Zeitraum.</p>
+        <p class="event-highlights-note">Bis zu drei bestätigte passende Vorschläge aus dieser Kategorie im gewählten Zeitraum.</p>
         <div id="topEventList" class="discovery-timeline"></div>
       </div>
       <h3 class="event-list-heading finder-group-heading">Weitere Events</h3>

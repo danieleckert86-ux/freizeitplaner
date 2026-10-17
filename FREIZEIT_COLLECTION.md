@@ -344,3 +344,18 @@ Auf ausdrücklichen Nutzerwunsch sind restaurant/cafe/beerGarden aus den gespeic
 Profilen entfernt. Keine Profilbox, Entwürfe oder Bearbeitungsfunktion im neutralen
 Neueröffnungsbereich. Andere Profile und alle bisherigen Bewertungen bleiben erhalten;
 Legacy-Profilkennungen bleiben ausschließlich lesekompatibel für alte Assessments.
+
+## Musik & Konzerte getrennt von Kultur & Veranstaltungen
+
+Zwei eigene Reiter mit jeweils unabhängiger Top3 im gewählten Zeitraum. Erst die
+bestätigte persönliche Freigabe und harte Faktenprüfung, dann bestehende Rangfolge;
+keine neuen Gewichte oder Füllplätze. Weitere passende Termine bleiben darunter.
+Die Auswahl filtert zuerst nach Kategorie, sodass Musik und Kultur keine Topplätze
+voneinander verdrängen. Zeitraum/Sortierung/Vormerkfilter wirken auf den aktiven
+Bereich. Das jeweilige Musik-/Kulturprofil und Bewertungsarchiv werden getrennt
+angezeigt; gespeicherte Profile/Bewertungen/IDs bleiben unverändert.
+
+Die qualitative Profilanzeige liefert absichtlich keine persönliche Punktzahl.
+Sie darf den bestehenden öffentlichen Rangfolgewert einer bereits freigegebenen
+Karte nicht löschen; dies hatte zuvor leere Top3 verursachen können. Dieser Wert
+wird ausschließlich zur Rangfolge innerhalb freigegebener Kandidaten erhalten.

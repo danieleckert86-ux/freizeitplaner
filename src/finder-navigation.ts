@@ -1,6 +1,7 @@
-export type NewCategory='events'|'cinema'|'stream'|'restaurants'|'outdoor';
+export type NewCategory='events'|'music'|'cinema'|'stream'|'restaurants'|'outdoor';
 export function finderSectionVisible(section:string,current:boolean,category:NewCategory,standard:'planning'|'stock'){
  if(!current)return section===standard;
+ if(category==='music')return section==='events';
  return category==='cinema'||category==='stream'?section==='movies':section===category;
 }
 export function discoveryFoodKind(x:{type?:string;category?:string}){
@@ -52,3 +53,5 @@ export function streamingProvider(item:{platform?:string;meta?:readonly string[]
  }catch{return 'Anbieter noch ungeklärt';}
 }
 
+
+export function eventSection(x:{category?:string}):'music'|'events'{return /musik|konzert|indie|folk|songwriter|rock|pop|jazz/i.test(x.category||'')?'music':'events';}

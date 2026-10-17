@@ -56,12 +56,14 @@ test('existing real place stars remain exact and enter the archive without inven
 test('archives separate events, cinema, streaming and standard activities without losing stored examples',async()=>{
  const {tasteArchiveRatings}=await import('../src/taste-profile.ts');
  const rows=['event','cinema','stream','restaurant','routine'].map((kind,i)=>({...rating(kind,3),kind,score:i*5,reason:'Kommentar '+kind}));
- assert.deepEqual(tasteArchiveRatings(rows,'event').map(x=>x.id),['event']);
+ rows.push({...rating('culture',3),category:'Lesung',kind:'event'});
+ assert.deepEqual(tasteArchiveRatings(rows,'music').map(x=>x.id),['event']);
+ assert.deepEqual(tasteArchiveRatings(rows,'event').map(x=>x.id),['culture']);
  assert.deepEqual(tasteArchiveRatings(rows,'cinema').map(x=>x.id),['cinema']);
  assert.deepEqual(tasteArchiveRatings(rows,'stream').map(x=>x.id),['stream']);
  assert.deepEqual(tasteArchiveRatings(rows,'standard').map(x=>x.id),['routine']);
  assert.deepEqual(tasteArchiveRatings(rows,'food').map(x=>x.id),['restaurant']);
- assert.equal(rows.length,5);
+ assert.equal(rows.length,6);
 });
 test('cinema score zero, comment and confirmed format survive save and reload',()=>{
  const film={...item,id:'kino',kind:'cinema',category:'Film · Drama',mediaType:'film'};

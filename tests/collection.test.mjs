@@ -96,9 +96,9 @@ test('event controls restore hidden cards and filter top picks through the actua
  const rows=[card('Friday','2026-10-16',80,true),card('Saturday','2026-10-17',90),card('December','2026-12-01',100)];
  for(const c of rows)c.classList.toggle=(k,v)=>v?c.classes.add(k):c.classes.delete(k);
  const list=()=>({children:[],append(c){if(c.parentElement){const old=c.parentElement.children;old.splice(old.indexOf(c),1);}this.children.push(c);c.parentElement=this;}});
- const top=list(),rest=list(),block={hidden:true},empty={hidden:true},period={value:'all'},sort={value:'date'},saved={checked:false};
+ const top=list(),rest=list(),block={hidden:true,querySelector:()=>({textContent:''})},empty={hidden:true},period={value:'all'},sort={value:'date'},saved={checked:false};
  rows.forEach(c=>rest.append(c));
- const nodes={'#topEventList':top,'#discoveries > .discovery-timeline':rest,'#eventHighlights':block,'#eventsEmpty':empty,'#eventPeriod':period,'#eventSort':sort,'#onlySaved':saved};
+ const nodes={'#discoveriesHeading':{textContent:''},'#discoveries .event-list-heading':{textContent:''},'#topEventList':top,'#discoveries > .discovery-timeline':rest,'#eventHighlights':block,'#eventsEmpty':empty,'#eventPeriod':period,'#eventSort':sort,'#onlySaved':saved};
  const document={querySelector:s=>nodes[s],querySelectorAll:()=>[...top.children,...rest.children]};
  const source=readFileSync(new URL('../src/main.ts',import.meta.url),'utf8');
  const body=source.slice(source.indexOf('function refreshEventHighlights()'),source.indexOf('function quietCardActions()'));
@@ -137,4 +137,14 @@ test('German partial-coverage reports are incomplete research, never a total sou
  const check={id:'kantine',status:'failed',checkedAt:'2026-10-13T01:13:34Z',attemptedAt:'2026-10-17T00:57:20Z',lastSuccessfulFetchAt:'2026-10-17T00:57:20Z',error:'Teilabdeckung: Programm lesbar; weitere Details offen.',details:{returned:42,attempted:13,accepted:6},pendingUrls:['https://example.org/event']};
  const before=JSON.stringify(check),s=collectionSourceStates([{id:'kantine',hours:120}],[check])[0];
  assert.equal(s.state,'partial');assert.match(s.label,/unvollständig.*Programm lesbar/);assert.equal(s.accepted,6);assert.equal(s.returned,42);assert.equal(s.pending,1);assert.equal(JSON.stringify(check),before);
+});
+
+test('music and culture each have their own top three without cross-category competition',()=>{
+ const rows=[...Array.from({length:4},(_,i)=>({id:'m'+i,title:'Musik '+i,category:'Indie-Konzert',date:'2026-10-20',fitScore:99-i})),...Array.from({length:4},(_,i)=>({id:'c'+i,title:'Kultur '+i,category:'Lesung',date:'2026-10-21',fitScore:89-i}))];
+ const music=eventView(rows,'2026-10-17','all','date',false,'music'),culture=eventView(rows,'2026-10-17','all','date',false,'events');
+ assert.deepEqual(music.highlights.map(x=>x.id),['m0','m1','m2']);assert.deepEqual(culture.highlights.map(x=>x.id),['c0','c1','c2']);
+ assert.deepEqual(music.others.map(x=>x.id),['m3']);assert.deepEqual(culture.others.map(x=>x.id),['c3']);
+ assert.equal(eventView(rows.slice(0,1),'2026-10-17','all','date',false,'music').highlights.length,1);
+ assert.equal(eventView(rows,'2026-10-17','today','date',false,'music').highlights.length,0);
+ assert.equal(eventView(rows,'2026-10-17','all','date',true,'events').highlights.length,0);
 });

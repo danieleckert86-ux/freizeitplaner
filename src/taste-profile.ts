@@ -1,11 +1,12 @@
+import {eventSection} from './finder-navigation.ts';
 // Private, explicit ratings. The catalogue and its source timestamps stay unchanged.
 export type TasteSuggestion={id:string;title:string;category:string;description:string;kind:string;url:string;mediaType?:'film'|'series';date?:string;fitScore?:number;imported?:boolean;closed?:boolean;facts?:string[]};
-export type TasteScope='standard'|'event'|'cinema'|'stream'|'food'|'outdoor';
-export const tasteScopeLabels:Record<TasteScope,string>={standard:'Standardaktivitäten',event:'Veranstaltungen',cinema:'Kino',stream:'Streaming',food:'Essen & entdecken',outdoor:'Raus ins Grüne'};
+export type TasteScope='standard'|'event'|'music'|'cinema'|'stream'|'food'|'outdoor';
+export const tasteScopeLabels:Record<TasteScope,string>={standard:'Standardaktivitäten',event:'Kultur & Veranstaltungen',music:'Musik & Konzerte',cinema:'Kino',stream:'Streaming',food:'Essen & entdecken',outdoor:'Raus ins Grüne'};
 export function tasteScope(x:TasteSuggestion):TasteScope{
  if(x.kind==='cinema')return 'cinema';
  if(x.kind==='stream')return 'stream';
- if(x.kind==='event')return 'event';
+ if(x.kind==='event')return eventSection(x)==='music'?'music':'event';
  if(['restaurant','cafe','beer-garden'].includes(x.kind))return 'food';
  if(['hike','bike','walk','hike-short','hike-long','bike-short','bike-long'].includes(x.kind))return 'outdoor';
  return 'standard';

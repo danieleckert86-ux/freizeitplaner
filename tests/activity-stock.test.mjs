@@ -199,7 +199,7 @@ import {finderSectionVisible,discoveryFoodKind,discoveryRouteKind} from '../src/
 test('standard navigation shows only its two private collection tabs; discovery is under Neues',()=>{
  const sections=['planning','stock','events','movies','restaurants','outdoor'];
  for(const tab of ['planning','stock'])assert.deepEqual(sections.filter(s=>finderSectionVisible(s,false,'events',tab)),[tab]);
- for(const [category,section] of [['events','events'],['cinema','movies'],['stream','movies'],['restaurants','restaurants'],['outdoor','outdoor']])assert.deepEqual(sections.filter(s=>finderSectionVisible(s,true,category,'planning')),[section]);
+ for(const [category,section] of [['events','events'],['music','events'],['cinema','movies'],['stream','movies'],['restaurants','restaurants'],['outdoor','outdoor']])assert.deepEqual(sections.filter(s=>finderSectionVisible(s,true,category,'planning')),[section]);
 });
 test('discovery separates cafes, restaurants and beer gardens and identifies labelled walks',()=>{
  assert.equal(discoveryFoodKind({type:'Café / Frühstück'}),'cafe');

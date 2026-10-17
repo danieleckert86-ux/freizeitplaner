@@ -148,3 +148,12 @@ test('music and culture each have their own top three without cross-category com
  assert.equal(eventView(rows,'2026-10-17','today','date',false,'music').highlights.length,0);
  assert.equal(eventView(rows,'2026-10-17','all','date',true,'events').highlights.length,0);
 });
+
+test('cabaret and literature keep cultural priority over incidental music or jazz',()=>{
+ const categories=['Kabarett · Musik-Comedy','Liedermacher · Musikkabarett','Folk · Musikkabarett','Literatur · Lesung und Musik','Literatur · Gespräch · Musik','Literatur · Jazz · Livemusik','Lesung · Live-Musik · Bildprojektion'];
+ const rows=categories.map((category,i)=>({id:String(i),title:category,category,date:'2026-11-01',fitScore:90}));
+ assert.equal(eventView(rows,'2026-10-17','all','date',false,'music').highlights.length,0);
+ const culture=eventView(rows,'2026-10-17','all','date',false,'events');assert.equal(culture.highlights.length,3);assert.equal(culture.others.length,4);
+ const music=[{title:'Song Slam',category:'Song Slam · Konzert',date:'2026-11-01',fitScore:90},{title:'Band',category:'Indie-Folk Konzert',date:'2026-11-01',fitScore:89}];
+ assert.equal(eventView(music,'2026-10-17','all','date',false,'music').highlights.length,2);
+});

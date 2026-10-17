@@ -3,7 +3,7 @@ import {profileAssessment} from './taste-settings-ui';
 import {imdbMarkup,mediaRecommendationAllowed,germanTrailerMarkup} from './media-rating';
 import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI,openTasteDetails,closeTasteDetails,setTasteArchiveScope} from './taste-ui';
 import {publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
-import { favoriteArea,finderSectionVisible,discoveryFoodKind,discoveryRouteKind,hikeAscentAllowed,streamingFormat,streamingCardMeta,type NewCategory } from './finder-navigation';
+import { favoriteArea,finderSectionVisible,eventSection,discoveryFoodKind,discoveryRouteKind,hikeAscentAllowed,streamingFormat,streamingCardMeta,type NewCategory } from './finder-navigation';
 import { initPlanner } from './planner';
 import { neutralDescription } from './wording';
 import { categoryIcon } from './category-icons';
@@ -806,7 +806,7 @@ function renderFavorites() {
     return !!facts&&!!candidate&&recommendationAllowed(facts,profileAssessment(candidate));
 
   };
-  const filtered = favorites.filter(item => favoriteMediaAllowed(item) && !excludedMediaIds.has(item.suggestionId) && favoriteArea(item.category,savedEventDates.get(item.suggestionId)) === finderView && !renderedIds.has(item.suggestionId) && (finderView==='ideas'||['events','music'].includes(currentKind.value)&&! /kino|stream/i.test(item.category)&&(/musik|konzert|indie|folk|songwriter|rock|pop|jazz/i.test(item.category)===(currentKind.value==='music'))||currentKind.value==='cinema'&&/kino/i.test(item.category)||currentKind.value==='stream'&&/stream/i.test(item.category)));
+  const filtered = favorites.filter(item => favoriteMediaAllowed(item) && !excludedMediaIds.has(item.suggestionId) && favoriteArea(item.category,savedEventDates.get(item.suggestionId)) === finderView && !renderedIds.has(item.suggestionId) && (finderView==='ideas'||['events','music'].includes(currentKind.value)&&! /kino|stream/i.test(item.category)&&eventSection(item)===currentKind.value||currentKind.value==='cinema'&&/kino/i.test(item.category)||currentKind.value==='stream'&&/stream/i.test(item.category)));
 
   favoritesEmpty.hidden = filtered.length > 0;
   favoritesEmpty.textContent = 'Hier sind noch keine weiteren Vorschläge vorgemerkt.';

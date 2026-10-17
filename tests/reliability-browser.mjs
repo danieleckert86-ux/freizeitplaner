@@ -29,7 +29,9 @@ delete assessments[food.id];
 const cultureExtra=Array.from({length:3},(_,i)=>rec('culture-'+i,'event',{category:'Lesung'}));
 const music=Array.from({length:4},(_,i)=>rec('music-'+i,'event',{category:'Indie-Konzert'}));
 for(const item of music)assessments[item.id].profileKey='music';
-const data={schemaVersion:2,dataUpdated:at,weekendRange:'Fixture',weatherDays:[],top:[],ideas:[],discoveries:[approved,pending,...cultureExtra,...music],restaurants:[food,qualified,foodOld],cinema:[],stream:[stream,expired],hikes:[hike,low],bikes:[],walks:[],catalogChecks:[],catalogSources:[]};
+const mixed=[rec('mixed-cabaret','event',{category:'Kabarett · Musik-Comedy'}),rec('mixed-literature','event',{category:'Literatur · Jazz · Livemusik'})];
+for(const item of mixed)assessments[item.id].profileKey='music';
+const data={schemaVersion:2,dataUpdated:at,weekendRange:'Fixture',weatherDays:[],top:[],ideas:[],discoveries:[approved,pending,...cultureExtra,...music,...mixed],restaurants:[food,qualified,foodOld],cinema:[],stream:[stream,expired],hikes:[hike,low],bikes:[],walks:[],catalogChecks:[],catalogSources:[]};
 const personal={version:1,appointments:[],slots:[],entries:[],checks:[],routines:[],activityStock:[],tasteProfiles:profiles,tasteAssessments:assessments};
 let writes=0;
 await page.route('**/*',async route=>{
@@ -49,10 +51,14 @@ try{
  assert.equal(await visible('event-pending').isVisible(),false);
  assert.equal(await page.locator('#topEventList .discovery-item:visible').count(),3);
  assert.equal(await visible('music-0').isVisible(),false);
+ await visible('mixed-cabaret').waitFor({state:'visible'});
+ await visible('mixed-literature').waitFor({state:'visible'});
  assert.equal(await page.locator('[data-profile-edit=music]').count(),0);
  await page.locator('[data-new-tab=music]').click();
  await visible('music-0').waitFor({state:'visible'});
  assert.equal(await visible('event-approved').isVisible(),false);
+ assert.equal(await visible('mixed-cabaret').isVisible(),false);
+ assert.equal(await visible('mixed-literature').isVisible(),false);
  assert.equal(await page.locator('#topEventList .discovery-item:visible').count(),3);
  assert.equal(await page.locator('#discoveries > .discovery-timeline .discovery-item:visible').count(),1);
  assert.equal(await page.locator('[data-profile-edit=culture]').count(),0);

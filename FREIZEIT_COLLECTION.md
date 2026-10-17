@@ -359,3 +359,12 @@ Die qualitative Profilanzeige liefert absichtlich keine persönliche Punktzahl.
 Sie darf den bestehenden öffentlichen Rangfolgewert einer bereits freigegebenen
 Karte nicht löschen; dies hatte zuvor leere Top3 verursachen können. Dieser Wert
 wird ausschließlich zur Rangfolge innerhalb freigegebener Kandidaten erhalten.
+
+### Formatvorrang bei gemischten Veranstaltungen
+
+Kabarett, Comedy, Literatur, Lesung, Poetry, Theater, Gespräch, Vortrag und
+Ausstellung werden bei der Anzeige als Kultur geführt, auch wenn die Kategorie
+zusätzlich Musik/Jazz/Livemusik nennt. Reine Song-Slam-Konzerte und Bandkonzerte
+bleiben Musik. Derselbe eventSection-Helfer gilt für Liste, Top3 und Vormerkansicht.
+Bestehende persönliche Prüfungen behalten ihre tatsächlich verwendete Profilzuordnung
+über eventProfileKey; eine Anzeige-Umsortierung erzeugt keine neue Profilprüfung.

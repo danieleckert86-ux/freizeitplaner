@@ -54,4 +54,12 @@ export function streamingProvider(item:{platform?:string;meta?:readonly string[]
 }
 
 
-export function eventSection(x:{category?:string}):'music'|'events'{return /musik|konzert|indie|folk|songwriter|rock|pop|jazz/i.test(x.category||'')?'music':'events';}
+// Display category follows the main format; incidental music never overrides culture.
+export function eventSection(x:{category?:string}):'music'|'events'{
+ const category=x.category||'';
+ if(/kabarett|comedy|literatur|lesung|poetry|theater|schauspiel|kleinkunst|gespräch|diskussion|vortrag|ausstellung|museum|markt/i.test(category))return 'events';
+ return eventProfileKey(x)==='music'?'music':'events';
+}
+// Keep the profile under which existing evidence was reviewed. Display regrouping
+// is not a new personal review and must not relabel or invalidate that evidence.
+export function eventProfileKey(x:{category?:string}):'music'|'culture'{return /musik|konzert|indie|folk|songwriter|rock|pop|jazz/i.test(x.category||'')?'music':'culture';}

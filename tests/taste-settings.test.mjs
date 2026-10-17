@@ -40,3 +40,8 @@ test('media display requires current evidenced positive decision, retaining cont
  assert.equal(allowed(a,{}),false);
 });
 
+
+test('regrouping mixed event formats does not invent a new personal profile review',()=>{
+ assert.equal(profileKeyFor({kind:'event',category:'Kabarett · Musik-Comedy'}),'music');
+ assert.equal(profileKeyFor({kind:'event',category:'Lesung'}),'culture');
+});

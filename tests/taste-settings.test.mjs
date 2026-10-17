@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {defaultTasteProfiles,validTasteProfiles,validTasteAssessments,profileKeyFor,currentAssessment} from '../src/taste-settings.ts';
+import {defaultTasteProfiles,validTasteProfiles,validTasteAssessments,profileKeyFor,currentAssessment,strongAssessmentAllowed} from '../src/taste-settings.ts';
 test('confirmed profiles preserve nuanced positive references and separate formats',()=>{
  assert.equal(validTasteProfiles(defaultTasteProfiles),true);
  assert.equal(profileKeyFor({kind:'cinema',category:''}),'film');
@@ -23,4 +23,18 @@ test('personal claims require evidence and the exact saved profile version',()=>
 test('food projection routes café and beer garden to their own profile',()=>{
  assert.equal(profileKeyFor({kind:'restaurant',category:'Café · Frühstück'}),'cafe');
  assert.equal(profileKeyFor({kind:'restaurant',category:'Biergarten'}),'beerGarden');
+});
+
+test('media display requires current evidenced strong fit without a caveat',()=>{
+ const p=defaultTasteProfiles.film;
+ const a={profileKey:'film',profileUpdatedAt:p.updatedAt,status:'strong',reason:'Figurenentwicklung und intelligenter Humor',caveat:'',reviewedAt:p.updatedAt,sourceUrls:['https://example.org/review']};
+ const allowed=(a,profiles={film:p})=>strongAssessmentAllowed(currentAssessment('id','film',profiles,{id:a}));
+ assert.equal(allowed(a),true);
+ for(const status of ['qualified','rejected'])assert.equal(allowed({...a,status}),false);
+ assert.equal(strongAssessmentAllowed(null),false);
+ assert.equal(strongAssessmentAllowed(undefined),false);
+ assert.equal(allowed({...a,caveat:'Dauerhaft bedrückender Ton'}),false);
+ assert.equal(allowed({...a,sourceUrls:[]}),false);
+ assert.equal(allowed(a,{film:{...p,updatedAt:'2026-10-18T00:00:00Z'}}),false);
+ assert.equal(allowed(a,{}),false);
 });

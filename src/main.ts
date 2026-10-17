@@ -9,12 +9,9 @@ import { recommendationPlace, travelNote, googleMapsPlaceUrl, foodPlace } from '
 import './styles.css';
 import './collection.css';
 import {upcomingEvents,eventView,catalogueFitLabel,collectionSourceStates,researchTime} from './collection';
-import { createClient } from '@supabase/supabase-js';
+import {createLeisureDatabase} from './database';
 
-const supabase = createClient(
-  'https://mcpkvssierkwmueekyec.supabase.co',
-  'sb_publishable_LKYbSfFZ4WBWPnRpLfxyFQ_tqMGThd2'
-);
+const supabase = createLeisureDatabase();
 
 
 type Recommendation = {

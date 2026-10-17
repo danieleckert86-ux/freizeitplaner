@@ -3,7 +3,13 @@
  * Kein Web-App-Deployment, keine Tokens in der öffentlichen App.
  */
 const FP_CALENDAR = '288aa1dd08b3218ae703dae006e7ce15c40a882d7732978073deb16ea0889a7d@group.calendar.google.com';
-const FP_DB = 'https://mcpkvssierkwmueekyec.supabase.co/rest/v1/personal_planning';
+const FP_DB_LEGACY = 'https://mcpkvssierkwmueekyec.supabase.co/rest/v1/personal_planning';
+function fpDatabase() {
+  const target=PropertiesService.getScriptProperties().getProperty('FP_DATABASE_URL') || FP_DB_LEGACY;
+  const neon='https://fahrrad-zur-arbei.vercel.app/api/leisure/database/rest/v1/personal_planning';
+  if(target!==FP_DB_LEGACY && target!==neon)throw Error('Unbekanntes Planungsziel.');
+  return target;
+}
 const FP_KEY = 'sb_publishable_LKYbSfFZ4WBWPnRpLfxyFQ_tqMGThd2';
 const FP_ZONE = 'Europe/Berlin';
 
@@ -91,7 +97,7 @@ function fpBody(row, kind) {
   return result;
 }
 function fpRead() {
-  const response=UrlFetchApp.fetch(FP_DB+'?id=eq.shared&select=payload,revision', {
+  const response=UrlFetchApp.fetch(fpDatabase()+'?id=eq.shared&select=payload,revision', {
     headers:{apikey:FP_KEY},muteHttpExceptions:true});
   if (response.getResponseCode() !== 200) throw Error('Planung konnte nicht gelesen werden.');
   const rows=JSON.parse(response.getContentText());
@@ -100,7 +106,7 @@ function fpRead() {
   return rows[0];
 }
 function fpWrite(snapshot) {
-  const response=UrlFetchApp.fetch(FP_DB+'?id=eq.shared&revision=eq.'+snapshot.revision, {
+  const response=UrlFetchApp.fetch(fpDatabase()+'?id=eq.shared&revision=eq.'+snapshot.revision, {
     method:'patch',contentType:'application/json',headers:{apikey:FP_KEY,Prefer:'return=representation'},
     payload:JSON.stringify({payload:snapshot.payload}),muteHttpExceptions:true});
   if (response.getResponseCode() !== 200 || JSON.parse(response.getContentText()).length!==1)

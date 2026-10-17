@@ -34,3 +34,15 @@ Die App und ihre Planungsdaten bleiben wie gewünscht öffentlich gemeinsam les-
 `node tests/google-calendar-sync.cjs` prüft den Abgleich mit simulierten Google- und Datenbank-APIs. `npm run build` und TypeScript prüfen die App. Der echte, kontobezogene Google-Abgleich lässt sich erst nach deiner Einrichtung und Freigabe prüfen.
 
 Bei Fehlern: In Apps Script unter „Ausführungen“ nachsehen, ob die Google Calendar API aktiviert ist und das ausführende Konto Zugriff auf diesen Kalender hat. Der Planer zeigt fehlgeschlagene und länger als 15 Minuten ausbleibende Abgleiche an. Quoten-/Netzwerkfehler werden beim nächsten Trigger erneut versucht.
+
+## Neon-Umzug (vorbereiteter Schaltpunkt)
+
+Die aktualisierte Code.gs-Vorlage liest optional die Script Property
+`FP_DATABASE_URL`. Erst beim koordinierten Produktionswechsel auf
+`https://fahrrad-zur-arbei.vercel.app/api/leisure/database/rest/v1/personal_planning`
+setzen. Ohne Property bleibt der bisherige Supabase-Zugriff aktiv.
+Das Ersetzen der Repository-Vorlage aktualisiert **nicht** das installierte Projekt.
+Bestehende `event:*`- und `generation:*`-Properties behalten; `install` nicht erneut
+ausführen, damit keine zusätzlichen Trigger und keine neuen Kalenderzuordnungen entstehen.
+Vor dem Daten-Finalimport den vorhandenen Trigger pausieren, danach am selben
+Projekt mit denselben Properties weiterbetreiben. Keine Kalenderänderungen zum Testen.

@@ -1,9 +1,12 @@
 // Kept byte-identical with freizeitplaner/src/recommendation-eligibility.ts.
 // Facts and explicit personal approval are independent gates; no taste scoring here.
-export type RecommendationFacts={kind:string;contentChangedAt?:string;date?:string|null;releaseDate?:string|null;time?:string|null;location?:string;platform?:string;mediaType?:string;imdbRating?:number|null;imdbUrl?:string;imported?:boolean;closed?:boolean|null;verifiedAt?:string;km?:number|null;ascent?:number|null;minutes?:number|null;travelMinutes?:number|null;exposed?:boolean|null;climbing?:boolean|null;latitude?:number|null;longitude?:number|null};
+export type RouteEvidence={durationActivity:'walking'|'cycling';ascentMetric?:'totalAscent'|'heightDifference'|'unknown';ascentSourceUrl?:string;ascentVerifiedAt?:string;startMunicipality:string;startSourceUrl:string;startVerifiedAt:string;travelMode:'walk'|'bike'|'transit'|'car';travelReference?:'augsburg-centre';travelSourceUrl?:string;travelVerifiedAt?:string;specialAppeal?:string;appealSourceUrls?:string[];appealVerifiedAt?:string;wayCharacter:string;waySourceUrls:string[];wayVerifiedAt:string;surface?:'asphalt'|'firm'|'mixed'|'unknown';safetySourceUrls:string[];safetyVerifiedAt:string};
+export type RecommendationFacts={kind:string;routeEvidence?:RouteEvidence;contentChangedAt?:string;date?:string|null;releaseDate?:string|null;time?:string|null;location?:string;platform?:string;mediaType?:string;imdbRating?:number|null;imdbUrl?:string;imported?:boolean;closed?:boolean|null;verifiedAt?:string;km?:number|null;ascent?:number|null;minutes?:number|null;travelMinutes?:number|null;exposed?:boolean|null;climbing?:boolean|null;latitude?:number|null;longitude?:number|null};
 export type Approval={status:string;reason:string;caveat?:string;profileUpdatedAt:string;reviewedAt:string;sourceUrls:string[]};
 const timestamp=(v:unknown)=>typeof v==='string'&&v.includes('T')&&Number.isFinite(Date.parse(v));
 const isoDay=(v:unknown):v is string=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v))&&new Date(v).toISOString().slice(0,10)===v;
+const source=(v:unknown)=>{try{const u=new URL(String(v));return u.protocol==='https:'&&!u.username&&!u.password;}catch{return false;}};
+const sources=(v:unknown):v is string[]=>Array.isArray(v)&&v.length>0&&v.every(source);
 const number=(v:unknown):v is number=>typeof v==='number'&&Number.isFinite(v);
 export function berlinDay(now:Date){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(now);}
 export function hardEligibilityReason(x:RecommendationFacts,now=new Date()):string|null{
@@ -30,18 +33,28 @@ export function hardEligibilityReason(x:RecommendationFacts,now=new Date()):stri
   if(!/^https:\/\/(www\.)?imdb\.com\/title\/tt\d+(?:\/|$)/.test(x.imdbUrl||''))return 'imdb_identity_unknown';
  }
  if(['hike','bike','walk'].includes(x.kind)){
+  // Reject known hard failures before spending effort on missing descriptive evidence.
+  if(x.kind==='hike'&&(number(x.km)&&x.km>15||number(x.ascent)&&(x.ascent<500||x.ascent>900)||number(x.minutes)&&(x.minutes<180||x.minutes>360)||number(x.travelMinutes)&&(x.travelMinutes<0||x.travelMinutes>120)))return 'hike_limits';
+  if(x.kind==='bike'&&number(x.km)&&x.km>40)return 'bike_distance';
+  const e=x.routeEvidence;
+  if(!e||!e.startMunicipality?.trim()||!source(e.startSourceUrl)||!timestamp(e.startVerifiedAt)||!['walk','bike','transit','car'].includes(e.travelMode)||!e.wayCharacter?.trim()||!sources(e.waySourceUrls)||!timestamp(e.wayVerifiedAt)||!sources(e.safetySourceUrls)||!timestamp(e.safetyVerifiedAt))return 'route_evidence_missing';
+  if(e.durationActivity!==(x.kind==='bike'?'cycling':'walking'))return 'route_duration_sport_mismatch';
+  if(x.kind==='hike'&&(e.ascentMetric!=='totalAscent'||!source(e.ascentSourceUrl)||!timestamp(e.ascentVerifiedAt)))return 'route_ascent_evidence_missing';
+  if(e.travelMode==='car'&&(!number(x.travelMinutes)||x.travelMinutes<0||!source(e.travelSourceUrl)||!timestamp(e.travelVerifiedAt)||e.travelReference!=='augsburg-centre'))return 'route_travel_evidence_missing';
   if(!number(x.km)||x.km<=0||!number(x.minutes)||x.minutes<=0||x.exposed!==false||x.climbing!==false||x.closed!==false)return 'route_facts_missing';
   if(x.kind==='hike'&&(!number(x.ascent)||!number(x.travelMinutes)))return 'route_facts_missing';
   if(x.kind==='hike'&&(x.km>15||!number(x.ascent)||x.ascent<500||x.ascent>900||x.minutes<180||x.minutes>360||!number(x.travelMinutes)||x.travelMinutes<0||x.travelMinutes>120))return 'hike_limits';
   if(x.kind==='bike'&&x.km>40)return 'bike_distance';
+  if(x.kind==='bike'&&!['asphalt','firm'].includes(e.surface||''))return 'bike_surface_unconfirmed';
   if(x.kind==='walk'){
    if(!number(x.latitude)||Math.abs(x.latitude)>90||!number(x.longitude)||Math.abs(x.longitude)>180)return 'walk_start_unknown';
    const rad=(v:number)=>v*Math.PI/180,a=rad(x.latitude-48.3668),b=rad(x.longitude-10.8985);
    const h=Math.sin(a/2)**2+Math.cos(rad(48.3668))*Math.cos(rad(x.latitude))*Math.sin(b/2)**2;
    if(6371*2*Math.asin(Math.sqrt(Math.min(1,h)))>15+1e-9)return 'walk_radius';
-   // No invented commute: a positive car journey needs a current sourced strong review
-   // of the exceptional appeal as well as the bounded journey fact.
-   if(x.travelMinutes!==null&&x.travelMinutes!==undefined&&(!number(x.travelMinutes)||x.travelMinutes<0||x.travelMinutes>30))return 'walk_travel';
+   // Municipality is a separately sourced fact, never guessed from a publisher's name.
+   // Unknown access mode cannot silently become a walk without a car.
+   if(e.travelMode==='car'&&(!e.specialAppeal?.trim()||!sources(e.appealSourceUrls)||!timestamp(e.appealVerifiedAt)))return 'walk_special_appeal_missing';
+   if(e.travelMode==='car'&&(!number(x.travelMinutes)||x.travelMinutes<0||x.travelMinutes<0||x.travelMinutes>30))return 'walk_travel';
   }
  }
  return null;

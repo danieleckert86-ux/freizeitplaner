@@ -19,8 +19,8 @@ test('stream 60-day and rating/identity boundaries are enforced in the browser',
  assert.equal(recommendationAllowed({...stream,imdbUrl:''},a,now),false);
 });
 test('old low-ascent imports and long bicycle routes cannot return through a strong review',()=>{
- const hike={...x,kind:'hike',km:12,ascent:500,minutes:240,travelMinutes:90,closed:false,exposed:false,climbing:false};
+ const hike={...x,routeEvidence:{durationActivity:'walking',ascentMetric:'totalAscent',ascentSourceUrl:'https://example.org/event',ascentVerifiedAt:at,startMunicipality:'Augsburg',startSourceUrl:'https://example.org/event',startVerifiedAt:at,travelMode:'car',travelReference:'augsburg-centre',travelSourceUrl:'https://example.org/event',travelVerifiedAt:at,specialAppeal:'Historischer Natur- und Kulturweg am Kanal',appealSourceUrls:['https://example.org/event'],appealVerifiedAt:at,wayCharacter:'Fester, nicht ausgesetzter Weg',waySourceUrls:['https://example.org/event'],wayVerifiedAt:at,safetySourceUrls:['https://example.org/event'],safetyVerifiedAt:at,surface:'firm'},kind:'hike',km:12,ascent:500,minutes:240,travelMinutes:90,closed:false,exposed:false,climbing:false};
  for(const ascent of [500,900])assert.equal(recommendationAllowed({...hike,ascent},a,now),true);
  for(const ascent of [109,273,499,901])assert.equal(recommendationAllowed({...hike,ascent},a,now),false);
- assert.equal(hardEligibilityReason({...hike,kind:'bike',km:40.1},now),'bike_distance');
+ assert.equal(hardEligibilityReason({...hike,routeEvidence:{...hike.routeEvidence,durationActivity:'cycling'},kind:'bike',km:40.1},now),'bike_distance');
 });

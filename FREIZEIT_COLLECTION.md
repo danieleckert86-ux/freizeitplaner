@@ -313,3 +313,15 @@ unabhängig von der Passungsentscheidung geprüft. Die reine Freigabefunktion is
 dem Backend bytegleich. Browserabnahme: `tests/reliability-browser.mjs` mit ausschließlich
 abgefangenen Daten; keine Produktivschreibzugriffe. Zwei alte, unabhängige Freiraum-
 Backendtests bleiben als bereits bestehende Fehler dokumentiert.
+
+## P1-Outdoorbelege und Quellenarbeit · 17.10.2026
+
+Die byte-identische recommendation-eligibility.ts prüft optionales routeEvidence:
+belegte Startgemeinde, Wegcharakter, Sicherheit, richtige Dauer-Sportart,
+Gesamtaufstieg statt bloßer Höhendifferenz sowie feste Cityrad-Oberfläche.
+Autospaziergänge benötigen nachgewiesene höchstens30Min ab öffentlichem
+Augsburg-Referenzpunkt und einen konkret belegten besonderen Reiz. Unvollständige
+alte Touren bleiben gespeichert, erscheinen aber nicht als freigegebene Ideen.
+Persönlicher Vorrat bleibt außerhalb dieses Filters. Kein neuer Nutzer-Schreibweg.
+Fortsetzbare Pakete und echte Quellen-Fallbacks liegen im Backend/ChatGPT-Auftrag;
+Inventarzahlen sind keine persönlichen Freigaben.

@@ -299,3 +299,17 @@ Kein Browser-KI-Aufruf, keine erfundene automatische Freitextgewichtung. Ein Pro
 macht alte Abgleiche ausstehend. App zeigt starke Passung, mit Vorbehalt oder offen; negative
 Abgleiche bleiben gespeichert und werden als Empfehlung verborgen. Quellenbelege und
 Katalog-Grundpunkte werden dabei nicht verändert. Neue Medien benötigen bestätigte IMDb >=7,8.
+
+## Discovery-Freigabe · 17.10.2026
+
+In „Neues“ erscheinen über sämtliche Kategorien nur aktuelle, belegte starke
+Profilabgleiche. Vorbehalte/fehlende Abgleiche bleiben gespeichert, aber verborgen;
+Standardaktivitäten und eigener Vorrat werden dadurch nicht entfernt. Dasselbe gilt
+für wieder eingeblendete Discovery-Vormerkungen. Profilwechsel wird erneut gefiltert.
+Streaming ist auf 0–60 Berliner Kalendertage seit belegtem Dienststart begrenzt;
+IMDb >=7,8 samt Titel-Link, bestätigtes Format und einer der fünf Dienste sind Pflicht.
+Kino benötigt einen zukünftigen Augsburger Beginn. Strukturierte Tourenfakten werden
+unabhängig von der Passungsentscheidung geprüft. Die reine Freigabefunktion ist mit
+dem Backend bytegleich. Browserabnahme: `tests/reliability-browser.mjs` mit ausschließlich
+abgefangenen Daten; keine Produktivschreibzugriffe. Zwei alte, unabhängige Freiraum-
+Backendtests bleiben als bereits bestehende Fehler dokumentiert.

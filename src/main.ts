@@ -1,5 +1,5 @@
+import {recommendationAllowed,type RecommendationFacts} from './recommendation-eligibility';
 import {profileAssessment} from './taste-settings-ui';
-import {strongAssessmentAllowed} from './taste-settings';
 import {imdbMarkup,mediaRecommendationAllowed,germanTrailerMarkup} from './media-rating';
 import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI,openTasteDetails,closeTasteDetails,setTasteArchiveScope} from './taste-ui';
 import {publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
@@ -104,9 +104,9 @@ function tourAttributes(item: Recommendation) {
 }
 
 const excludedMediaIds=new Set<string>();
-let currentData:RecommendationData|undefined;
+const recommendationFacts=new Map<string,RecommendationFacts>();
 function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<string>()) {
-  currentData=data;
+  recommendationFacts.clear();
   excludedMediaIds.clear();
   for(const item of [...(data.cinema??[]),...(data.stream??[])])if(!mediaRecommendationAllowed(item)){excludedMediaIds.add(item.id);excludedMediaIds.add('lifestyle-'+item.id);}
   for(const [kind,items] of Object.entries({event:[...data.top,...data.ideas,...data.discoveries],hike:data.hikes,bike:data.bikes,walk:data.walks??[],restaurant:data.restaurants??[],cinema:data.cinema??[],stream:data.stream??[]})){
@@ -114,7 +114,8 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       const rec=item as Recommendation & LifestyleRecommendation;
       const id=rec.favorite?.id||rec.id;if(!id)continue;
       const facts=[...(rec.facts??[]),...(rec.meta??[])];
-      const snapshot={id,title:rec.title,category:rec.favorite?.categoryLabel||rec.badge||rec.type||rec.category||kind,description:rec.description||'',kind,...(rec.mediaType?{mediaType:rec.mediaType}:{}),url:rec.url||'',...(rec.date?{date:rec.date}:{}),...(Number.isFinite(rec.fitScore)?{fitScore:rec.fitScore}:{}),...(rec.imported===undefined?{}:{imported:rec.imported}),facts:kind==='cinema'||kind==='stream'?streamingCardMeta(facts):facts};
+      recommendationFacts.set(id,{...item,kind} as RecommendationFacts);
+      const snapshot={id,title:rec.title,category:rec.category||rec.favorite?.categoryLabel||rec.type||kind,description:rec.description||'',kind,...(rec.mediaType?{mediaType:rec.mediaType}:{}),url:rec.url||'',...(rec.date?{date:rec.date}:{}),...(Number.isFinite(rec.fitScore)?{fitScore:rec.fitScore}:{}),...(rec.imported===undefined?{}:{imported:rec.imported}),facts:kind==='cinema'||kind==='stream'?streamingCardMeta(facts):facts};
       tasteItems.set(id,snapshot);registerTasteSuggestion(snapshot);
     }
   }
@@ -206,12 +207,10 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   };
   for(const [selector,kind] of [['#restaurantList','restaurant'],['#cafeList','cafe'],['#beerGardenList','beer-garden']])renderLifestyle(selector,(data.restaurants??[]).filter(x=>discoveryFoodKind(x)===kind),'restaurants');
   renderLifestyle('#cinemaList', data.cinema ?? [], 'cinema');
-  const streamItems=(data.stream ?? []).filter(mediaRecommendationAllowed).filter(item => {
-    const age = (Date.now() - new Date(item.releaseDate + 'T00:00:00').getTime()) / 86400000;
-    return !Number.isFinite(age) || age >= 0;
-  });
+  const streamItems=(data.stream ?? []).filter(mediaRecommendationAllowed);
   for(const [selector,format] of [['#streamFilmList','film'],['#streamSeriesList','series'],['#streamUnknownList','unknown']])renderLifestyle(selector,streamItems.filter(x=>streamingFormat(x)===format),'stream');
-  document.querySelector<HTMLElement>('#streamUnknownGroup')!.hidden=!streamItems.some(x=>!hiddenIds.has(x.id)&&streamingFormat(x)==='unknown');
+  document.querySelector<HTMLElement>('#streamUnknownGroup')!.hidden=true;
+  applyPersonalTasteScores();
 }
 
 let stockRatingsAvailable=false;
@@ -234,18 +233,20 @@ function applyPersonalTasteScores(){
     if(!id)return;
     const item=tasteItems.get(id);if(!item)return;
     const fit=adjustedTaste(item),label=card.querySelector<HTMLElement>('.collection-fit');
-    const media=item.kind==='cinema'||item.kind==='stream';
-    const allowed=strongAssessmentAllowed(profileAssessment(item));
-    card.dataset.profileRejected=String(media?!allowed:fit.confidence==='rejected');
-    if(media){if(allowed)card.style.removeProperty('display');else card.style.setProperty('display','none','important');}
+    const facts=recommendationFacts.get(id);
+    if(!facts)return; // Personal stock and standard activities are not discovery recommendations.
+    const allowed=recommendationAllowed(facts,profileAssessment(item));
+    card.dataset.profileRejected=String(!allowed);
+    card.hidden=!allowed;
+    if(allowed)card.style.removeProperty('display');else card.style.setProperty('display','none','important');
     if(label){let explanation=card.querySelector<HTMLElement>('.profile-fit-reason');if(!explanation){explanation=document.createElement('p');explanation.className='profile-fit-reason';label.after(explanation);}explanation.textContent=fit.reason;label.textContent=fit.confidence==='strong'?'Passt zu deinem Geschmack':fit.confidence==='qualified'?'Passend mit Vorbehalt':fit.confidence==='rejected'?'Passt derzeit nicht zum Profil':'Profilabgleich ausstehend';label.title=fit.reason+' · Rangfolge nach Geschmack; keine Wahrscheinlichkeit und keine Termin- oder Sicherheitsfreigabe.';}
     if(card.classList.contains('discovery-item'))card.dataset.fitScore=fit.score===null?'':String(fit.score);
   });
-  for(const selector of ['#cinemaList','#streamFilmList','#streamSeriesList','#streamUnknownList']){
+  for(const selector of ['#cinemaList','#streamFilmList','#streamSeriesList','#restaurantList','#cafeList','#beerGardenList','#hikeGroup .tour-list','#bikeGroup .tour-list','#walkGroup .tour-list']){
     const list=document.querySelector<HTMLElement>(selector);if(!list)continue;
     let empty=list.querySelector<HTMLElement>('.profile-empty');
-    if(!empty){empty=document.createElement('p');empty.className='profile-empty';empty.textContent='Aktuell keine Titel mit bestätigter persönlicher Passung. Es werden nur klar passende Empfehlungen zu deinem aktuellen Profil angezeigt.';list.append(empty);}
-    empty.hidden=Array.from(list.querySelectorAll<HTMLElement>('.lifestyle-card')).some(card=>card.dataset.profileRejected!=='true');
+    if(!empty){empty=document.createElement('p');empty.className='profile-empty';empty.textContent='Aktuell keine Vorschläge mit bestätigter persönlicher Passung. Es werden nur klar passende Empfehlungen zu deinem aktuellen Profil angezeigt.';list.append(empty);}
+    empty.hidden=Array.from(list.querySelectorAll<HTMLElement>('.lifestyle-card,.tour-card')).some(card=>card.dataset.profileRejected!=='true');
   }
   refreshEventHighlights();
   document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));
@@ -686,7 +687,7 @@ async function loadWeather() {
 }
 
 function isVisible(item: HTMLElement) {
-  return !item.classList.contains('is-hidden') && !item.classList.contains('expired');
+  return !item.hidden&&item.dataset.profileRejected!=='true'&&!item.classList.contains('is-hidden') && !item.classList.contains('expired');
 }
 
 function renderCurrentFilters() {
@@ -703,7 +704,7 @@ function renderCurrentFilters() {
   });
 
   filterableItems.forEach(item => {
-    if (item.classList.contains('expired')) {
+    if (item.classList.contains('expired')||item.dataset.profileRejected==='true') {
       item.classList.add('is-hidden');
       return;
     }
@@ -799,10 +800,10 @@ function renderFavorites() {
 
   const renderedIds=new Set(Array.from(document.querySelectorAll<HTMLButtonElement>('[data-favorite]')).filter(b=>!!b.closest<HTMLElement>('.view-section:not([hidden])')).map(b=>b.dataset.id));
   const favoriteMediaAllowed=(item:Favorite)=>{
-    if(!/kino|stream/i.test(item.category))return true;
-    const candidates=[...(currentData?.cinema??[]).map(x=>({...x,kind:'cinema'})),...(currentData?.stream??[]).map(x=>({...x,kind:'stream'}))];
-    const media=candidates.find(x=>x.id===item.suggestionId||'lifestyle-'+x.id===item.suggestionId);
-    return !!media&&mediaRecommendationAllowed(media)&&strongAssessmentAllowed(profileAssessment({...media,category:media.type}));
+    if(finderView==='ideas')return true;
+    const id=item.suggestionId.replace(/^lifestyle-/,''),facts=recommendationFacts.get(id),candidate=tasteItems.get(id);
+    return !!facts&&!!candidate&&recommendationAllowed(facts,profileAssessment(candidate));
+
   };
   const filtered = favorites.filter(item => favoriteMediaAllowed(item) && !excludedMediaIds.has(item.suggestionId) && favoriteArea(item.category,savedEventDates.get(item.suggestionId)) === finderView && !renderedIds.has(item.suggestionId) && (finderView==='ideas'||currentKind.value==='events'&&!/kino|stream/i.test(item.category)||currentKind.value==='cinema'&&/kino/i.test(item.category)||currentKind.value==='stream'&&/stream/i.test(item.category)));
 
@@ -1058,7 +1059,7 @@ function refreshEventHighlights() {
   const period=document.querySelector<HTMLSelectElement>('#eventPeriod')?.value||'all';
   const sort=document.querySelector<HTMLSelectElement>('#eventSort')?.value==='fit'?'fit':'date';
   const savedOnly=!!document.querySelector<HTMLInputElement>('#onlySaved')?.checked;
-  const view=eventView(cards.map(card=>({card,title:card.querySelector('h3')?.textContent||'',date:card.dataset.date,time:card.dataset.eventTime,fitScore:card.dataset.fitScore?Number(card.dataset.fitScore):undefined,saved:!!card.querySelector('[data-favorite].saved')})),today,period,sort,savedOnly);
+  const view=eventView(cards.filter(card=>card.dataset.profileRejected!=='true').map(card=>({card,title:card.querySelector('h3')?.textContent||'',date:card.dataset.date,time:card.dataset.eventTime,fitScore:card.dataset.fitScore?Number(card.dataset.fitScore):undefined,saved:!!card.querySelector('[data-favorite].saved')})),today,period,sort,savedOnly);
   const visible=new Set([...view.highlights,...view.others].map(x=>x.card));
   for(const card of cards){
     delete card.dataset.topEvent;

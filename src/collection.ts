@@ -31,11 +31,12 @@ export type CollectionSourceCheck={id:string;status:string;checkedAt:string;atte
 export function collectionSourceStates(sources:{id:string;hours:number}[],checks:CollectionSourceCheck[],now=Date.now()){
  return sources.map(source=>{
   const check=checks.find(c=>c.id===source.id),age=now-Date.parse(check?.checkedAt||'');
-  const partial=!!check&&(check.error?.startsWith('partial:')||check.error==='catalog_source_in_progress'||check.error==='catalog_listing_pagination'||!check.error&&!!check.pendingUrls?.length);
+  const partialMessage=/^(?:partial|Teilabdeckung)\s*:/i.test(check?.error||'');
+  const partial=!!check&&(partialMessage||check.error==='catalog_source_in_progress'||check.error==='catalog_listing_pagination'||!check.error&&!!check.pendingUrls?.length);
   const state=!check?'missing':partial?'partial':check.status!=='checked'?'failed':!Number.isFinite(age)||age < -60000||age>source.hours*3600000?'stale':'checked';
   const labels={missing:'noch nicht geprüft',failed:'Prüfung fehlgeschlagen',stale:'Prüfung veraltet',checked:'geprüft',partial:'Prüfung unvollständig'};
   const directReasons:Record<string,string>={catalog_source_in_progress:'Weitere Detailseiten stehen noch aus',catalog_attempt_started:'Abruf begonnen; noch kein Ergebnis',catalog_event_fields_missing:'Datum, Beginn oder Spielort fehlen',catalog_listing_unrecognized:'Programmstruktur nicht erkannt',catalog_listing_pagination:'Weitere Programmseiten noch ungeprüft',catalog_direct_timeout:'Originalseite antwortet nicht rechtzeitig',catalog_direct_robots_unavailable:'Zugriffsregeln nicht abrufbar',catalog_direct_access_restricted:'Quellenzugriff beschränkt',catalog_detail_redirect_unresolved:'Weiterleitung liefert keine eindeutige Eventseite',catalog_direct_unsafe_url:'Weiterleitung außerhalb der erlaubten Originalquelle'};
-  const reason=(check?.error?.startsWith('partial:')?check.error.slice(8).trim():'')||directReasons[check?.error||'']||(check?.error?.startsWith('research_budget_')?'Bezahlte Recherche pausiert (Freizeitbudget)':check?.error==='catalog_fallback_paused'?'KI-Ersatzprüfung begrenzt':check?.error==='catalog_direct_unchanged_unresolved'?'Quelle unverändert; Angaben weiterhin ungeklärt':check?.directError==='catalog_direct_access_restricted'?'Quellenzugriff beschränkt':check?.error?.startsWith('catalog_direct_http_')?'Originalseite meldet HTTP '+check.error.slice('catalog_direct_http_'.length):'');
+  const reason=(partialMessage?check!.error!.replace(/^(?:partial|Teilabdeckung)\s*:\s*/i,'').trim():'')||directReasons[check?.error||'']||(check?.error?.startsWith('research_budget_')?'Bezahlte Recherche pausiert (Freizeitbudget)':check?.error==='catalog_fallback_paused'?'KI-Ersatzprüfung begrenzt':check?.error==='catalog_direct_unchanged_unresolved'?'Quelle unverändert; Angaben weiterhin ungeklärt':check?.directError==='catalog_direct_access_restricted'?'Quellenzugriff beschränkt':check?.error?.startsWith('catalog_direct_http_')?'Originalseite meldet HTTP '+check.error.slice('catalog_direct_http_'.length):'');
   return {id:source.id,state,label:(check?.error==='catalog_source_in_progress'?'Prüfung unvollständig':labels[state])+(reason?' · '+reason:'')+(state==='failed'&&check?.nextAttemptAt?' · erneuter Versuch frühestens '+check.nextAttemptAt.slice(0,10):''),checkedAt:check?.checkedAt||'',attemptedAt:check?.attemptedAt||'',lastSuccessfulFetchAt:check?.lastSuccessfulFetchAt||'',accepted:check?.details?.accepted??null,returned:check?.details?.returned??null,attempted:check?.details?.attempted??null,pending:check?.pendingUrls?.length??0};
  });
 }
@@ -44,3 +45,4 @@ export function collectionSourceStates(sources:{id:string;hours:number}[],checks
 export function researchTime(value:string){
  const date=new Date(value);return Number.isFinite(date.getTime())?new Intl.DateTimeFormat('de-DE',{timeZone:'Europe/Berlin',dateStyle:'short',timeStyle:'short'}).format(date)+' (Berlin)':'unbekannt';
 }
+

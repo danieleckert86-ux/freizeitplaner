@@ -131,3 +131,10 @@ test('a real HTTP failure stays failed even when its URL remains pending',()=>{
  const s=collectionSourceStates([{id:'x',hours:120}],[{id:'x',status:'failed',checkedAt:'',error:'catalog_direct_http_403',pendingUrls:['https://example.com']}])[0];
  assert.equal(s.state,'failed');assert.match(s.label,/HTTP 403/);assert.equal(s.pending,1);
 });
+
+
+test('German partial-coverage reports are incomplete research, never a total source failure',()=>{
+ const check={id:'kantine',status:'failed',checkedAt:'2026-10-13T01:13:34Z',attemptedAt:'2026-10-17T00:57:20Z',lastSuccessfulFetchAt:'2026-10-17T00:57:20Z',error:'Teilabdeckung: Programm lesbar; weitere Details offen.',details:{returned:42,attempted:13,accepted:6},pendingUrls:['https://example.org/event']};
+ const before=JSON.stringify(check),s=collectionSourceStates([{id:'kantine',hours:120}],[check])[0];
+ assert.equal(s.state,'partial');assert.match(s.label,/unvollständig.*Programm lesbar/);assert.equal(s.accepted,6);assert.equal(s.returned,42);assert.equal(s.pending,1);assert.equal(JSON.stringify(check),before);
+});

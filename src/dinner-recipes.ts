@@ -2,9 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 export const RECIPE_APP_URL = 'https://was-koche-ich-heute-daniel-c82d.vercel.app';
 export type DinnerRecipe = {id:string;title:string;category:string;image:string;minutes:number|null;search:string};
-const neonBase=import.meta.env.VITE_RECIPE_DATABASE_URL as string|undefined;
-if(neonBase&&neonBase!=='https://fahrrad-zur-arbei.vercel.app/api/recipes/database')throw Error('Ungültige Rezept-Verbindung');
-const recipeDb = createClient(neonBase||'https://wgiqzmeuxluxqnnsyyue.supabase.co',neonBase?'shared-recipes':'sb_publishable_SElwH8yU99vG347ROLXcGA_B3Haw-n1', {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},...(neonBase?{global:{fetch:async(input:RequestInfo|URL,init?:RequestInit)=>{const headers=new Headers(init?.headers);headers.delete('authorization');headers.delete('apikey');return fetch(input,{...init,headers});}}}:{})});
+const recipeDb = createClient('https://wgiqzmeuxluxqnnsyyue.supabase.co', 'sb_publishable_SElwH8yU99vG347ROLXcGA_B3Haw-n1', {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
 export const recipeLink = (id:string) => RECIPE_APP_URL + '/?recipe=' + encodeURIComponent(id);
 
 export async function loadDinnerRecipes():Promise<DinnerRecipe[]> {

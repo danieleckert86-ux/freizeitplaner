@@ -337,3 +337,10 @@ openingSourceUrl; unverifizierte und ältere Lokale nicht anzeigen. Neueste zuer
 Alte Einträge, gespeicherte Orte, Ausblendungen, Profile und Bewertungen bleiben
 bestehen. Die gemeinsame Empfehlungsgate-Ausnahme gilt ausschließlich für diese
 neutralen Neueröffnungen; Film/Serie/Kultur/Outdoor bleiben streng profilgeprüft.
+
+### Geschmacksprofile für Essen & entdecken entfernt
+
+Auf ausdrücklichen Nutzerwunsch sind restaurant/cafe/beerGarden aus den gespeicherten
+Profilen entfernt. Keine Profilbox, Entwürfe oder Bearbeitungsfunktion im neutralen
+Neueröffnungsbereich. Andere Profile und alle bisherigen Bewertungen bleiben erhalten;
+Legacy-Profilkennungen bleiben ausschließlich lesekompatibel für alte Assessments.

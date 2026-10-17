@@ -20,9 +20,10 @@ test('personal claims require evidence and the exact saved profile version',()=>
  assert.equal(currentAssessment('id','film',{film:{...p,updatedAt:'2026-10-17T00:00:00Z'}},{id:a}),null);
  assert.equal(validTasteAssessments({id:{...a,sourceUrls:[]}}),false);
 });
-test('food projection routes café and beer garden to their own profile',()=>{
- assert.equal(profileKeyFor({kind:'restaurant',category:'Café · Frühstück'}),'cafe');
- assert.equal(profileKeyFor({kind:'restaurant',category:'Biergarten'}),'beerGarden');
+test('food openings have no personal profile or default drafts',()=>{
+ assert.equal(profileKeyFor({kind:'restaurant',category:'Café · Frühstück'}),null);
+ assert.equal(profileKeyFor({kind:'restaurant',category:'Biergarten'}),null);
+ for(const key of ['restaurant','cafe','beerGarden'])assert.equal(defaultTasteProfiles[key],undefined);
 });
 
 test('media display requires current evidenced positive decision, retaining content notes',()=>{

@@ -46,6 +46,8 @@ try{
  assert.equal(await visible('event-pending').isVisible(),false);
  await page.locator('[data-new-tab="restaurants"]').click();
  await visible('food-approved').waitFor({state:'visible'});
+ assert.equal(await page.locator('#restaurants .taste-profile-panel:visible').count(),0);
+ assert.equal(await page.getByRole('heading',{name:'Mein Geschmacksprofil',exact:true}).isVisible(),false);
  await visible('food-qualified').waitFor({state:'visible'});
  assert.equal(await visible('food-old').count(),0);
  assert.equal(await page.locator('#restaurantList .collection-fit').count(),0);

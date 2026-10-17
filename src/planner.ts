@@ -557,6 +557,7 @@ export function initPlanner(database: SupabaseClient) {
   }
   document.addEventListener('taste-profile-request',async ev=>{
     const {key,profile,expectedUpdatedAt,done}=(ev as CustomEvent<{key:ProfileKey;profile:TasteProfile;expectedUpdatedAt:string|null;done:(ok:boolean,message:string)=>void}>).detail;
+    if(['restaurant','cafe','beerGarden'].includes(key)){done(false,'Für Neueröffnungen wird kein Geschmacksprofil verwendet.');return;}
     if(!loaded||saving){done(false,'Die Sammlung wird noch geladen oder gespeichert.');return;}
     const ok=await mutate(()=>{
       if((state.tasteProfiles?.[key]?.updatedAt??null)!==expectedUpdatedAt)throw Error('Profile changed');

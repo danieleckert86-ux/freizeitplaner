@@ -1,3 +1,5 @@
+import {profileAssessment} from './taste-settings-ui';
+import {strongAssessmentAllowed} from './taste-settings';
 import {imdbMarkup,mediaRecommendationAllowed,germanTrailerMarkup} from './media-rating';
 import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI,openTasteDetails,closeTasteDetails,setTasteArchiveScope} from './taste-ui';
 import {publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
@@ -102,7 +104,9 @@ function tourAttributes(item: Recommendation) {
 }
 
 const excludedMediaIds=new Set<string>();
+let currentData:RecommendationData|undefined;
 function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<string>()) {
+  currentData=data;
   excludedMediaIds.clear();
   for(const item of [...(data.cinema??[]),...(data.stream??[])])if(!mediaRecommendationAllowed(item)){excludedMediaIds.add(item.id);excludedMediaIds.add('lifestyle-'+item.id);}
   for(const [kind,items] of Object.entries({event:[...data.top,...data.ideas,...data.discoveries],hike:data.hikes,bike:data.bikes,walk:data.walks??[],restaurant:data.restaurants??[],cinema:data.cinema??[],stream:data.stream??[]})){
@@ -188,7 +192,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
     const list = document.querySelector<HTMLElement>(selector);
     if (!list) return;
     list.innerHTML = items.filter(item => !hiddenIds.has(item.id)&&(section==='restaurants'||mediaRecommendationAllowed(item))).map(item =>
-      '<article class="lifestyle-card" data-lifestyle-id="' + dataEscape(item.id) + '">' +
+      '<article class="lifestyle-card" '+(section==='restaurants'?'':'data-profile-rejected="true" ')+'data-lifestyle-id="' + dataEscape(item.id) + '">' +
       '<div class="lifestyle-top"><span class="lifestyle-type">' + categoryIcon(section, item.type) + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(/passung/i.test(item.badge||'')?'Inhaltlich vorgeprüft':item.badge) + '</span></div>' +
       '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div>' +
       '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item, section) + '<p>' + dataEscape(neutralDescription(item.description).replace(section==='cinema'?/Heute/gi:/$^/g,'Gespeicherte Vorstellung')) + '</p>' +
@@ -230,12 +234,21 @@ function applyPersonalTasteScores(){
     if(!id)return;
     const item=tasteItems.get(id);if(!item)return;
     const fit=adjustedTaste(item),label=card.querySelector<HTMLElement>('.collection-fit');
-    card.dataset.profileRejected=String(fit.confidence==='rejected');
+    const media=item.kind==='cinema'||item.kind==='stream';
+    const allowed=strongAssessmentAllowed(profileAssessment(item));
+    card.dataset.profileRejected=String(media?!allowed:fit.confidence==='rejected');
     if(label){let explanation=card.querySelector<HTMLElement>('.profile-fit-reason');if(!explanation){explanation=document.createElement('p');explanation.className='profile-fit-reason';label.after(explanation);}explanation.textContent=fit.reason;label.textContent=fit.confidence==='strong'?'Starke persönliche Passung':fit.confidence==='qualified'?'Passend mit Vorbehalt':fit.confidence==='rejected'?'Passt derzeit nicht zum Profil':'Profilabgleich ausstehend';label.title=fit.reason+' · Rangfolge nach Geschmack; keine Wahrscheinlichkeit und keine Termin- oder Sicherheitsfreigabe.';}
     if(card.classList.contains('discovery-item'))card.dataset.fitScore=fit.score===null?'':String(fit.score);
   });
+  for(const selector of ['#cinemaList','#streamFilmList','#streamSeriesList','#streamUnknownList']){
+    const list=document.querySelector<HTMLElement>(selector);if(!list)continue;
+    let empty=list.querySelector<HTMLElement>('.profile-empty');
+    if(!empty){empty=document.createElement('p');empty.className='profile-empty';empty.textContent='Aktuell keine Titel mit bestätigter persönlicher Passung. Es werden nur klar passende Empfehlungen zu deinem aktuellen Profil angezeigt.';list.append(empty);}
+    empty.hidden=Array.from(list.querySelectorAll<HTMLElement>('.lifestyle-card')).some(card=>card.dataset.profileRejected!=='true');
+  }
   refreshEventHighlights();
   document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));
+  document.dispatchEvent(new Event('media-fit-changed'));
 }
 const tasteItems=new Map<string,Parameters<typeof registerTasteSuggestion>[0]>();
 document.addEventListener('taste-scores-changed',()=>{
@@ -302,6 +315,7 @@ type Favorite = {
 
 async function bootstrap() {
   initPlanner(supabase);
+  document.addEventListener('media-fit-changed',()=>renderFavorites());
 
   let finderView: 'ideas' | 'current' = 'ideas';
   let standardTab:'planning'|'stock'='planning';
@@ -783,7 +797,13 @@ function renderFavorites() {
   favoritesList.innerHTML = '';
 
   const renderedIds=new Set(Array.from(document.querySelectorAll<HTMLButtonElement>('[data-favorite]')).filter(b=>!!b.closest<HTMLElement>('.view-section:not([hidden])')).map(b=>b.dataset.id));
-  const filtered = favorites.filter(item => !excludedMediaIds.has(item.suggestionId) && favoriteArea(item.category,savedEventDates.get(item.suggestionId)) === finderView && !renderedIds.has(item.suggestionId) && (finderView==='ideas'||currentKind.value==='events'&&!/kino|stream/i.test(item.category)||currentKind.value==='cinema'&&/kino/i.test(item.category)||currentKind.value==='stream'&&/stream/i.test(item.category)));
+  const favoriteMediaAllowed=(item:Favorite)=>{
+    if(!/kino|stream/i.test(item.category))return true;
+    const candidates=[...(currentData?.cinema??[]).map(x=>({...x,kind:'cinema'})),...(currentData?.stream??[]).map(x=>({...x,kind:'stream'}))];
+    const media=candidates.find(x=>x.id===item.suggestionId||'lifestyle-'+x.id===item.suggestionId);
+    return !!media&&mediaRecommendationAllowed(media)&&strongAssessmentAllowed(profileAssessment({...media,category:media.type}));
+  };
+  const filtered = favorites.filter(item => favoriteMediaAllowed(item) && !excludedMediaIds.has(item.suggestionId) && favoriteArea(item.category,savedEventDates.get(item.suggestionId)) === finderView && !renderedIds.has(item.suggestionId) && (finderView==='ideas'||currentKind.value==='events'&&!/kino|stream/i.test(item.category)||currentKind.value==='cinema'&&/kino/i.test(item.category)||currentKind.value==='stream'&&/stream/i.test(item.category)));
 
   favoritesEmpty.hidden = filtered.length > 0;
   favoritesEmpty.textContent = 'Hier sind noch keine weiteren Vorschläge vorgemerkt.';
@@ -1096,6 +1116,7 @@ document.addEventListener('click',ev=>{
  document.dispatchEvent(new CustomEvent('stock-copy-request',{detail:{favorite,meta:JSON.parse(button.dataset.meta||'[]'),snapshot:JSON.parse(button.dataset.snapshot||'null'),done:(ok:boolean,message:string)=>{button.disabled=ok;button.textContent=ok?'In Orte & Touren gespeichert':'Erneut übernehmen';button.title=message;const status=document.querySelector<HTMLElement>('#stockCopyStatus');if(status)status.textContent=message;}}}));
 });
 void bootstrap();
+
 
 
 

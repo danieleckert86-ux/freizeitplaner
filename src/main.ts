@@ -106,7 +106,9 @@ function tourAttributes(item: Recommendation) {
 
 const excludedMediaIds=new Set<string>();
 const recommendationFacts=new Map<string,RecommendationFacts>();
+let outdoorIdentities:{id:string;title:string;url:string}[]=[];
 function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<string>()) {
+  outdoorIdentities=[...data.hikes,...data.bikes,...(data.walks??[])].map(x=>({id:x.id||x.favorite.id,title:x.title,url:x.url||x.favorite.url}));
   recommendationFacts.clear();
   excludedMediaIds.clear();
   for(const item of [...(data.cinema??[]),...(data.stream??[])])if(!mediaRecommendationAllowed(item)){excludedMediaIds.add(item.id);excludedMediaIds.add('lifestyle-'+item.id);}
@@ -1145,7 +1147,7 @@ function refreshOutdoorPicks(){
   const cards=Array.from(group.querySelectorAll<HTMLElement>('.tour-card'));
   const rows=cards.map(card=>({card,id:card.dataset.tourId||'',title:card.dataset.tourTitle||'',url:card.dataset.tourUrl||'',fitScore:Number(card.dataset.tourScore)}));
   const hidden=new Set([...sources.decisions.hidden,...rows.filter(x=>x.card.dataset.profileRejected==='true').map(x=>x.id)]);
-  const picks=new Set(outdoorPicks(rows,[...library.items,...sources.favorites],hidden,library.ready&&sources.decisions.ready).map(x=>x.card));
+  const picks=new Set(outdoorPicks(rows,[...library.items,...sources.favorites,...outdoorIdentities.filter(x=>sources.decisions.hidden.has(x.id))],hidden,library.ready&&sources.decisions.ready).map(x=>x.card));
   for(const card of cards){const show=picks.has(card);card.hidden=!show;card.classList.toggle('is-hidden',!show);card.style.setProperty('display',show?'':'none',show?'':'important');}
   const empty=group.querySelector<HTMLElement>('.outdoor-empty');if(empty){empty.hidden=picks.size>0;empty.textContent=library.ready&&sources.decisions.ready?'Noch keine weiteren passenden, ungespeicherten Touren geprüft. Ziel: zwei neue Vorschläge.':'Tourenbibliothek wird geladen …';}
   const generic=group.querySelector<HTMLElement>('.profile-empty');if(generic)generic.hidden=true;

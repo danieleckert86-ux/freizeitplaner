@@ -1,4 +1,4 @@
-import {recommendationAllowed,type RecommendationFacts} from './recommendation-eligibility';
+import {recommendationAllowed,foodOpeningLabel,type RecommendationFacts} from './recommendation-eligibility';
 import {profileAssessment} from './taste-settings-ui';
 import {imdbMarkup,mediaRecommendationAllowed,germanTrailerMarkup} from './media-rating';
 import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI,openTasteDetails,closeTasteDetails,setTasteArchiveScope} from './taste-ui';
@@ -26,7 +26,7 @@ type Recommendation = {
 };
 
 type LifestyleRecommendation = {
-  id: string; mediaType?: 'film'|'series'; title: string; type: string; description: string; meta: string[];
+  id: string; openingDate?:string;openingCity?:string;openingSourceUrl?:string;mediaType?: 'film'|'series'; title: string; type: string; description: string; meta: string[];
   fitScore?: number; imported?: boolean; category?:string; favorite?:{id:string;categoryLabel?:string};
   url: string; badge: string; location?: string; venue?: string; city?: string; address?: string; platform?: string; imdbRating?: number|null; imdbUrl?: string; trailerUrl?: string; trailerLanguage?: 'de'|'en'|'other';
 };
@@ -192,16 +192,16 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   const renderLifestyle = (selector: string, items: LifestyleRecommendation[], section: 'restaurants' | 'cinema' | 'stream') => {
     const list = document.querySelector<HTMLElement>(selector);
     if (!list) return;
-    list.innerHTML = items.filter(item => !hiddenIds.has(item.id)&&(section==='restaurants'||mediaRecommendationAllowed(item))).map(item =>
-      '<article class="lifestyle-card" '+(section==='restaurants'?'':'data-profile-rejected="true" style="display:none!important" ')+'data-lifestyle-id="' + dataEscape(item.id) + '">' +
+    list.innerHTML = [...items].filter(item => !hiddenIds.has(item.id)&&(section==='restaurants'?recommendationAllowed({...item,kind:'restaurant',verifiedAt:(item as any).verifiedAt,closed:(item as any).closed},null):mediaRecommendationAllowed(item))).sort((a,b)=>section==='restaurants'?(b.openingDate||'').localeCompare(a.openingDate||'')||a.title.localeCompare(b.title):0).map(item =>
+      '<article class="lifestyle-card" '+'data-profile-rejected="true" style="display:none!important" '+'data-lifestyle-id="' + dataEscape(item.id) + '">' +
       '<div class="lifestyle-top"><span class="lifestyle-type">' + categoryIcon(section, item.type) + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(/passung/i.test(item.badge||'')?'Inhaltlich vorgeprüft':item.badge) + '</span></div>' +
-      '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div>' +
+      (section==='restaurants'?'<div class="opening-label">'+dataEscape(foodOpeningLabel(item))+'</div>':'<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div>') +
       '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item, section) + '<p>' + dataEscape(neutralDescription(item.description).replace(section==='cinema'?/Heute/gi:/$^/g,'Gespeicherte Vorstellung')) + '</p>' +
       '<div class="lifestyle-meta">' + (section==='stream'||section==='cinema'?streamingCardMeta(item.meta):item.meta).filter(v=>section!=='stream'||v.trim()!==recommendationPlace(item,section)).map(v => '<span>' + dataEscape(v.replace(/^Neu seit (\d{2})\.(\d{2})\.\d{4}$/, "Seit $1.$2.")) + '</span>').join('') +
       (['cinema','stream'].includes(section)?imdbMarkup(item):'') +
       (['cinema','stream'].includes(section)?germanTrailerMarkup(item):'') + '</div>' +
       '<div class="lifestyle-actions"><div class="lifestyle-links"><a class="info-link" href="' + dataEscape(section==='restaurants'?googleMapsPlaceUrl(item):item.url) + '" target="_blank" rel="noopener noreferrer">'+(section==='restaurants'?'Google Maps öffnen':'Mehr erfahren')+'</a></div>' +
-      '<div class="lifestyle-card-buttons">' + ratingMarkup(item.id, item.title, section) + (section==='restaurants'?stockCopyMarkup({id:'lifestyle-'+item.id,title:item.title,category:({cafe:'Café',restaurant:'Restaurant','beer-garden':'Biergarten'})[discoveryFoodKind(item)],description:item.description,url:item.url},item.meta,item):lifestyleFavoriteMarkup(item,section)) +
+      '<div class="lifestyle-card-buttons">' + (section==='restaurants'?'':ratingMarkup(item.id, item.title, section)) + (section==='restaurants'?stockCopyMarkup({id:'lifestyle-'+item.id,title:item.title,category:({cafe:'Café',restaurant:'Restaurant','beer-garden':'Biergarten'})[discoveryFoodKind(item)],description:item.description,url:item.url},item.meta,item):lifestyleFavoriteMarkup(item,section)) +
       '<button class="hide-card-btn" type="button" data-hide-card data-id="' + dataEscape(item.id) + '" data-section="' + section + '" data-title="' + dataEscape(item.title) + '">Ausblenden</button></div></div></article>'
     ).join('');
   };
@@ -229,23 +229,24 @@ function wireRatingButtons(ratings: Map<string, number>) {
 }
 function applyPersonalTasteScores(){
   document.querySelectorAll<HTMLElement>('.discovery-item,.tour-card,.lifestyle-card,.idea-card,.card').forEach(card=>{
-    const id=card.querySelector<HTMLElement>('[data-taste-wrap]')?.dataset.tasteWrap;
+    const id=card.dataset.lifestyleId||card.querySelector<HTMLElement>('[data-taste-wrap]')?.dataset.tasteWrap;
     if(!id)return;
     const item=tasteItems.get(id);if(!item)return;
     const fit=adjustedTaste(item),label=card.querySelector<HTMLElement>('.collection-fit');
     const facts=recommendationFacts.get(id);
     if(!facts)return; // Personal stock and standard activities are not discovery recommendations.
-    const allowed=recommendationAllowed(facts,profileAssessment(item));
+    const allowed=recommendationAllowed(facts,facts.kind==='restaurant'?null:profileAssessment(item));
     card.dataset.profileRejected=String(!allowed);
     card.hidden=!allowed;
     if(allowed)card.style.removeProperty('display');else card.style.setProperty('display','none','important');
+    if(facts.kind==='restaurant')return;
     if(label){let explanation=card.querySelector<HTMLElement>('.profile-fit-reason');if(!explanation){explanation=document.createElement('p');explanation.className='profile-fit-reason';label.after(explanation);}explanation.textContent=fit.reason;label.textContent=fit.confidence==='strong'?'Passt zu deinem Geschmack':fit.confidence==='qualified'?'Passend mit Vorbehalt':fit.confidence==='rejected'?'Passt derzeit nicht zum Profil':'Profilabgleich ausstehend';label.title=fit.reason+' · Rangfolge nach Geschmack; keine Wahrscheinlichkeit und keine Termin- oder Sicherheitsfreigabe.';}
     if(card.classList.contains('discovery-item'))card.dataset.fitScore=fit.score===null?'':String(fit.score);
   });
   for(const selector of ['#cinemaList','#streamFilmList','#streamSeriesList','#restaurantList','#cafeList','#beerGardenList','#hikeGroup .tour-list','#bikeGroup .tour-list','#walkGroup .tour-list']){
     const list=document.querySelector<HTMLElement>(selector);if(!list)continue;
     let empty=list.querySelector<HTMLElement>('.profile-empty');
-    if(!empty){empty=document.createElement('p');empty.className='profile-empty';empty.textContent='Aktuell keine Vorschläge mit bestätigter persönlicher Passung. Es werden nur klar passende Empfehlungen zu deinem aktuellen Profil angezeigt.';list.append(empty);}
+    if(!empty){empty=document.createElement('p');empty.className='profile-empty';empty.textContent=['#restaurantList','#cafeList','#beerGardenList'].includes(selector)?'Noch keine bestätigten Neueröffnungen in Augsburg innerhalb der letzten60Tage gelistet.':'Aktuell keine Vorschläge mit bestätigter persönlicher Passung. Es werden nur klar passende Empfehlungen zu deinem aktuellen Profil angezeigt.';list.append(empty);}
     empty.hidden=Array.from(list.querySelectorAll<HTMLElement>('.lifestyle-card,.tour-card')).some(card=>card.dataset.profileRejected!=='true');
   }
   refreshEventHighlights();

@@ -1,7 +1,7 @@
 // Kept byte-identical with freizeitplaner/src/recommendation-eligibility.ts.
 // Facts and explicit personal approval are independent gates; no taste scoring here.
 export type RouteEvidence={durationActivity:'walking'|'cycling';ascentMetric?:'totalAscent'|'heightDifference'|'unknown';ascentSourceUrl?:string;ascentVerifiedAt?:string;startMunicipality:string;startSourceUrl:string;startVerifiedAt:string;travelMode:'walk'|'bike'|'transit'|'car';travelReference?:'augsburg-centre';travelSourceUrl?:string;travelVerifiedAt?:string;specialAppeal?:string;appealSourceUrls?:string[];appealVerifiedAt?:string;wayCharacter:string;waySourceUrls:string[];wayVerifiedAt:string;surface?:'asphalt'|'firm'|'mixed'|'unknown';safetySourceUrls:string[];safetyVerifiedAt:string};
-export type RecommendationFacts={kind:string;routeEvidence?:RouteEvidence;contentChangedAt?:string;date?:string|null;releaseDate?:string|null;time?:string|null;location?:string;platform?:string;mediaType?:string;imdbRating?:number|null;imdbUrl?:string;imported?:boolean;closed?:boolean|null;verifiedAt?:string;km?:number|null;ascent?:number|null;minutes?:number|null;travelMinutes?:number|null;exposed?:boolean|null;climbing?:boolean|null;latitude?:number|null;longitude?:number|null};
+export type RecommendationFacts={kind:string;openingDate?:string;openingCity?:string;openingSourceUrl?:string;routeEvidence?:RouteEvidence;contentChangedAt?:string;date?:string|null;releaseDate?:string|null;time?:string|null;location?:string;platform?:string;mediaType?:string;imdbRating?:number|null;imdbUrl?:string;imported?:boolean;closed?:boolean|null;verifiedAt?:string;km?:number|null;ascent?:number|null;minutes?:number|null;travelMinutes?:number|null;exposed?:boolean|null;climbing?:boolean|null;latitude?:number|null;longitude?:number|null};
 export type Approval={status:string;reason:string;caveat?:string;profileUpdatedAt:string;reviewedAt:string;sourceUrls:string[]};
 const timestamp=(v:unknown)=>typeof v==='string'&&v.includes('T')&&Number.isFinite(Date.parse(v));
 const isoDay=(v:unknown):v is string=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v))&&new Date(v).toISOString().slice(0,10)===v;
@@ -13,6 +13,20 @@ export function hardEligibilityReason(x:RecommendationFacts,now=new Date()):stri
  if(x.closed===true)return 'unavailable';
  if(x.imported===true||!timestamp(x.verifiedAt))return 'unverified';
  const day=berlinDay(now),date=x.releaseDate??x.date;
+ if(x.kind==='restaurant'){
+  if(x.openingCity!=='Augsburg'||!x.location?.trim())return 'opening_location_unconfirmed';
+  if(!source(x.openingSourceUrl))return 'opening_source_missing';
+  const opened=x.openingDate;
+  const month=typeof opened==='string'&&/^\d{4}-(0[1-9]|1[0-2])$/.test(opened);
+  if(!month&&!isoDay(opened))return 'opening_date_unknown';
+  const earliest=month?opened+'-01':opened!;
+  const verifiedDay=berlinDay(new Date(x.verifiedAt!));
+  if(earliest>verifiedDay||earliest>day)return 'opening_not_yet_verified';
+  const age=(Date.parse(day)-Date.parse(earliest))/86400000;
+  // A coarse month must fit entirely in the window; never invent an opening day.
+  if(age>60)return 'outside_opening_window';
+  if(x.closed!==false)return 'opening_operating_status_unknown';
+ }
  if(x.kind==='event'||x.kind==='cinema'){
   if(!isoDay(x.date)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(x.time||'')||!x.location?.trim())return 'event_facts_missing';
   const age=(Date.parse(x.date)-Date.parse(day))/86400000;
@@ -60,5 +74,12 @@ export function hardEligibilityReason(x:RecommendationFacts,now=new Date()):stri
  return null;
 }
 export function recommendationAllowed(x:RecommendationFacts,a:Approval|null|undefined,now=new Date()):boolean{
+ if(x.kind==='restaurant')return hardEligibilityReason(x,now)===null;
  return !!a&&(!x.contentChangedAt||timestamp(x.contentChangedAt)&&Date.parse(a.reviewedAt)>=Date.parse(x.contentChangedAt))&&a.status==='strong'&&!!a.reason?.trim()&&timestamp(a.profileUpdatedAt)&&timestamp(a.reviewedAt)&&Array.isArray(a.sourceUrls)&&a.sourceUrls.length>0&&a.sourceUrls.every(u=>{try{const url=new URL(u);return url.protocol==='https:'&&!url.username&&!url.password;}catch{return false;}})&&hardEligibilityReason(x,now)===null;
+}
+
+export function foodOpeningLabel(x:{openingDate?:string}){
+ const value=x.openingDate||'';
+ if(/^\d{4}-(0[1-9]|1[0-2])$/.test(value))return 'Eröffnet im '+new Intl.DateTimeFormat('de-DE',{timeZone:'Europe/Berlin',month:'long',year:'numeric'}).format(new Date(value+'-01T12:00:00Z'));
+ return isoDay(value)?'Eröffnet am '+value.split('-').reverse().join('.'):'Eröffnung noch nicht belegt';
 }

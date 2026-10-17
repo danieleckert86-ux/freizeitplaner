@@ -325,3 +325,15 @@ alte Touren bleiben gespeichert, erscheinen aber nicht als freigegebene Ideen.
 Persönlicher Vorrat bleibt außerhalb dieses Filters. Kein neuer Nutzer-Schreibweg.
 Fortsetzbare Pakete und echte Quellen-Fallbacks liegen im Backend/ChatGPT-Auftrag;
 Inventarzahlen sind keine persönlichen Freigaben.
+
+## Essen & entdecken · Neueröffnungen ab17.10.2026
+
+Dieser Bereich zeigt neutral belegte Augsburger Gastronomie-Neueröffnungen der
+letzten60Tage. Keine Geschmacksfreigabe/-sortierung, kein Bewertungsbutton und keine
+Profil-Passungshinweise auf diesen Karten. Name, Art, sachliche Beschreibung,
+Adresse, Eröffnungsdatum oder belegter Monat und Google-Maps-Link bleiben sichtbar.
+Tages-/Monatsangaben über openingDate, Stadtbeleg openingCity und Eröffnungsquelle
+openingSourceUrl; unverifizierte und ältere Lokale nicht anzeigen. Neueste zuerst.
+Alte Einträge, gespeicherte Orte, Ausblendungen, Profile und Bewertungen bleiben
+bestehen. Die gemeinsame Empfehlungsgate-Ausnahme gilt ausschließlich für diese
+neutralen Neueröffnungen; Film/Serie/Kultur/Outdoor bleiben streng profilgeprüft.

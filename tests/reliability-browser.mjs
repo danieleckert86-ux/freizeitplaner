@@ -22,7 +22,11 @@ const stream=rec('stream-approved','stream',{mediaType:'film',platform:'RTL+ Deu
 const expired=rec('stream-expired','stream',{...stream,id:'stream-expired',title:'stream-expired',favorite:undefined,date:'2026-08-17',releaseDate:'2026-08-17'});
 const hike=rec('hike-approved','hike',{routeEvidence:{durationActivity:'walking',ascentMetric:'totalAscent',ascentSourceUrl:'https://example.org/event',ascentVerifiedAt:at,startMunicipality:'Augsburg',startSourceUrl:'https://example.org/event',startVerifiedAt:at,travelMode:'car',travelReference:'augsburg-centre',travelSourceUrl:'https://example.org/event',travelVerifiedAt:at,specialAppeal:'Historischer Natur- und Kulturweg am Kanal',appealSourceUrls:['https://example.org/event'],appealVerifiedAt:at,wayCharacter:'Fester, nicht ausgesetzter Weg',waySourceUrls:['https://example.org/event'],wayVerifiedAt:at,safetySourceUrls:['https://example.org/event'],safetyVerifiedAt:at,surface:'firm'},km:12,ascent:700,minutes:240,travelMinutes:100,exposed:false,climbing:false});
 const low=rec('hike-too-low','hike',{routeEvidence:{durationActivity:'walking',ascentMetric:'totalAscent',ascentSourceUrl:'https://example.org/event',ascentVerifiedAt:at,startMunicipality:'Augsburg',startSourceUrl:'https://example.org/event',startVerifiedAt:at,travelMode:'car',travelReference:'augsburg-centre',travelSourceUrl:'https://example.org/event',travelVerifiedAt:at,specialAppeal:'Historischer Natur- und Kulturweg am Kanal',appealSourceUrls:['https://example.org/event'],appealVerifiedAt:at,wayCharacter:'Fester, nicht ausgesetzter Weg',waySourceUrls:['https://example.org/event'],wayVerifiedAt:at,safetySourceUrls:['https://example.org/event'],safetyVerifiedAt:at,surface:'firm'},km:12,ascent:273,minutes:240,travelMinutes:100,exposed:false,climbing:false});
-const data={schemaVersion:2,dataUpdated:at,weekendRange:'Fixture',weatherDays:[],top:[],ideas:[],discoveries:[approved,pending],restaurants:[food,qualified],cinema:[],stream:[stream,expired],hikes:[hike,low],bikes:[],walks:[],catalogChecks:[],catalogSources:[]};
+const foodOld=rec('food-old','restaurant',{openingDate:'2026-08-17',openingCity:'Augsburg',openingSourceUrl:'https://example.org/opening'});
+Object.assign(food,{openingDate:'2026-10-01',openingCity:'Augsburg',openingSourceUrl:'https://example.org/opening'});
+Object.assign(qualified,{openingDate:'2026-10',openingCity:'Augsburg',openingSourceUrl:'https://example.org/opening'});
+delete assessments[food.id];
+const data={schemaVersion:2,dataUpdated:at,weekendRange:'Fixture',weatherDays:[],top:[],ideas:[],discoveries:[approved,pending],restaurants:[food,qualified,foodOld],cinema:[],stream:[stream,expired],hikes:[hike,low],bikes:[],walks:[],catalogChecks:[],catalogSources:[]};
 const personal={version:1,appointments:[],slots:[],entries:[],checks:[],routines:[],activityStock:[],tasteProfiles:profiles,tasteAssessments:assessments};
 let writes=0;
 await page.route('**/*',async route=>{
@@ -42,7 +46,12 @@ try{
  assert.equal(await visible('event-pending').isVisible(),false);
  await page.locator('[data-new-tab="restaurants"]').click();
  await visible('food-approved').waitFor({state:'visible'});
- assert.equal(await visible('food-qualified').isVisible(),false);
+ await visible('food-qualified').waitFor({state:'visible'});
+ assert.equal(await visible('food-old').count(),0);
+ assert.equal(await page.locator('#restaurantList .collection-fit').count(),0);
+ assert.equal(await page.locator('#restaurantList [data-taste-wrap]').count(),0);
+ assert.match(await page.locator('#restaurantList a.info-link').first().getAttribute('href'),/google\.com\/maps/);
+ assert.match(await page.locator('#restaurantList .opening-label').first().textContent(),/Eröffnet/);
  await page.locator('[data-new-tab="stream"]').click();
  await visible('stream-approved').waitFor({state:'visible'});
  assert.equal(await visible('stream-expired').isVisible(),false);
@@ -57,5 +66,5 @@ try{
  await page.waitForTimeout(100);
  assert.equal(await visible('hike-approved').isVisible(),false);
  assert.deepEqual(errors,[]);assert.equal(writes,0);
- console.log(JSON.stringify({browser:'passed',strongOnly:true,stream60Days:true,hikeBounds:true,profileChange:true,consoleErrors:errors,writes}));
+ console.log(JSON.stringify({browser:'passed',strongOnly:true,foodOpeningsWithoutTaste:true,stream60Days:true,hikeBounds:true,profileChange:true,consoleErrors:errors,writes}));
 }finally{await browser.close();}

@@ -24,3 +24,12 @@ test('old low-ascent imports and long bicycle routes cannot return through a str
  for(const ascent of [109,273,499,901])assert.equal(recommendationAllowed({...hike,ascent},a,now),false);
  assert.equal(hardEligibilityReason({...hike,routeEvidence:{...hike.routeEvidence,durationActivity:'cycling'},kind:'bike',km:40.1},now),'bike_distance');
 });
+
+test('food openings are neutral listings with sourced Augsburg dates, independent of taste',()=>{
+ const food={kind:'restaurant',verifiedAt:at,openingCity:'Augsburg',openingSourceUrl:'https://example.org/opening',openingDate:'2026-10-01',location:'Beispielstraße 1, Augsburg',closed:false};
+ for(const approval of [null,undefined,{...a,status:'rejected'}])assert.equal(recommendationAllowed(food,approval,now),true);
+ assert.equal(recommendationAllowed({...food,openingDate:'2026-08-18'},null,now),true);
+ for(const openingDate of ['2026-08-17','2026-10-18','2026-02-30',undefined,'2026-08'])assert.equal(recommendationAllowed({...food,openingDate},null,now),false);
+ assert.equal(recommendationAllowed({...food,openingDate:'2026-09'},null,now),true);
+ for(const extra of [{openingCity:'Friedberg'},{openingCity:'Landkreis Augsburg'},{openingSourceUrl:''},{closed:true},{imported:true},{verifiedAt:'2026-09-01T10:00:00Z'}])assert.equal(recommendationAllowed({...food,...extra},null,now),false);
+});

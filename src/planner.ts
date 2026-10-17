@@ -3,7 +3,7 @@ import {publishTasteSettings} from './taste-settings-ui';
 import {withTasteRating,validTasteRating,withExistingTasteRatings,type TasteRating,type TasteSuggestion} from './taste-profile';
 import {publishTasteProfile,registerTasteSuggestion,tasteRatingMarkup,refreshTasteUI,registerTasteDetails,openTasteDetails,closeTasteDetails} from './taste-ui';
 import {withMapsStock} from './maps-stock';
-import {placeOnlyKind,withStockRating,stockFromSuggestion,existingStockSuggestion,type StockFavorite,stockMarkup,stockSources,stockKinds,validStockItem,draftFromFavorite, type StockItem} from './activity-stock';
+import {publishOutdoorLibrary,placeOnlyKind,withStockRating,stockFromSuggestion,existingStockSuggestion,type StockFavorite,stockMarkup,stockSources,stockKinds,validStockItem,draftFromFavorite, type StockItem} from './activity-stock';
 import './planner.css';
 import {withKnownActivities, type KnownActivity} from './known-activities';
 import {activityCategories,activitySettings,categoryOf,settingOf,matchesSetting,legacyMood,validActivityProperties,energyLabels,effortLabels, type ActivityCategory, type ActivitySetting} from './activity-properties';
@@ -590,6 +590,7 @@ export function initPlanner(database: SupabaseClient) {
     done(ok,ok?'In Orte & Touren gespeichert. Auf allen Geräten verfügbar.':message);syncStockCopyButtons();
   });
   function renderStock(){
+    publishOutdoorLibrary(state.activityStock??[],loaded);
     syncStockCopyButtons();
     if(!stockHost)return;
     for(const row of state.activityStock??[]){

@@ -31,7 +31,8 @@ const music=Array.from({length:4},(_,i)=>rec('music-'+i,'event',{category:'Indie
 for(const item of music)assessments[item.id].profileKey='music';
 const mixed=[rec('mixed-cabaret','event',{category:'Kabarett · Musik-Comedy'}),rec('mixed-literature','event',{category:'Literatur · Jazz · Livemusik'})];
 for(const item of mixed)assessments[item.id].profileKey='music';
-const data={schemaVersion:2,dataUpdated:at,weekendRange:'Fixture',weatherDays:[],top:[],ideas:[],discoveries:[approved,pending,...cultureExtra,...music,...mixed],restaurants:[food,qualified,foodOld],cinema:[],stream:[stream,expired],hikes:[hike,low],bikes:[],walks:[],catalogChecks:[],catalogSources:[]};
+const extraHikes=[1,2,3].map(i=>rec('hike-extra-'+i,'hike',{...hike,id:'hike-extra-'+i,title:'hike-extra-'+i,url:'https://example.org/route-'+i,favorite:{...hike.favorite,id:'hike-extra-'+i,title:'hike-extra-'+i,url:'https://example.org/route-'+i}}));
+const data={schemaVersion:2,dataUpdated:at,weekendRange:'Fixture',weatherDays:[],top:[],ideas:[],discoveries:[approved,pending,...cultureExtra,...music,...mixed],restaurants:[food,qualified,foodOld],cinema:[],stream:[stream,expired],hikes:[hike,low,...extraHikes],bikes:[],walks:[],catalogChecks:[],catalogSources:[]};
 const personal={version:1,appointments:[],slots:[],entries:[],checks:[],routines:[],activityStock:[],tasteProfiles:profiles,tasteAssessments:assessments};
 let writes=0;
 await page.route('**/*',async route=>{
@@ -82,6 +83,14 @@ try{
  await page.locator('[data-new-tab="outdoor"]').click();
  await visible('hike-approved').waitFor({state:'visible'});
  assert.equal(await visible('hike-too-low').count(),0);
+ assert.equal(await page.locator('#hikeGroup .tour-card:visible').count(),2);
+ // A legacy library identity under another ID excludes the same route after reload.
+ personal.activityStock=[{id:'library-route',title:'hike-approved',kind:'hike',url:hike.url,minutes:240,travelMinutes:100,distanceKm:12,elevationM:700,setting:'outside',energy:'medium',effort:'trip',note:'Saved route',sourceId:hike.id}];
+ await page.reload();await page.locator('[data-new-tab="outdoor"]').click();
+ await visible('hike-extra-1').waitFor({state:'visible'});
+ assert.equal(await visible('hike-approved').isVisible(),false);
+ assert.equal(await page.locator('#hikeGroup .tour-card:visible').count(),2);
+
  // Simulate a saved profile change in the read-only API fixture.
  profiles.hike.updatedAt='2026-10-17T13:00:00Z';
  // Reload with a changed saved profile; old assessments must become pending.

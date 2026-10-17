@@ -368,3 +368,6 @@ zusätzlich Musik/Jazz/Livemusik nennt. Reine Song-Slam-Konzerte und Bandkonzert
 bleiben Musik. Derselbe eventSection-Helfer gilt für Liste, Top3 und Vormerkansicht.
 Bestehende persönliche Prüfungen behalten ihre tatsächlich verwendete Profilzuordnung
 über eventProfileKey; eine Anzeige-Umsortierung erzeugt keine neue Profilprüfung.
+
+
+Outdoor-Bibliothek: Orte & Touren bleibt der private dauerhafte Vorrat. Neue Tourenvorschläge schließen Vorrat und Merkliste sowie Ausblendungen vor Rangfolge und Limit aus (IDs, Import-IDs, normalisierte Namen, kanonische Original-URLs). Je Outdoor-Kategorie höchstens zwei vollständig geeignete Vorschläge; gespeicherte Touren bleiben unverändert. Beim Speichern/Ausblenden rückt geeigneter Bestand nach. Ohne geladenen Vorrat/Entscheidungen keine neuen Tourenkarten. Recherche ergänzt unterbesetzte Kategorien im bestehenden Rhythmus, keine Fülltreffer.

@@ -1,8 +1,9 @@
+import {outdoorPicks} from './outdoor-selection';
 import {recommendationAllowed,foodOpeningLabel,type RecommendationFacts} from './recommendation-eligibility';
 import {profileAssessment} from './taste-settings-ui';
 import {imdbMarkup,mediaRecommendationAllowed,germanTrailerMarkup} from './media-rating';
 import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI,openTasteDetails,closeTasteDetails,setTasteArchiveScope} from './taste-ui';
-import {publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
+import {outdoorLibrary,stockSources,publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
 import { favoriteArea,finderSectionVisible,eventSection,discoveryFoodKind,discoveryRouteKind,hikeAscentAllowed,streamingFormat,streamingCardMeta,type NewCategory } from './finder-navigation';
 import { initPlanner } from './planner';
 import { neutralDescription } from './wording';
@@ -168,7 +169,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
     const list = document.querySelector<HTMLElement>(selector + ' .tour-list');
     if (!list) return;
     list.innerHTML = items.sort((a,b)=>(b.fitScore||0)-(a.fitScore||0)).map(item =>
-      '<article' + tourAttributes(item) + ' class="tour-card filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '">' +
+      '<article data-tour-id="'+dataEscape(item.favorite.id)+'" data-tour-title="'+dataEscape(item.title)+'" data-tour-url="'+dataEscape(item.url||item.favorite.url)+'" data-tour-score="'+dataEscape(String(item.fitScore??-1))+'"' + tourAttributes(item) + ' class="tour-card filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '">' +
       '<div class="tour-top"><span class="tour-category">' + categoryIcon(item.category, item.label || item.title) + dataEscape(item.label) + '</span><span class="meta-label">' + dataEscape(item.metaLabel) + '</span></div>' +
       '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div><h4>' + dataEscape(item.title) + '</h4>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' +
       '<p class="collection-condition">' + dataEscape(item.conditionsStatus||'Vor dem Ausflug Wetter, Sperrungen und Routenverlauf prüfen. Keine aktuelle Freigabe.') + '</p><div class="tour-meta">' + (item.meta ?? []).map(v => '<span' + (/Anfahrt/i.test(v)?' class="travel-detail"':'') + '>' + dataEscape(v) + '</span>').join('') + '</div>' +
@@ -249,6 +250,7 @@ function applyPersonalTasteScores(){
     if(!empty){empty=document.createElement('p');empty.className='profile-empty';empty.textContent=['#restaurantList','#cafeList','#beerGardenList'].includes(selector)?'Noch keine bestätigten Neueröffnungen in Augsburg innerhalb der letzten60Tage gelistet.':'Aktuell keine Vorschläge mit bestätigter persönlicher Passung. Es werden nur klar passende Empfehlungen zu deinem aktuellen Profil angezeigt.';list.append(empty);}
     empty.hidden=Array.from(list.querySelectorAll<HTMLElement>('.lifestyle-card,.tour-card')).some(card=>card.dataset.profileRejected!=='true');
   }
+  refreshOutdoorPicks();
   refreshEventHighlights();
   document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));
   document.dispatchEvent(new Event('media-fit-changed'));
@@ -349,6 +351,7 @@ async function bootstrap() {
     document.querySelectorAll<HTMLElement>('[data-media-panel]').forEach(panel=>{panel.hidden=panel.dataset.mediaPanel!==currentKind.value;panel.classList.toggle('active',!panel.hidden);});
     document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));
     document.querySelectorAll<HTMLElement>('.tour-card,.lifestyle-card').forEach(card=>{card.hidden=savedFilter&&onlySaved.checked&&!card.querySelector('[data-favorite].saved');});
+    refreshOutdoorPicks();
     document.dispatchEvent(new CustomEvent('finder-saved-filter',{detail:savedFilter&&onlySaved.checked}));
   };
   const setAppView = (view: string) => {
@@ -415,7 +418,9 @@ void loadFavorites();
         button.textContent = 'Ausblenden';
         return;
       }
+      blockStockSource(id);
       button.closest<HTMLElement>('.lifestyle-card,.discovery-item,.tour-card,.idea-card,.card')?.remove();
+      refreshOutdoorPicks();
       refreshEventHighlights();
       document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));
     });
@@ -743,6 +748,7 @@ function renderCurrentFilters() {
   if (resetFilters) {
     resetFilters.hidden = activeDay === 'all' && activeCategory === 'all';
   }
+  refreshOutdoorPicks();
 }
 
 function syncDetailFavorite() {
@@ -1132,3 +1138,18 @@ void bootstrap();
 
 
 
+
+function refreshOutdoorPicks(){
+ const library=outdoorLibrary(),sources=stockSources();
+ for(const group of document.querySelectorAll<HTMLElement>('#hikeGroup,#bikeGroup,#walkGroup')){
+  const cards=Array.from(group.querySelectorAll<HTMLElement>('.tour-card'));
+  const rows=cards.map(card=>({card,id:card.dataset.tourId||'',title:card.dataset.tourTitle||'',url:card.dataset.tourUrl||'',fitScore:Number(card.dataset.tourScore)}));
+  const hidden=new Set([...sources.decisions.hidden,...rows.filter(x=>x.card.dataset.profileRejected==='true').map(x=>x.id)]);
+  const picks=new Set(outdoorPicks(rows,[...library.items,...sources.favorites],hidden,library.ready&&sources.decisions.ready).map(x=>x.card));
+  for(const card of cards){const show=picks.has(card);card.hidden=!show;card.classList.toggle('is-hidden',!show);card.style.setProperty('display',show?'':'none',show?'':'important');}
+  const empty=group.querySelector<HTMLElement>('.outdoor-empty');if(empty){empty.hidden=picks.size>0;empty.textContent=library.ready&&sources.decisions.ready?'Noch keine weiteren passenden, ungespeicherten Touren geprüft. Ziel: zwei neue Vorschläge.':'Tourenbibliothek wird geladen …';}
+  const generic=group.querySelector<HTMLElement>('.profile-empty');if(generic)generic.hidden=true;
+ }
+}
+document.addEventListener('activity-stock-sources',refreshOutdoorPicks);
+document.addEventListener('outdoor-library-changed',refreshOutdoorPicks);

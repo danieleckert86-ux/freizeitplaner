@@ -91,6 +91,10 @@ export function matchingStock(a:KnownActivity,items:readonly StockItem[],answers
 }
 
 // Private in-memory bridge, never sent to the public catalogue or a research provider.
+let library:StockItem[]=[];
+let libraryReady=false;
+export const outdoorLibrary=()=>({items:library,ready:libraryReady});
+export function publishOutdoorLibrary(items:StockItem[],ready:boolean){library=items.map(x=>({...x}));libraryReady=ready;if(typeof document!=='undefined')document.dispatchEvent(new Event('outdoor-library-changed'));}
 let favorites:StockFavorite[]=[];
 let decisions:StockDecisions={ready:false,hidden:new Set(),ratings:new Map()};
 export const stockSources=()=>({favorites,decisions});

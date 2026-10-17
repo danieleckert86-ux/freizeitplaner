@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --experimental-strip-types --test tests/collection.test.mjs tests/known-activities.test.mjs tests/activity-guide.test.mjs tests/activity-stock.test.mjs tests/taste-profile.test.mjs tests/media-rating.test.mjs tests/taste-settings.test.mjs tests/database.test.mjs tests/hike-eligibility.test.mjs tests/recommendation-eligibility.test.mjs"
+    "test": "node --experimental-strip-types --test tests/outdoor-selection.test.mjs tests/collection.test.mjs tests/known-activities.test.mjs tests/activity-guide.test.mjs tests/activity-stock.test.mjs tests/taste-profile.test.mjs tests/media-rating.test.mjs tests/taste-settings.test.mjs tests/database.test.mjs tests/hike-eligibility.test.mjs tests/recommendation-eligibility.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4"

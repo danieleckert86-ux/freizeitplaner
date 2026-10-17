@@ -27,5 +27,6 @@ export function validTasteAssessments(x:unknown):x is TasteAssessments{return !!
 export function profileKeyFor(x:{kind:string;mediaType?:'film'|'series';category:string}):ProfileKey|null{if(x.kind==='cinema')return 'film';if(x.kind==='stream')return x.mediaType==='film'?'film':x.mediaType==='series'?'series':null;if(x.kind==='restaurant')return /biergarten/i.test(x.category)?'beerGarden':/café|cafe/i.test(x.category)?'cafe':'restaurant';if(x.kind==='event')return /musik|konzert|indie|folk|songwriter|rock|pop|jazz/i.test(x.category)?'music':'culture';return ({restaurant:'restaurant',cafe:'cafe','beer-garden':'beerGarden',hike:'hike',bike:'bike',walk:'walk'} as Record<string,ProfileKey>)[x.kind]??'standard';}
 export function currentAssessment(id:string,key:ProfileKey|null,profiles:TasteProfiles,assessments:TasteAssessments){const a=assessments[id];return key&&a&&a.profileKey===key&&profiles[key]?.updatedAt===a.profileUpdatedAt?a:null;}
 
-// Only a current, evidenced strong assessment without a caveat may be displayed.
-export function strongAssessmentAllowed(a:TasteAssessment|null|undefined):boolean{return !!a&&a.status==='strong'&&!a.caveat.trim()&&validTasteAssessments({candidate:a});}
+// Display a current, evidenced positive decision. Content notes do not negate a match.
+export function strongAssessmentAllowed(a:TasteAssessment|null|undefined):boolean{return !!a&&a.status==='strong'&&validTasteAssessments({candidate:a});}
+

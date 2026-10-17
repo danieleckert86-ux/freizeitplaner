@@ -18,7 +18,7 @@ export function setLegacyTasteRatings(value:Map<string,number>){legacy=new Map(v
 export function tasteRatingById(id:string){return ratings.find(x=>x.id===id);}
 export function effectiveLegacyRatings(value:Map<string,number>){const next=new Map(value);for(const r of ratings){const score=ratingScore(r)!;next.set(r.id,score<40?-1:score>60?1:0);}return next;}
 export function publishTasteProfile(value:readonly TasteRating[],available:boolean){const signature=JSON.stringify([available,value]);if(signature===profileSignature)return;profileSignature=signature;ratings=[...value];ready=available;refreshTasteUI();document.dispatchEvent(new Event('taste-scores-changed'));}
-export function adjustedTaste(item:TasteSuggestion){const a=profileAssessment(item);return {score:null as number|null,reason:a?a.reason+(a.caveat?' · Vorbehalt: '+a.caveat:''):'Noch kein Inhaltsabgleich mit deinem aktuellen Profil dokumentiert.',confidence:a?.status??'pending'};}
+export function adjustedTaste(item:TasteSuggestion){const a=profileAssessment(item);return {score:null as number|null,reason:a?a.reason+(a.caveat?' · Hinweis: '+a.caveat:''):'Noch kein Inhaltsabgleich mit deinem aktuellen Profil dokumentiert.',confidence:a?.status??'pending'};}
 export function refreshTasteUI(){
  const host=document.querySelector<HTMLElement>('#tasteArchive');if(!host)return;
  const open=host.querySelector('details')?.open??false;
@@ -53,3 +53,4 @@ export function initTasteUI(){
 }
 
 document.addEventListener('taste-settings-changed',()=>{refreshTasteUI();document.dispatchEvent(new Event('taste-scores-changed'));});
+

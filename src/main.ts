@@ -192,7 +192,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
     const list = document.querySelector<HTMLElement>(selector);
     if (!list) return;
     list.innerHTML = items.filter(item => !hiddenIds.has(item.id)&&(section==='restaurants'||mediaRecommendationAllowed(item))).map(item =>
-      '<article class="lifestyle-card" '+(section==='restaurants'?'':'data-profile-rejected="true" ')+'data-lifestyle-id="' + dataEscape(item.id) + '">' +
+      '<article class="lifestyle-card" '+(section==='restaurants'?'':'data-profile-rejected="true" style="display:none!important" ')+'data-lifestyle-id="' + dataEscape(item.id) + '">' +
       '<div class="lifestyle-top"><span class="lifestyle-type">' + categoryIcon(section, item.type) + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(/passung/i.test(item.badge||'')?'Inhaltlich vorgeprüft':item.badge) + '</span></div>' +
       '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div>' +
       '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item, section) + '<p>' + dataEscape(neutralDescription(item.description).replace(section==='cinema'?/Heute/gi:/$^/g,'Gespeicherte Vorstellung')) + '</p>' +
@@ -237,6 +237,7 @@ function applyPersonalTasteScores(){
     const media=item.kind==='cinema'||item.kind==='stream';
     const allowed=strongAssessmentAllowed(profileAssessment(item));
     card.dataset.profileRejected=String(media?!allowed:fit.confidence==='rejected');
+    if(media){if(allowed)card.style.removeProperty('display');else card.style.setProperty('display','none','important');}
     if(label){let explanation=card.querySelector<HTMLElement>('.profile-fit-reason');if(!explanation){explanation=document.createElement('p');explanation.className='profile-fit-reason';label.after(explanation);}explanation.textContent=fit.reason;label.textContent=fit.confidence==='strong'?'Starke persönliche Passung':fit.confidence==='qualified'?'Passend mit Vorbehalt':fit.confidence==='rejected'?'Passt derzeit nicht zum Profil':'Profilabgleich ausstehend';label.title=fit.reason+' · Rangfolge nach Geschmack; keine Wahrscheinlichkeit und keine Termin- oder Sicherheitsfreigabe.';}
     if(card.classList.contains('discovery-item'))card.dataset.fitScore=fit.score===null?'':String(fit.score);
   });

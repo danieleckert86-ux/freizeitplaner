@@ -11,6 +11,20 @@ export function discoveryRouteKind(x:{kind?:string;category?:string;label?:strin
  if(x.kind==='walk'||/spazier|walking/i.test([x.category,x.label].join(' ')))return 'walk';
  return x.kind==='bike'?'bike':'hike';
 }
+// Imported routes stay in storage; only eligible climbs belong in new hike suggestions.
+// The current backend projection carries ascent in a dedicated meta entry.
+export function hikeAscentAllowed(x:{ascent?:number|null;meta?:readonly string[]}):boolean {
+ let ascent=x.ascent;
+ if(ascent===undefined){
+  const values=(x.meta??[]).flatMap(value=>{
+   const match=value.trim().match(/^(\d+(?:[.,]\d+)?)\s*(?:hm|höhenmeter)(?:\s*(?:aufstieg|bergauf))?$/i);
+   return match?[Number(match[1].replace(',','.'))]:[];
+  });
+  if(values.length!==1)return false;
+  ascent=values[0];
+ }
+ return typeof ascent==='number'&&Number.isFinite(ascent)&&ascent>=500&&ascent<=900;
+}
 // Saved discovery belongs to Neues even when it is an evergreen route or place.
 export function favoriteArea(category:string,date?:string):'ideas'|'current' {
  if(date&&/^\d{4}-\d{2}-\d{2}$/.test(date))return 'current';

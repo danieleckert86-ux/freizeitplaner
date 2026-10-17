@@ -3,7 +3,7 @@ import {strongAssessmentAllowed} from './taste-settings';
 import {imdbMarkup,mediaRecommendationAllowed,germanTrailerMarkup} from './media-rating';
 import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI,openTasteDetails,closeTasteDetails,setTasteArchiveScope} from './taste-ui';
 import {publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
-import { favoriteArea,finderSectionVisible,discoveryFoodKind,discoveryRouteKind,streamingFormat,streamingCardMeta,type NewCategory } from './finder-navigation';
+import { favoriteArea,finderSectionVisible,discoveryFoodKind,discoveryRouteKind,hikeAscentAllowed,streamingFormat,streamingCardMeta,type NewCategory } from './finder-navigation';
 import { initPlanner } from './planner';
 import { neutralDescription } from './wording';
 import { categoryIcon } from './category-icons';
@@ -20,7 +20,7 @@ type Recommendation = {
   day: string; category: string; date: string; title: string; description: string;
   url: string; sourceLabel: string; location?: string; venue?: string; city?: string; address?: string;
   favorite: { id: string; title: string; dayLabel: string; categoryLabel: string; description: string; url: string };
-  id?: string; mediaType?: 'film'|'series'; fitScore?: number; verifiedAt?: string; imported?: boolean; conditionsStatus?: string; bookingDeadline?: string;
+  id?: string; mediaType?: 'film'|'series'; ascent?: number|null; fitScore?: number; verifiedAt?: string; imported?: boolean; conditionsStatus?: string; bookingDeadline?: string;
   dayText?: string; badge?: string; facts?: string[]; why?: string;
   label?: string; meta?: string[]; metaLabel?: string; time?: string;
 };
@@ -174,7 +174,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       '<div class="item-actions">' + sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, item.category) + stockCopyMarkup({id:item.favorite.id,title:item.title,category:item.favorite.categoryLabel,description:item.description,url:item.favorite.url},item.meta??[],item) + '</div></article>'
     ).join('')+'<p class="collection-empty outdoor-empty" '+(items.length?'hidden':'')+'>Noch keine recherchierten Wege gespeichert.</p>';
   };
-  renderTours('#hikeGroup', data.hikes.filter(x=>discoveryRouteKind(x)!=='walk'));
+  renderTours('#hikeGroup', data.hikes.filter(x=>discoveryRouteKind(x)!=='walk'&&hikeAscentAllowed(x)));
   renderTours('#walkGroup', [...(data.walks??[]),...data.hikes.filter(x=>discoveryRouteKind(x)==='walk')]);
   renderTours('#bikeGroup', data.bikes);
 
@@ -724,7 +724,7 @@ function renderCurrentFilters() {
   weekendSection?.classList.toggle('is-hidden', visibleIdeas === 0);
   for(const [group,count] of [[hikeGroup,visibleHikes],[bikeGroup,visibleBikes],[document.querySelector<HTMLElement>('#walkGroup'),visibleWalks]] as const){
     group?.classList.remove('is-hidden');
-    const empty=group?.querySelector<HTMLElement>('.outdoor-empty');if(empty){empty.hidden=count>0;empty.textContent='Noch keine passenden recherchierten Wege angezeigt.';}
+    const empty=group?.querySelector<HTMLElement>('.outdoor-empty');if(empty){empty.hidden=count>0;empty.textContent=group===hikeGroup?'Noch keine passenden Wanderungen mit belegten 500–900 Höhenmetern angezeigt.':'Noch keine passenden recherchierten Wege angezeigt.';}
   }
   outdoorSection?.classList.remove('is-hidden');
 

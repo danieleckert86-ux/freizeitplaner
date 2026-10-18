@@ -255,7 +255,7 @@ function applyPersonalTasteScores(){
   }
   refreshOutdoorPicks();
   refreshEventHighlights();
-  document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));
+  refreshEventHighlights();
   document.dispatchEvent(new Event('media-fit-changed'));
 }
 const tasteItems=new Map<string,Parameters<typeof registerTasteSuggestion>[0]>();
@@ -307,7 +307,7 @@ async function loadRecommendationData() {
   publishStockDecisions(hiddenIds,effectiveLegacyRatings(ratings),stockRatingsAvailable);
   renderRecommendationData(data, hiddenIds);
   wireRatingButtons(ratings);
-  document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));
+  refreshEventHighlights();
 }
 
 type Favorite = {
@@ -352,7 +352,7 @@ async function bootstrap() {
     });
     document.querySelectorAll<HTMLButtonElement>('[data-media-tab]').forEach(b=>b.classList.toggle('active',b.dataset.mediaTab===currentKind.value));
     document.querySelectorAll<HTMLElement>('[data-media-panel]').forEach(panel=>{panel.hidden=panel.dataset.mediaPanel!==currentKind.value;panel.classList.toggle('active',!panel.hidden);});
-    document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));
+    refreshEventHighlights();
     document.querySelectorAll<HTMLElement>('.tour-card,.lifestyle-card').forEach(card=>{card.hidden=savedFilter&&onlySaved.checked&&!card.querySelector('[data-favorite].saved');});
     refreshOutdoorPicks();
     document.dispatchEvent(new CustomEvent('finder-saved-filter',{detail:savedFilter&&onlySaved.checked}));
@@ -425,7 +425,7 @@ void loadFavorites();
       button.closest<HTMLElement>('.lifestyle-card,.discovery-item,.tour-card,.idea-card,.card')?.remove();
       refreshOutdoorPicks();
       refreshEventHighlights();
-      document.querySelector<HTMLSelectElement>('#eventPeriod')?.dispatchEvent(new Event('change'));
+      refreshEventHighlights();
     });
   });
 
@@ -1124,7 +1124,6 @@ function quietCardActions() {
   });
 }
 new MutationObserver(quietCardActions).observe(document.querySelector('#app')!, {childList:true,subtree:true});
-document.querySelector<HTMLSelectElement>('#eventPeriod')?.addEventListener('change',refreshEventHighlights);
 document.querySelector<HTMLSelectElement>('#eventSort')?.addEventListener('change',refreshEventHighlights);
 
 document.addEventListener('click',ev=>{

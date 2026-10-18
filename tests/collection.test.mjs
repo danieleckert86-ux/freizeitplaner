@@ -98,7 +98,7 @@ test('event controls restore hidden cards and filter top picks through the actua
  const list=()=>({children:[],append(c){if(c.parentElement){const old=c.parentElement.children;old.splice(old.indexOf(c),1);}this.children.push(c);c.parentElement=this;}});
  const top=list(),rest=list(),block={hidden:true,querySelector:()=>({textContent:''})},empty={hidden:true},period={value:'all'},sort={value:'date'},saved={checked:false};
  rows.forEach(c=>rest.append(c));
- const nodes={'#discoveriesHeading':{textContent:''},'#discoveries .event-list-heading':{textContent:''},'#topEventList':top,'#discoveries > .discovery-timeline':rest,'#eventHighlights':block,'#eventsEmpty':empty,'#eventPeriod':period,'#eventSort':sort,'#onlySaved':saved};
+ const nodes={'#discoveriesHeading':{textContent:''},'#discoveries .event-list-heading':{textContent:''},'#topEventList':top,'#discoveries > .discovery-timeline':rest,'#eventHighlights':block,'#eventsEmpty':empty,'#eventPeriod':period,'#eventSort':sort,'#onlySaved':saved,'#currentKind':{value:'events'}};
  const document={querySelector:s=>nodes[s],querySelectorAll:()=>[...top.children,...rest.children]};
  const source=readFileSync(new URL('../src/main.ts',import.meta.url),'utf8');
  const body=source.slice(source.indexOf('function refreshEventHighlights()'),source.indexOf('function quietCardActions()'));
@@ -111,7 +111,7 @@ test('event controls restore hidden cards and filter top picks through the actua
  period.value='all';refresh();assert.equal(top.children.length,2);assert.equal(rows[2].hidden,true);assert.equal(rows[2].attrs['aria-hidden'],'true');
  period.value='weekend';saved.checked=true;refresh();assert.deepEqual(top.children.map(c=>c.querySelector('h3').textContent),['Friday']);
  saved.checked=false;refresh();assert.equal(top.children.length,2);assert.equal(rows[2].hidden,true);
- rows[0].dataset.date='2026-10-19';rows[1].dataset.date='2026-10-20';refresh();assert.equal(block.hidden,false);assert.equal(empty.hidden,true);
+ rows[0].dataset.category='Indie-Konzert';nodes['#currentKind'].value='music';refresh();assert.equal(nodes['#discoveriesHeading'].textContent,'Musik & Konzerte');assert.deepEqual(top.children.map(c=>c.querySelector('h3').textContent),['Friday']);nodes['#currentKind'].value='events';rows[0].dataset.date='2026-10-19';rows[1].dataset.date='2026-10-20';refresh();assert.equal(block.hidden,false);assert.equal(empty.hidden,true);
 });
 
 test('partial research preserves fetch evidence, pending work and failures separately',()=>{

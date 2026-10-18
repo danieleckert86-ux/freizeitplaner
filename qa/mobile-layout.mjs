@@ -5,9 +5,9 @@ import {createServer} from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {join,extname} from 'node:path';
 import assert from 'node:assert/strict';
-const stamp=new Date().toISOString();
-const base={title:'Restaurant und Kulturhaus mit besonders langem Namen in Augsburg',type:'Restaurant',description:'Ausführliche Beschreibung für die isolierte mobile Layoutprüfung.',meta:['Augsburg'],url:'https://example.invalid/original',badge:'Passt gut',city:'Augsburg',address:'Maximilianstraße 123, Hinterhof am historischen Stadtmarkt, 86150 Augsburg',verifiedAt:stamp,fitScore:84};
-const data={schemaVersion:2,dataUpdated:stamp,weekendRange:'Test',weatherDays:[],top:[],ideas:[],hikes:[],bikes:[],walks:[],discoveries:[],restaurants:[{...base,id:'qa-food',category:'restaurant'}],cinema:[{...base,id:'qa-cinema',title:'Ein besonders langer Kinofilmtitel für die mobile Vorschau',type:'Kino',category:'cinema',imdbRating:7.8,imdbUrl:'https://www.imdb.com/title/tt1234567/',trailerUrl:'https://www.youtube.com/watch?v=example',trailerLanguage:'de'}],stream:[{...base,id:'qa-stream',title:'Eine besonders lange Streamingserie für die mobile Vorschau',type:'Serie',mediaType:'series',category:'stream',platform:'ARD Mediathek',releaseDate:stamp,imdbRating:8.1,trailerLanguage:'de',trailerUrl:'https://www.youtube.com/watch?v=example'}]};
+const stamp=new Date().toISOString();const day=stamp.slice(0,10);
+const base={title:'Restaurant und Kulturhaus mit besonders langem Namen in Augsburg',type:'Restaurant',description:'Ausführliche Beschreibung für die isolierte mobile Layoutprüfung.',meta:['Augsburg'],url:'https://example.invalid/original',badge:'Passt gut',city:'Augsburg',address:'Maximilianstraße 123, Hinterhof am historischen Stadtmarkt, 86150 Augsburg',verifiedAt:stamp,fitScore:84,location:'Augsburg · Maximilianstraße 123, Hinterhof am historischen Stadtmarkt',closed:false,openingCity:'Augsburg',openingDate:day,openingSourceUrl:'https://example.invalid/opening',date:day,time:'23:59',imdbUrl:'https://www.imdb.com/title/tt1234567/'};
+const data={schemaVersion:2,dataUpdated:stamp,weekendRange:'Test',weatherDays:[],top:[],ideas:[],hikes:[],bikes:[],walks:[],discoveries:[],restaurants:[{...base,id:'qa-food',category:'restaurant'}],cinema:[{...base,id:'qa-cinema',title:'Ein besonders langer Kinofilmtitel für die mobile Vorschau',type:'Kino',category:'cinema',imdbRating:7.8,imdbUrl:'https://www.imdb.com/title/tt1234567/',trailerUrl:'https://www.youtube.com/watch?v=example',trailerLanguage:'de'}],stream:[{...base,id:'qa-stream',title:'Eine besonders lange Streamingserie für die mobile Vorschau',type:'Serie',mediaType:'series',category:'stream',platform:'ARD Mediathek',releaseDate:day,imdbRating:8.1,trailerLanguage:'de',trailerUrl:'https://www.youtube.com/watch?v=example'}]};
 const server=createServer(async(req,res)=>{try{const u=new URL(req.url,'http://localhost');const file=join(process.cwd(),'dist',u.pathname==='/'?'index.html':u.pathname);const body=await readFile(file);res.setHeader('Content-Type',({'.html':'text/html','.js':'application/javascript','.css':'text/css','.svg':'image/svg+xml'})[extname(file)]||'application/octet-stream');res.end(body);}catch{res.statusCode=404;res.end('not found');}});
 await new Promise(r=>server.listen(4173,'127.0.0.1',r));
 let browser;
@@ -15,7 +15,7 @@ try{
  browser=await pw.launch({executablePath:await chromium.executablePath(),args:chromium.args,headless:true});
  for(const width of [320,390]){
   const page=await browser.newPage({viewport:{width,height:844},isMobile:true,deviceScaleFactor:1});
-  let writes=0;
+  let writes=0;page.on('pageerror',e=>console.log('QA_PAGE_ERROR '+e.message));page.on('console',m=>{if(m.type()==='error')console.log('QA_CONSOLE '+m.text());});
   await page.route('**/*',async route=>{
    const req=route.request(),url=req.url();
    if(!['GET','HEAD','OPTIONS'].includes(req.method())){writes++;return route.abort();}

@@ -13,8 +13,9 @@ await new Promise(r=>server.listen(4173,'127.0.0.1',r));
 let browser;
 try{
  browser=await pw.launch({executablePath:await chromium.executablePath(),args:chromium.args,headless:true});
+ const page=await browser.newPage({viewport:{width:320,height:844},isMobile:true,deviceScaleFactor:1});
  for(const width of [320,390]){
-  const page=await browser.newPage({viewport:{width,height:844},isMobile:true,deviceScaleFactor:1});
+  await page.setViewportSize({width,height:844});
   let writes=0;page.on('pageerror',e=>console.log('QA_PAGE_ERROR '+e.message));page.on('console',m=>{if(m.type()==='error')console.log('QA_CONSOLE '+m.text());});
   await page.route('**/*',async route=>{
    const req=route.request(),url=req.url();
@@ -53,7 +54,7 @@ try{
   }
   assert.equal(writes,0,'No write calls during fixture tests');
   console.log('MOBILE_VIEWPORT_OK '+width+' hidden taste overview; long addresses; IMDb/trailer; contained 44px actions; real detail dialogs; synthetic data only');
-  await page.close();
+  await page.unroute('**/*');
  }
  console.log('MOBILE_LAYOUT_PASS 320px 390px');
 }finally{await browser?.close();server.close();}

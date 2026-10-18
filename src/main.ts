@@ -1,3 +1,4 @@
+import {advanceBookingReason,type AdvanceBooking} from './event-planning';
 import {outdoorPicks} from './outdoor-selection';
 import {recommendationAllowed,foodOpeningLabel,type RecommendationFacts} from './recommendation-eligibility';
 import {profileAssessment} from './taste-settings-ui';
@@ -11,7 +12,7 @@ import { categoryIcon } from './category-icons';
 import { recommendationPlace, travelNote, googleMapsPlaceUrl, foodPlace } from './locations';
 import './styles.css';
 import './collection.css';
-import {upcomingEvents,eventView,catalogueFitLabel,collectionSourceStates,researchTime} from './collection';
+import {upcomingEvents,weeklyBookingView,catalogueFitLabel,collectionSourceStates,researchTime} from './collection';
 import {createLeisureDatabase} from './database';
 
 const supabase = createLeisureDatabase();
@@ -21,7 +22,7 @@ type Recommendation = {
   day: string; category: string; date: string; title: string; description: string;
   url: string; sourceLabel: string; location?: string; venue?: string; city?: string; address?: string;
   favorite: { id: string; title: string; dayLabel: string; categoryLabel: string; description: string; url: string };
-  id?: string; mediaType?: 'film'|'series'; ascent?: number|null; fitScore?: number; verifiedAt?: string; imported?: boolean; conditionsStatus?: string; bookingDeadline?: string;
+  id?: string; mediaType?: 'film'|'series'; ascent?: number|null; fitScore?: number; verifiedAt?: string; imported?: boolean; conditionsStatus?: string; bookingDeadline?: string; advanceBooking?: AdvanceBooking;
   dayText?: string; badge?: string; facts?: string[]; why?: string;
   label?: string; meta?: string[]; metaLabel?: string; time?: string;
 };
@@ -185,8 +186,8 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   const discoveries = document.querySelector<HTMLElement>('#discoveries > .discovery-timeline');
   if(discoveries)document.querySelector<HTMLElement>('#topEventList')?.replaceChildren();
   if (discoveries) discoveries.innerHTML = upcomingEvents([...data.top,...data.ideas,...data.discoveries], new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date()),hiddenIds).map(item =>
-    '<article class="discovery-item filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '" data-event-location="' + dataEscape(item.location || '') + '" data-event-time="' + dataEscape(item.time || '') + '" data-fit-score="' + (item.imported || !Number.isFinite(item.fitScore) ? '' : item.fitScore) + '"><div><div class="discovery-header"><time datetime="' + dataEscape(item.date) + '">' + dataEscape(new Intl.DateTimeFormat('de-DE', {weekday:'short',day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(new Date(item.date + 'T12:00:00Z'))) + (/^\d{2}:\d{2}$/.test(item.time || '') ? ' · ' + dataEscape(item.time) : '') + '</time><span class="mini-badge">' + categoryIcon(item.category, item.badge || item.title) + '<span class="category-label">' + dataEscape((item.badge || item.label || item.favorite.categoryLabel).split(/\s*[·×]\s*/)[0]) + '</span></span></div>' +
-    '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div><h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' + (item.bookingDeadline?'<p class="collection-condition">Buchungsfrist: '+dataEscape(item.bookingDeadline)+'</p>':'') + '<div class="item-actions">' +
+    '<article class="discovery-item filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '" data-advance-booking="' + dataEscape(JSON.stringify(item.advanceBooking||null)) + '" data-booking-deadline="' + dataEscape(item.bookingDeadline||'') + '" data-event-location="' + dataEscape(item.location || '') + '" data-event-time="' + dataEscape(item.time || '') + '" data-fit-score="' + (item.imported || !Number.isFinite(item.fitScore) ? '' : item.fitScore) + '"><div><div class="discovery-header"><time datetime="' + dataEscape(item.date) + '">' + dataEscape(new Intl.DateTimeFormat('de-DE', {weekday:'short',day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(new Date(item.date + 'T12:00:00Z'))) + (/^\d{2}:\d{2}$/.test(item.time || '') ? ' · ' + dataEscape(item.time) : '') + '</time><span class="mini-badge">' + categoryIcon(item.category, item.badge || item.title) + '<span class="category-label">' + dataEscape((item.badge || item.label || item.favorite.categoryLabel).split(/\s*[·×]\s*/)[0]) + '</span></span></div>' +
+    '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div><h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' + (advanceBookingReason(item,new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date()))?'<p class="collection-condition">'+dataEscape(advanceBookingReason(item,new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date()))||'')+'</p>':'') + '<div class="item-actions">' +
     sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, 'discoveries') + favoriteMarkup(item, true) + '</div></div></article>'
   ).join('');
 
@@ -1065,15 +1066,14 @@ function refreshEventHighlights() {
   if(!topList||!rest||!block)return;
   const cards=Array.from(document.querySelectorAll<HTMLElement>('#discoveries .discovery-item'));
   const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date());
-  const period=document.querySelector<HTMLSelectElement>('#eventPeriod')?.value||'all';
   const sort=document.querySelector<HTMLSelectElement>('#eventSort')?.value==='fit'?'fit':'date';
   const savedOnly=!!document.querySelector<HTMLInputElement>('#onlySaved')?.checked;
   const section=document.querySelector<HTMLSelectElement>('#currentKind')?.value==='music'?'music':'events';
   const heading=section==='music'?'Musik & Konzerte':'Kultur & Veranstaltungen';
   document.querySelector<HTMLElement>('#discoveriesHeading')!.textContent=heading;
-  block.querySelector('h3')!.textContent='Deine Top 3 · '+heading;
-  document.querySelector<HTMLElement>('#discoveries .event-list-heading')!.textContent=section==='music'?'Weitere Konzerte':'Weitere Kulturveranstaltungen';
-  const view=eventView(cards.filter(card=>card.dataset.profileRejected!=='true').map(card=>({card,location:card.dataset.eventLocation,category:card.dataset.category,title:card.querySelector('h3')?.textContent||'',date:card.dataset.date,time:card.dataset.eventTime,fitScore:card.dataset.fitScore?Number(card.dataset.fitScore):undefined,saved:!!card.querySelector('[data-favorite].saved')})),today,period,sort,savedOnly,section);
+  block.querySelector('h3')!.textContent='Diese Woche · '+heading;
+  document.querySelector<HTMLElement>('#discoveries .event-list-heading')!.textContent='Frühzeitig buchen · nächste 90 Tage';
+  const view=weeklyBookingView(cards.filter(card=>card.dataset.profileRejected!=='true').map(card=>({card,location:card.dataset.eventLocation,category:card.dataset.category,title:card.querySelector('h3')?.textContent||'',date:card.dataset.date,time:card.dataset.eventTime,bookingDeadline:card.dataset.bookingDeadline,advanceBooking:JSON.parse(card.dataset.advanceBooking||'null')||undefined,fitScore:card.dataset.fitScore?Number(card.dataset.fitScore):undefined,saved:!!card.querySelector('[data-favorite].saved')})),today,sort,savedOnly,section);
   const visible=new Set([...view.highlights,...view.others].map(x=>x.card));
   for(const card of cards){
     delete card.dataset.topEvent;
@@ -1086,7 +1086,7 @@ function refreshEventHighlights() {
   for(const {card} of view.others)rest.append(card);
   block.hidden=view.highlights.length===0;
   const empty=document.querySelector<HTMLElement>('#eventsEmpty');
-  if(empty){empty.hidden=visible.size>0;empty.textContent='Aktuell keine '+heading+' mit bestätigter persönlicher Passung im gewählten Zeitraum.';}
+  if(empty){empty.hidden=visible.size>0;empty.textContent='Aktuell keine passenden '+heading+' für diese Woche oder mit belegtem Grund zum frühzeitigen Buchen.';}
 }
 
 function quietCardActions() {
@@ -1155,3 +1155,4 @@ function refreshOutdoorPicks(){
 }
 document.addEventListener('activity-stock-sources',refreshOutdoorPicks);
 document.addEventListener('outdoor-library-changed',refreshOutdoorPicks);
+

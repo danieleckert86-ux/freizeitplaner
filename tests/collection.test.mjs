@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {upcomingEvents,topTasteEvents,eventInPeriod,catalogueFitLabel,eventView} from '../src/collection.ts';
+import {upcomingEvents,topTasteEvents,eventInPeriod,catalogueFitLabel,eventView,weeklyBookingView} from '../src/collection.ts';
 import {collectionSourceStates} from '../src/collection.ts';
 test('source evidence shows missing, failed and stale separately and never substitutes collection save time',()=>{
  const now=Date.parse('2026-10-10T05:00:00Z');
@@ -103,15 +103,15 @@ test('event controls restore hidden cards and filter top picks through the actua
  const source=readFileSync(new URL('../src/main.ts',import.meta.url),'utf8');
  const body=source.slice(source.indexOf('function refreshEventHighlights()'),source.indexOf('function quietCardActions()'));
  class FixedDate extends Date{constructor(value){super(value??'2026-10-16T10:00:00Z');}}
- const context={document,eventView,Date:FixedDate,Intl};
+ const context={document,weeklyBookingView,Date:FixedDate,Intl};
  vm.createContext(context);vm.runInContext(ts.transpileModule(body,{compilerOptions:{target:ts.ScriptTarget.ES2020}}).outputText,context);
  const refresh=()=>vm.runInContext('refreshEventHighlights()',context);
- refresh();assert.equal(top.children.length,3);
- period.value='today';refresh();assert.deepEqual(top.children.map(c=>c.querySelector('h3').textContent),['Friday']);assert.equal(rows[2].hidden,true);assert.equal(rows[2].classes.has('is-hidden'),true);
- period.value='all';refresh();assert.equal(top.children.length,3);assert.equal(rows[2].hidden,false);assert.equal(rows[2].attrs['aria-hidden'],'false');
+ refresh();assert.equal(top.children.length,2);
+ period.value='today';refresh();assert.deepEqual(top.children.map(c=>c.querySelector('h3').textContent),['Friday','Saturday']);assert.equal(rows[2].hidden,true);assert.equal(rows[2].classes.has('is-hidden'),true);
+ period.value='all';refresh();assert.equal(top.children.length,2);assert.equal(rows[2].hidden,true);assert.equal(rows[2].attrs['aria-hidden'],'true');
  period.value='weekend';saved.checked=true;refresh();assert.deepEqual(top.children.map(c=>c.querySelector('h3').textContent),['Friday']);
  saved.checked=false;refresh();assert.equal(top.children.length,2);assert.equal(rows[2].hidden,true);
- period.value='today';rows[0].dataset.date='2026-10-17';refresh();assert.equal(block.hidden,true);assert.equal(empty.hidden,false);
+ rows[0].dataset.date='2026-10-19';rows[1].dataset.date='2026-10-20';refresh();assert.equal(block.hidden,true);assert.equal(empty.hidden,false);
 });
 
 test('partial research preserves fetch evidence, pending work and failures separately',()=>{
@@ -161,4 +161,17 @@ test('cabaret and literature keep cultural priority over incidental music or jaz
 test('Top 3 use distinct formats while second performance remains visible',()=>{
  const rows=[{title:'Designmarkt',location:'Gaswerk',date:'2026-10-18',fitScore:99},{title:'Designmarkt',location:'Gaswerk',date:'2026-10-19',fitScore:98},{title:'Lesung',date:'2026-10-20',fitScore:95},{title:'Kabarett',date:'2026-10-21',fitScore:94}];
  const view=eventView(rows,'2026-10-18');assert.deepEqual(view.highlights.map(x=>x.title),['Designmarkt','Lesung','Kabarett']);assert.equal(view.others[0].date,'2026-10-19');
+});
+
+
+
+test('weekly display has no top-three cap and future preview requires real booking evidence',()=>{
+ const today='2026-10-19';
+ const evidence={reason:'Veranstalter meldet wenige verbleibende Karten',sourceUrl:'https://tickets.example.org/event',verifiedAt:'2026-10-18T10:00:00Z'};
+ const rows=[...Array.from({length:5},(_,i)=>({id:'w'+i,title:'Woche '+i,date:'2026-10-2'+(i+1),category:'Konzert'})),{id:'book',title:'EOFT',date:'2026-11-01',advanceBooking:evidence},{id:'ordinary',title:'Bekannte Band',date:'2026-11-02'}, {id:'deadline',title:'Anmeldung',date:'2026-11-03',bookingDeadline:'2026-10-30'}, {id:'expired',title:'Frist vorbei',date:'2026-11-04',bookingDeadline:'2026-10-18'}, {id:'invalid',title:'Unbelegt',date:'2026-11-05',advanceBooking:{...evidence,sourceUrl:'http://example.org'}}];
+ const view=weeklyBookingView(rows,today);assert.equal(view.highlights.length,5);assert.deepEqual(view.others.map(x=>x.id),['book','deadline']);assert.equal(rows.length,10);
+ assert.deepEqual(weeklyBookingView(rows,'2026-10-26').highlights.map(x=>x.id),['book']);
+ assert.equal(weeklyBookingView(rows,today,'date',true).highlights.length,0);
+ assert.equal(weeklyBookingView(rows,today,'date',false,'music').highlights.length,5);
+ assert.equal(weeklyBookingView(rows,today,'date',false,'events').highlights.length,0);
 });

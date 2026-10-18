@@ -371,3 +371,13 @@ Bestehende persönliche Prüfungen behalten ihre tatsächlich verwendete Profilz
 
 
 Outdoor-Bibliothek: Orte & Touren bleibt der private dauerhafte Vorrat. Neue Tourenvorschläge schließen Vorrat und Merkliste sowie Ausblendungen vor Rangfolge und Limit aus (IDs, Import-IDs, normalisierte Namen, kanonische Original-URLs). Je Outdoor-Kategorie höchstens zwei vollständig geeignete Vorschläge; gespeicherte Touren bleiben unverändert. Beim Speichern/Ausblenden rückt geeigneter Bestand nach. Ohne geladenen Vorrat/Entscheidungen keine neuen Tourenkarten. Recherche ergänzt unterbesetzte Kategorien im bestehenden Rhythmus, keine Fülltreffer.
+
+
+
+## Veranstaltungen: diese Woche und frühzeitig buchen · 18.10.2026
+
+Die aktive App-Darstellung ersetzt Top3 und die ungefilterte 90-Tage-Liste. Musik/Kultur bleiben getrennt. Alle noch kommenden persönlich freigegebenen Termine der aktuellen Berliner Kalenderwoche bis Sonntag erscheinen ohne Drei-Titel-Limit. Spätere Termine bis90Tage erscheinen ausschließlich mit konkretem Buchungsgrund; bloße Ticketlinks oder bekannte Namen genügen nicht.
+
+CatalogItem.advanceBooking ist optional und enthält reason, sourceUrl und verifiedAt aus tatsächlich gelesenen öffentlichen Belegen. Bestehende gültige zukünftige bookingDeadline zählt ebenfalls. Die API projiziert diese Fakten; Checkpoints validieren HTTPS-Quelle, Grund und Prüfzeit. Das ist keine Ticketverfügbarkeits- oder persönliche Passungsfreigabe. Fehlender Buchungsbeleg blendet spätere Events aus, löscht aber weder Bestand noch Vormerkungen. Recherchefenster, strong-Filter, IDs, Speicherung und Mailhöchstzahl bleiben unverändert.
+
+Abnahme: mehr als drei Wochentermine; Wochenwechsel Sonntag/Montag; getrennte Musik/Kultur; spätere gewöhnliche Termine unsichtbar; belegter Buchungsgrund/Frist sichtbar; fehlende/ungültige Belege und abgelaufene Fristen unsichtbar. App-Controller und Checkpoint/API-Projektion werden getestet.

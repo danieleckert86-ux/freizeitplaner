@@ -159,23 +159,15 @@
         </div>
       </div>
       <div class="event-controls">
-      <label class="event-period-picker">Zeitraum
-        <select id="eventPeriod" aria-label="Veranstaltungszeitraum">
-          <option value="all">Nächste 90 Tage</option>
-          <option value="month">Nächste 30 Tage</option>
-          <option value="today">Heute</option>
-          <option value="week">Diese Woche</option>
-          <option value="weekend">Dieses Wochenende</option>
-        </select>
-      </label>
         <label class="event-period-picker">Sortieren nach<select id="eventSort" aria-label="Veranstaltungen sortieren"><option value="date">Datum</option><option value="fit">Persönliche Passung</option></select></label>
       </div>
       <div id="eventHighlights" class="event-highlights" hidden>
-        <h3 class="finder-group-heading">Deine Top 3</h3>
-        <p class="event-highlights-note">Bis zu drei bestätigte passende Vorschläge aus dieser Kategorie im gewählten Zeitraum.</p>
+        <h3 class="finder-group-heading">Diese Woche</h3>
+        <p class="event-highlights-note">Passende kommende Veranstaltungen bis einschließlich Sonntag.</p>
         <div id="topEventList" class="discovery-timeline"></div>
       </div>
-      <h3 class="event-list-heading finder-group-heading">Weitere Events</h3>
+      <h3 class="event-list-heading finder-group-heading">Frühzeitig buchen · nächste 90 Tage</h3>
+      <p class="section-note">Spätere Termine nur mit belegtem Grund für frühzeitige Buchung. Ein Ticketlink allein reicht nicht.</p>
 
       <p id="eventsEmpty" hidden>Für diesen Zeitraum sind gerade keine weiteren Veranstaltungen verfügbar.</p>
       <div class="discovery-timeline">
@@ -243,6 +235,7 @@
 <script type="module" src="./src/main.ts"></script>
 </body>
 </html>
+
 
 
 

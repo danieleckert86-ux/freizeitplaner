@@ -1,5 +1,6 @@
+import {advanceBookingReason,type AdvanceBooking} from './event-planning.ts';
 import {eventSection} from './finder-navigation.ts';
-export type CollectionItem={title:string;location?:string;category?:string;date?:string;time?:string;fitScore?:number;favorite?:{id:string};id?:string;verifiedAt?:string;imported?:boolean;closed?:boolean|null};
+export type CollectionItem={bookingDeadline?:string|null;advanceBooking?:AdvanceBooking;title:string;location?:string;category?:string;date?:string;time?:string;fitScore?:number;favorite?:{id:string};id?:string;verifiedAt?:string;imported?:boolean;closed?:boolean|null};
 export function upcomingEvents<T extends CollectionItem>(items:T[],today:string,hidden:Set<string>):T[]{
  const max=new Date(today+'T12:00:00Z');max.setUTCDate(max.getUTCDate()+90);const last=max.toISOString().slice(0,10);
  const seen=new Set<string>();
@@ -29,6 +30,15 @@ export function eventView<T extends CollectionItem & {saved?:boolean}>(items:T[]
  const others=visible.filter(x=>!top.has(x)).sort((a,b)=>sort==='fit'?score(b)-score(a)||byDate(a,b):byDate(a,b)||score(b)-score(a));
  return {highlights,others};
 }
+/** Current calendar week, then only later events with concrete booking evidence. */
+export function weeklyBookingView<T extends CollectionItem & {saved?:boolean}>(items:T[],today:string,sort:EventSort='date',savedOnly=false,section?:'music'|'events'){
+ const byDate=(a:T,b:T)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||'')||a.title.localeCompare(b.title,'de');
+ const rank=(a:T,b:T)=>sort==='fit'?(b.fitScore??-1)-(a.fitScore??-1)||byDate(a,b):byDate(a,b);
+ const visible=upcomingEvents(items.filter(x=>(!section||eventSection(x)===section)&&(!savedOnly||x.saved)),today,new Set());
+ const highlights=visible.filter(x=>eventInPeriod(x.date||'',today,'week')).sort(rank);
+ const others=visible.filter(x=>!eventInPeriod(x.date||'',today,'week')&&!!advanceBookingReason(x,today)).sort(rank);
+ return {highlights,others};
+}
 export function catalogueFitLabel(item:CollectionItem){
  return !item.imported&&Number.isFinite(item.fitScore)?`${Math.round(item.fitScore!)} / 100 · passt grundsätzlich`:'Passung noch nicht bewertet';
 }
@@ -50,4 +60,5 @@ export function collectionSourceStates(sources:{id:string;hours:number}[],checks
 export function researchTime(value:string){
  const date=new Date(value);return Number.isFinite(date.getTime())?new Intl.DateTimeFormat('de-DE',{timeZone:'Europe/Berlin',dateStyle:'short',timeStyle:'short'}).format(date)+' (Berlin)':'unbekannt';
 }
+
 

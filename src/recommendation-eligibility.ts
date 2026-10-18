@@ -15,8 +15,16 @@ export function hardEligibilityReason(x:RecommendationFacts,now=new Date()):stri
  if(x.kind==='hike'&&(number(x.km)&&x.km>15||number(x.ascent)&&(x.ascent<500||x.ascent>900)||number(x.travelMinutes)&&(x.travelMinutes<0||x.travelMinutes>120)))return 'hike_limits';
  if(x.kind==='bike'&&number(x.km)&&x.km>40)return 'bike_distance';
  if(['hike','bike','walk'].includes(x.kind)&&(x.exposed===true||x.climbing===true))return 'route_unsuitable';
- if(x.imported===true||!timestamp(x.verifiedAt))return 'unverified';
  const day=berlinDay(now),date=x.releaseDate??x.date;
+ // Expired or not-yet-relevant imports do not need a new original-source review.
+ if(['event','cinema'].includes(x.kind)&&isoDay(x.date)){
+  const age=(Date.parse(x.date)-Date.parse(day))/86400000;
+  const clock=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(now);
+  if(age<0||age>90||age===0&&/^([01]\d|2[0-3]):[0-5]\d$/.test(x.time||'')&&x.time!<=clock)return 'outside_event_window';
+ }
+ if(x.kind==='stream'&&isoDay(date)){const age=(Date.parse(day)-Date.parse(date))/86400000;if(age<0||age>60)return 'outside_stream_window';}
+ if(['cinema','stream'].includes(x.kind)&&number(x.imdbRating)&&x.imdbRating>=0&&x.imdbRating<7.8)return 'imdb_threshold';
+ if(x.imported===true||!timestamp(x.verifiedAt))return 'unverified';
  if(x.kind==='restaurant'){
   if(x.openingCity!=='Augsburg'||!x.location?.trim())return 'opening_location_unconfirmed';
   if(!source(x.openingSourceUrl))return 'opening_source_missing';

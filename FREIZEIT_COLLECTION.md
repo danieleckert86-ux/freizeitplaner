@@ -381,3 +381,22 @@ Musik/Kultur bleiben getrennt. Alle noch kommenden persönlich freigegebenen Ter
 CatalogItem.ticketPrice={amount:number,currency:'EUR',basis:'regular-adult',sourceUrl,verifiedAt}. Der Betrag ist der reguläre Eintritt pro erwachsener Person, bei Preiskategorien der günstigste tatsächlich buchbare reguläre Preis. Keine Ermäßigung, Paket-/Gruppenpreise, Spenden, Schätzungen oder erfundenen Prüfzeiten. Checkpoints validieren Betrag, Basis, HTTPS-Beleg und Zeit; die API projiziert die Fakten. Legacy advanceBooking und bookingDeadline bleiben erhalten, schalten die Vorschau aber nicht mehr frei. Persönlicher strong-Filter und Absage-/Ausverkauftfilter bleiben unverändert.
 
 Abnahme: >3 Wochentermine möglich; kostenlose Wochenveranstaltungen bleiben sichtbar; 15,00EUR ausgeschlossen,15,01EUR erlaubt; fehlende/ungültige/Fremdwährungs-/ermäßigte Preise ausgeschlossen; kein doppelter Termin in Wochenliste/Vorschau. Bestehende Sammlung, Vormerkungen, private Profile und Mailhöchstzahl bleiben erhalten.
+
+
+## Geschmacksbereich in Kategorieübersichten ausblenden · 18.10.2026
+
+Auf Nutzerwunsch ist der gemeinsame Bereich `#tasteArchive` in allen Kategorien
+mit `hidden` ausgeblendet. Das betrifft Mein Geschmacksprofil samt Vorschautext,
+Bearbeiten-Schaltflächen und Bisherige Bewertungen. Eine gezielte CSS-Regel
+bewahrt dies auch gegenüber vorhandenen Layoutregeln. Kategorie- oder
+Hauptreiterwechsel zeigen den Bereich nicht erneut an; der gemeinsame Host bleibt
+im DOM. Bestehende Detailansichten werden nicht verändert.
+
+Dies ist ausschließlich eine Darstellungskorrektur. Private Profile, bisherige
+Bewertungen, Assessments, Favoriten und Ausblendungen bleiben gespeichert.
+Profilveröffentlichung und Profilabgleich für Empfehlungen laufen unverändert;
+keine Datenbankänderung, Recherche oder neue Prüfzeit. Kein neues Einstellungsmenü.
+Lokale Tests, TypeScript und Build konnten in diesem Fachchat wegen nicht
+verfügbarer Ausführungsumgebung nicht ausgeführt werden. Vor Integration den
+Vorschau-Build sowie die Ansicht und Kategorie-Wechsel prüfen. Integration und
+Produktionsveröffentlichung durch00.

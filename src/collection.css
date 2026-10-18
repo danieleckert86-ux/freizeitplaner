@@ -124,3 +124,6 @@
 .event-controls{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 20px;align-items:end}
 .event-controls .event-period-picker{display:flex;flex-direction:column;gap:5px;margin:0;flex:1 1 180px;font-size:12px;color:#52675e}
 .event-controls select{width:100%;min-height:44px;padding:9px 12px;border:1px solid #d9e3dd;border-radius:9px;background:#fff;color:#315b43;font:inherit;font-size:14px}
+
+/* Keep profile settings and legacy ratings out of every category overview. */
+#tasteArchive[hidden]{display:none!important}

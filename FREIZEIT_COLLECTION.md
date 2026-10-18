@@ -400,3 +400,19 @@ Lokale Tests, TypeScript und Build konnten in diesem Fachchat wegen nicht
 verfügbarer Ausführungsumgebung nicht ausgeführt werden. Vor Integration den
 Vorschau-Build sowie die Ansicht und Kategorie-Wechsel prüfen. Integration und
 Produktionsveröffentlichung durch00.
+
+## Kachelhöhe und Aktionsleisten · 18.10.2026
+
+Die starre Höhe von 280px ist durch inhaltsabhängig wachsende, innerhalb eines
+Rasters gleich hohe Zeilen ersetzt. 280px bleiben die Mindesthöhe. Die Fußleisten
+dürfen nicht schrumpfen; lange Titel, Adressen, IMDb- und Trailerangaben erhalten
+ihren Platz oberhalb der Knöpfe. Auch die innere Eventhülle wächst mit.
+
+Gemeinsame automatische Grid-Spalten ersetzen feste benannte Aktionspositionen:
+zwei sichtbare Knöpfe nutzen die verfügbare Breite, drei stehen bei ausreichendem
+Platz gleichmäßig nebeneinander; schmale Ansichten erlauben zusätzliche Zeilen.
+Dies gilt auch für Restaurant-/Café-/Biergartenkarten ohne Geschmackssteuerung.
+Knöpfe sind mindestens 44px hoch, Texte dürfen umbrechen und ausgeblendete
+Detailpanels bleiben aus dem Layout entfernt. Keine Änderung an Klickfunktionen,
+gespeicherten Daten oder der Recherche. Mobile Sichtprüfung bei 320/390px,
+mit langer Adresse, Filmmetadaten sowie geöffneten Details vor Integration nötig.

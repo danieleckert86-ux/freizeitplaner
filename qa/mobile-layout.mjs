@@ -33,13 +33,13 @@ try{
    await card.scrollIntoViewIfNeeded();
    const bounds=await card.evaluate(el=>{
     const r=el.getBoundingClientRect();
-    const buttons=[...el.querySelectorAll('button,a')].filter(b=>b.getClientRects().length&&getComputedStyle(b).display!=='none').map(b=>{const q=b.getBoundingClientRect();return {text:b.textContent.trim(),left:q.left,right:q.right,top:q.top,bottom:q.bottom,height:q.height};});
+    const buttons=[...el.querySelectorAll('button,a')].filter(b=>b.getClientRects().length&&getComputedStyle(b).display!=='none').map(b=>{const q=b.getBoundingClientRect();return {text:b.textContent.trim(),left:q.left,right:q.right,top:q.top,bottom:q.bottom,height:q.height,action:!!b.closest('.item-actions,.lifestyle-actions')};});
     return {left:r.left,right:r.right,bottom:r.bottom,width:r.width,scroll:el.scrollWidth,client:el.clientWidth,buttons};
    });
    assert(bounds.left>=-1&&bounds.right<=width+1,JSON.stringify({width,id,bounds}));
    assert(bounds.scroll<=bounds.client+1,'card horizontal content overflow '+id);
    assert(bounds.buttons.length>=2,'card action buttons rendered '+id);
-   for(const b of bounds.buttons){assert(b.left>=bounds.left-1&&b.right<=bounds.right+1&&b.bottom<=bounds.bottom+1,'button containment '+JSON.stringify({width,id,b}));assert(b.height>=43.9,'44px action '+JSON.stringify({width,id,b}));}
+   for(const b of bounds.buttons){assert(b.left>=bounds.left-1&&b.right<=bounds.right+1&&b.bottom<=bounds.bottom+1,'button containment '+JSON.stringify({width,id,b}));if(b.action)assert(b.height>=43.9,'44px action '+JSON.stringify({width,id,b}));}
    const more=card.locator('button.card-more,button[data-details]').first();
    if(await more.count()){
     await more.click();

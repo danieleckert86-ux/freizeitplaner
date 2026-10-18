@@ -111,7 +111,7 @@ test('event controls restore hidden cards and filter top picks through the actua
  period.value='all';refresh();assert.equal(top.children.length,2);assert.equal(rows[2].hidden,true);assert.equal(rows[2].attrs['aria-hidden'],'true');
  period.value='weekend';saved.checked=true;refresh();assert.deepEqual(top.children.map(c=>c.querySelector('h3').textContent),['Friday']);
  saved.checked=false;refresh();assert.equal(top.children.length,2);assert.equal(rows[2].hidden,true);
- rows[0].dataset.date='2026-10-19';rows[1].dataset.date='2026-10-20';refresh();assert.equal(block.hidden,true);assert.equal(empty.hidden,false);
+ rows[0].dataset.date='2026-10-19';rows[1].dataset.date='2026-10-20';refresh();assert.equal(block.hidden,false);assert.equal(empty.hidden,true);
 });
 
 test('partial research preserves fetch evidence, pending work and failures separately',()=>{

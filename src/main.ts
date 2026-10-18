@@ -1084,9 +1084,11 @@ function refreshEventHighlights() {
   }
   for(const {card} of view.highlights){card.dataset.topEvent='true';topList.append(card);}
   for(const {card} of view.others)rest.append(card);
-  block.hidden=view.highlights.length===0;
+  block.hidden=false;
+  const weekEmpty=document.querySelector<HTMLElement>('#weekEventsEmpty');if(weekEmpty)weekEmpty.hidden=view.highlights.length>0;
+  const bookingEmpty=document.querySelector<HTMLElement>('#bookingEventsEmpty');if(bookingEmpty)bookingEmpty.hidden=view.others.length>0;
   const empty=document.querySelector<HTMLElement>('#eventsEmpty');
-  if(empty){empty.hidden=visible.size>0;empty.textContent='Aktuell keine passenden '+heading+' für diese Woche oder mit belegtem Grund zum frühzeitigen Buchen.';}
+  if(empty){empty.hidden=true;empty.textContent='Aktuell keine passenden '+heading+' für diese Woche oder mit belegtem Grund zum frühzeitigen Buchen.';}
 }
 
 function quietCardActions() {

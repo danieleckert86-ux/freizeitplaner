@@ -167,11 +167,18 @@ test('Top 3 use distinct formats while second performance remains visible',()=>{
 
 test('weekly display has no top-three cap and future preview requires real booking evidence',()=>{
  const today='2026-10-19';
- const evidence={reason:'Veranstalter meldet wenige verbleibende Karten',sourceUrl:'https://tickets.example.org/event',verifiedAt:'2026-10-18T10:00:00Z'};
- const rows=[...Array.from({length:5},(_,i)=>({id:'w'+i,title:'Woche '+i,date:'2026-10-2'+(i+1),category:'Konzert'})),{id:'book',title:'EOFT',date:'2026-11-01',advanceBooking:evidence},{id:'ordinary',title:'Bekannte Band',date:'2026-11-02'}, {id:'deadline',title:'Anmeldung',date:'2026-11-03',bookingDeadline:'2026-10-30'}, {id:'expired',title:'Frist vorbei',date:'2026-11-04',bookingDeadline:'2026-10-18'}, {id:'invalid',title:'Unbelegt',date:'2026-11-05',advanceBooking:{...evidence,sourceUrl:'http://example.org'}}];
- const view=weeklyBookingView(rows,today);assert.equal(view.highlights.length,5);assert.deepEqual(view.others.map(x=>x.id),['book','deadline']);assert.equal(rows.length,10);
+ const evidence={amount:22,currency:'EUR',basis:'regular-adult',sourceUrl:'https://tickets.example.org/event',verifiedAt:'2026-10-18T10:00:00Z'};
+ const rows=[...Array.from({length:5},(_,i)=>({id:'w'+i,title:'Woche '+i,date:'2026-10-2'+(i+1),category:'Konzert'})),{id:'book',title:'EOFT',date:'2026-11-01',ticketPrice:evidence},{id:'ordinary',title:'Bekannte Band',date:'2026-11-02'}, {id:'deadline',title:'Anmeldung',date:'2026-11-03',bookingDeadline:'2026-10-30'}, {id:'expired',title:'Frist vorbei',date:'2026-11-04',bookingDeadline:'2026-10-18'}, {id:'invalid',title:'Unbelegt',date:'2026-11-05',ticketPrice:{...evidence,sourceUrl:'http://example.org'}}];
+ const view=weeklyBookingView(rows,today);assert.equal(view.highlights.length,5);assert.deepEqual(view.others.map(x=>x.id),['book']);assert.equal(rows.length,10);
  assert.deepEqual(weeklyBookingView(rows,'2026-10-26').highlights.map(x=>x.id),['book']);
  assert.equal(weeklyBookingView(rows,today,'date',true).highlights.length,0);
  assert.equal(weeklyBookingView(rows,today,'date',false,'music').highlights.length,5);
  assert.equal(weeklyBookingView(rows,today,'date',false,'events').highlights.length,0);
+});
+
+
+test('preview price threshold does not filter the current week or imply scarcity',()=>{
+ const p={amount:15,currency:'EUR',basis:'regular-adult',sourceUrl:'https://example.org/tickets',verifiedAt:'2026-10-18T12:00:00Z'};
+ const rows=[{id:'free-week',title:'Kostenlos',date:'2026-10-20'},{id:'exact',title:'15 Euro',date:'2026-11-01',ticketPrice:p},{id:'over',title:'15,01 Euro',date:'2026-11-02',ticketPrice:{...p,amount:15.01}},{id:'unknown',title:'Preis offen',date:'2026-11-03'},{id:'sold',title:'Ausverkauft',date:'2026-11-04',closed:true,ticketPrice:{...p,amount:25}}];
+ const v=weeklyBookingView(rows,'2026-10-19');assert.deepEqual(v.highlights.map(x=>x.id),['free-week']);assert.deepEqual(v.others.map(x=>x.id),['over']);
 });

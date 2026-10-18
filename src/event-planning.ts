@@ -6,10 +6,14 @@ export function validAdvanceBooking(v:unknown):v is AdvanceBooking{
  if(typeof a.reason!=='string'||!a.reason.trim()||a.reason.length>2000||typeof a.verifiedAt!=='string'||!a.verifiedAt.includes('T')||!Number.isFinite(Date.parse(a.verifiedAt)))return false;
  try{const u=new URL(a.sourceUrl);return u.protocol==='https:'&&!u.username&&!u.password;}catch{return false;}
 }
-export function advanceBookingReason(x:{date?:string|null;bookingDeadline?:string|null;advanceBooking?:AdvanceBooking},today:string):string|null{
- if(!day(x.date)||x.date<today)return null;
- // An actual future registration deadline is itself a concrete planning reason.
- if(day(x.bookingDeadline)&&x.bookingDeadline>=today&&x.bookingDeadline<=x.date)return 'Buchungsfrist: '+x.bookingDeadline.split('-').reverse().join('.');
- if(!validAdvanceBooking(x.advanceBooking)||x.advanceBooking.verifiedAt.slice(0,10)>today)return null;
- return x.advanceBooking.reason.trim();
+export type TicketPrice={amount:number;currency:'EUR';basis:'regular-adult';sourceUrl:string;verifiedAt:string};
+export function validTicketPrice(v:unknown):v is TicketPrice{
+ if(!v||typeof v!=='object')return false;const p=v as TicketPrice;
+ if(typeof p.amount!=='number'||!Number.isFinite(p.amount)||p.amount<0||p.currency!=='EUR'||p.basis!=='regular-adult'||typeof p.verifiedAt!=='string'||!p.verifiedAt.includes('T')||!Number.isFinite(Date.parse(p.verifiedAt)))return false;
+ try{const u=new URL(p.sourceUrl);return u.protocol==='https:'&&!u.username&&!u.password;}catch{return false;}
+}
+/** Price is a user-chosen approximation, never a claim of scarcity. */
+export function advanceBookingReason(x:{date?:string|null;ticketPrice?:TicketPrice;bookingDeadline?:string|null;advanceBooking?:AdvanceBooking},today:string):string|null{
+ if(!day(x.date)||x.date<today||!validTicketPrice(x.ticketPrice)||x.ticketPrice.amount<=15||x.ticketPrice.verifiedAt.slice(0,10)>today)return null;
+ return 'Regulärer Eintritt: '+new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(x.ticketPrice.amount)+' pro Person';
 }

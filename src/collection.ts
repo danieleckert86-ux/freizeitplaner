@@ -1,6 +1,6 @@
-import {advanceBookingReason,type AdvanceBooking} from './event-planning.ts';
+import {advanceBookingReason,type AdvanceBooking,type TicketPrice} from './event-planning.ts';
 import {eventSection} from './finder-navigation.ts';
-export type CollectionItem={bookingDeadline?:string|null;advanceBooking?:AdvanceBooking;title:string;location?:string;category?:string;date?:string;time?:string;fitScore?:number;favorite?:{id:string};id?:string;verifiedAt?:string;imported?:boolean;closed?:boolean|null};
+export type CollectionItem={ticketPrice?:TicketPrice;bookingDeadline?:string|null;advanceBooking?:AdvanceBooking;title:string;location?:string;category?:string;date?:string;time?:string;fitScore?:number;favorite?:{id:string};id?:string;verifiedAt?:string;imported?:boolean;closed?:boolean|null};
 export function upcomingEvents<T extends CollectionItem>(items:T[],today:string,hidden:Set<string>):T[]{
  const max=new Date(today+'T12:00:00Z');max.setUTCDate(max.getUTCDate()+90);const last=max.toISOString().slice(0,10);
  const seen=new Set<string>();

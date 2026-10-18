@@ -374,10 +374,10 @@ Outdoor-Bibliothek: Orte & Touren bleibt der private dauerhafte Vorrat. Neue Tou
 
 
 
-## Veranstaltungen: diese Woche und frühzeitig buchen · 18.10.2026
+## Veranstaltungen: diese Woche und Frühzeitig buchen · Preisregel 18.10.2026
 
-Die aktive App-Darstellung ersetzt Top3 und die ungefilterte 90-Tage-Liste. Musik/Kultur bleiben getrennt. Alle noch kommenden persönlich freigegebenen Termine der aktuellen Berliner Kalenderwoche bis Sonntag erscheinen ohne Drei-Titel-Limit. Spätere Termine bis90Tage erscheinen ausschließlich mit konkretem Buchungsgrund; bloße Ticketlinks oder bekannte Namen genügen nicht.
+Musik/Kultur bleiben getrennt. Alle noch kommenden persönlich freigegebenen Termine dieser Berliner Kalenderwoche bis Sonntag erscheinen unabhängig vom Preis ohne Drei-Titel-Limit. Spätere Termine bis90Tage erscheinen unter „Frühzeitig buchen“ nur mit bestätigtem regulärem Erwachsenen-Eintritt über15EUR pro Person. Genau15EUR zählt nicht; unbekannte/niedrigere Preise bleiben aus der Vorschau. Der Preis ist die vom Nutzer gewünschte Näherung, kein Knappheitsnachweis.
 
-CatalogItem.advanceBooking ist optional und enthält reason, sourceUrl und verifiedAt aus tatsächlich gelesenen öffentlichen Belegen. Bestehende gültige zukünftige bookingDeadline zählt ebenfalls. Die API projiziert diese Fakten; Checkpoints validieren HTTPS-Quelle, Grund und Prüfzeit. Das ist keine Ticketverfügbarkeits- oder persönliche Passungsfreigabe. Fehlender Buchungsbeleg blendet spätere Events aus, löscht aber weder Bestand noch Vormerkungen. Recherchefenster, strong-Filter, IDs, Speicherung und Mailhöchstzahl bleiben unverändert.
+CatalogItem.ticketPrice={amount:number,currency:'EUR',basis:'regular-adult',sourceUrl,verifiedAt}. Der Betrag ist der reguläre Eintritt pro erwachsener Person, bei Preiskategorien der günstigste tatsächlich buchbare reguläre Preis. Keine Ermäßigung, Paket-/Gruppenpreise, Spenden, Schätzungen oder erfundenen Prüfzeiten. Checkpoints validieren Betrag, Basis, HTTPS-Beleg und Zeit; die API projiziert die Fakten. Legacy advanceBooking und bookingDeadline bleiben erhalten, schalten die Vorschau aber nicht mehr frei. Persönlicher strong-Filter und Absage-/Ausverkauftfilter bleiben unverändert.
 
-Abnahme: mehr als drei Wochentermine; Wochenwechsel Sonntag/Montag; getrennte Musik/Kultur; spätere gewöhnliche Termine unsichtbar; belegter Buchungsgrund/Frist sichtbar; fehlende/ungültige Belege und abgelaufene Fristen unsichtbar. App-Controller und Checkpoint/API-Projektion werden getestet.
+Abnahme: >3 Wochentermine möglich; kostenlose Wochenveranstaltungen bleiben sichtbar; 15,00EUR ausgeschlossen,15,01EUR erlaubt; fehlende/ungültige/Fremdwährungs-/ermäßigte Preise ausgeschlossen; kein doppelter Termin in Wochenliste/Vorschau. Bestehende Sammlung, Vormerkungen, private Profile und Mailhöchstzahl bleiben erhalten.

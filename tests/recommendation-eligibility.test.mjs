@@ -33,3 +33,12 @@ test('food openings are neutral listings with sourced Augsburg dates, independen
  assert.equal(recommendationAllowed({...food,openingDate:'2026-09'},null,now),true);
  for(const extra of [{openingCity:'Friedberg'},{openingCity:'Landkreis Augsburg'},{openingSourceUrl:''},{closed:true},{imported:true},{verifiedAt:'2026-09-01T10:00:00Z'}])assert.equal(recommendationAllowed({...food,...extra},null,now),false);
 });
+
+test('tour descriptions allow unknown closure status and preferred duration without weather or GPX',()=>{
+ const url='https://example.org/route',routeEvidence={durationActivity:'walking',ascentMetric:'totalAscent',ascentSourceUrl:url,ascentVerifiedAt:at,startMunicipality:'Pfronten',startSourceUrl:url,startVerifiedAt:at,travelMode:'car',travelReference:'augsburg-centre',travelSourceUrl:url,travelVerifiedAt:at,wayCharacter:'Ausführliche Wanderbeschreibung auf Forstwegen und Wanderpfaden',waySourceUrls:[url],wayVerifiedAt:at,safetySourceUrls:[url],safetyVerifiedAt:at};
+ const route={kind:'hike',verifiedAt:at,km:12,ascent:600,minutes:170,travelMinutes:110,closed:null,exposed:false,climbing:false,routeEvidence};
+ assert.equal(recommendationAllowed(route,a,now),true);assert.equal(recommendationAllowed({...route,closed:true},a,now),false);assert.equal(recommendationAllowed({...route,climbing:true},a,now),false);
+ const bike={...route,kind:'bike',routeEvidence:{...routeEvidence,durationActivity:'cycling',surface:'mixed',surfaceComponents:['asphalt','firm']}};
+ assert.equal(recommendationAllowed(bike,a,now),true);assert.equal(recommendationAllowed({...bike,routeEvidence:{...bike.routeEvidence,surfaceComponents:['asphalt','unsuitable']}},a,now),false);
+});
+

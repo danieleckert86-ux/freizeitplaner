@@ -11,10 +11,10 @@ test('all discovery categories require a sourced strong decision; hard rejection
  assert.equal(recommendationAllowed({...x,contentChangedAt:'2026-10-17T13:00:00Z'},a,now),false);
  assert.equal(currentAssessment('a','culture',{culture:{...defaultTasteProfiles.culture,updatedAt:'2026-10-18T00:00:00Z'}},{a}),null);
 });
-test('stream 60-day and rating/identity boundaries are enforced in the browser',()=>{
- const stream={...x,kind:'stream',mediaType:'film',location:'Netflix Deutschland',imdbRating:7.8,imdbUrl:'https://www.imdb.com/title/tt1234567/'};
- for(const date of ['2026-10-17','2026-08-18'])assert.equal(recommendationAllowed({...stream,date},a,now),true);
- for(const date of ['2026-08-17','2026-10-18',null,''])assert.equal(recommendationAllowed({...stream,date},a,now),false);
+test('stream 30-day and rating/identity boundaries are enforced in the browser',()=>{
+ const stream={...x,kind:'stream',mediaType:'film',location:'Netflix Deutschland',imdbRating:7.9,imdbUrl:'https://www.imdb.com/title/tt1234567/'};
+ for(const date of ['2026-10-17','2026-09-18'])assert.equal(recommendationAllowed({...stream,date},a,now),true);
+ for(const date of ['2026-09-17','2026-10-18',null,''])assert.equal(recommendationAllowed({...stream,date},a,now),false);
  assert.equal(recommendationAllowed({...stream,imdbRating:7.7},a,now),false);
  assert.equal(recommendationAllowed({...stream,imdbUrl:''},a,now),false);
 });

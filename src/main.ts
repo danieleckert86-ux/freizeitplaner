@@ -1,8 +1,8 @@
 import {advanceBookingReason,type AdvanceBooking,type TicketPrice} from './event-planning';
 import {outdoorPicks} from './outdoor-selection';
-import {recommendationAllowed,foodOpeningLabel,type RecommendationFacts} from './recommendation-eligibility';
+import {recommendationAllowed,foodOpeningLabel,mediaIdentityKey,mediaHidden,type RecommendationFacts} from './recommendation-eligibility';
 import {profileAssessment} from './taste-settings-ui';
-import {imdbMarkup,mediaRecommendationAllowed,germanTrailerMarkup} from './media-rating';
+import {imdbMarkup,mediaRecommendationAllowed,germanTrailerMarkup,mediaReleaseLabel} from './media-rating';
 import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI,openTasteDetails,closeTasteDetails,setTasteArchiveScope} from './taste-ui';
 import {outdoorLibrary,stockSources,publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
 import { favoriteArea,finderSectionVisible,eventSection,discoveryFoodKind,discoveryRouteKind,hikeAscentAllowed,streamingFormat,streamingCardMeta,type NewCategory } from './finder-navigation';
@@ -28,7 +28,7 @@ type Recommendation = {
 };
 
 type LifestyleRecommendation = {
-  id: string; openingDate?:string;openingCity?:string;openingSourceUrl?:string;mediaType?: 'film'|'series'; title: string; type: string; description: string; meta: string[];
+  id: string; kind?:string;releaseDate?:string;date?:string; openingDate?:string;openingCity?:string;openingSourceUrl?:string;mediaType?: 'film'|'series'; title: string; type: string; description: string; meta: string[];
   fitScore?: number; imported?: boolean; category?:string; favorite?:{id:string;categoryLabel?:string};
   url: string; badge: string; location?: string; venue?: string; city?: string; address?: string; platform?: string; imdbRating?: number|null; imdbUrl?: string; trailerUrl?: string; trailerLanguage?: 'de'|'en'|'other';
 };
@@ -106,9 +106,11 @@ function tourAttributes(item: Recommendation) {
 }
 
 const excludedMediaIds=new Set<string>();
+let currentHiddenIds=new Set<string>();
 const recommendationFacts=new Map<string,RecommendationFacts>();
 let outdoorIdentities:{id:string;title:string;url:string}[]=[];
 function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<string>()) {
+  currentHiddenIds=hiddenIds;
   outdoorIdentities=[...data.hikes,...data.bikes,...(data.walks??[])].map(x=>({id:x.id||x.favorite.id,title:x.title,url:x.url||x.favorite.url}));
   recommendationFacts.clear();
   excludedMediaIds.clear();
@@ -120,7 +122,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
       const facts=[...(rec.facts??[]),...(rec.meta??[])];
       recommendationFacts.set(id,{...item,kind} as RecommendationFacts);
       const snapshot={id,title:rec.title,category:rec.category||rec.favorite?.categoryLabel||rec.type||kind,description:rec.description||'',kind,...(rec.mediaType?{mediaType:rec.mediaType}:{}),url:rec.url||'',...(rec.date?{date:rec.date}:{}),...(Number.isFinite(rec.fitScore)?{fitScore:rec.fitScore}:{}),...(rec.imported===undefined?{}:{imported:rec.imported}),facts:kind==='cinema'||kind==='stream'?streamingCardMeta(facts):facts};
-      tasteItems.set(id,snapshot);registerTasteSuggestion(snapshot);
+      tasteItems.set(id,snapshot);if(!['cinema','stream'].includes(kind))registerTasteSuggestion(snapshot);
     }
   }
   const hide=(items:Recommendation[])=>items.filter(x=>!hiddenIds.has(x.id||x.favorite?.id||''));
@@ -196,16 +198,16 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   const renderLifestyle = (selector: string, items: LifestyleRecommendation[], section: 'restaurants' | 'cinema' | 'stream') => {
     const list = document.querySelector<HTMLElement>(selector);
     if (!list) return;
-    list.innerHTML = [...items].filter(item => !hiddenIds.has(item.id)&&(section==='restaurants'?recommendationAllowed({...item,kind:'restaurant',verifiedAt:(item as any).verifiedAt,closed:(item as any).closed},null):mediaRecommendationAllowed(item))).sort((a,b)=>section==='restaurants'?(b.openingDate||'').localeCompare(a.openingDate||'')||a.title.localeCompare(b.title):0).map(item =>
+    list.innerHTML = [...items].filter(item => !mediaHidden(item,hiddenIds)&&(section==='restaurants'?recommendationAllowed({...item,kind:'restaurant',verifiedAt:(item as any).verifiedAt,closed:(item as any).closed},null):mediaRecommendationAllowed(item))).sort((a,b)=>section==='restaurants'?(b.openingDate||'').localeCompare(a.openingDate||'')||a.title.localeCompare(b.title):(b.imdbRating||0)-(a.imdbRating||0)||(b.releaseDate||'').localeCompare(a.releaseDate||'')||a.title.localeCompare(b.title)).map(item =>
       '<article class="lifestyle-card" '+'data-profile-rejected="true" style="display:none!important" '+'data-lifestyle-id="' + dataEscape(item.id) + '">' +
-      '<div class="lifestyle-top"><span class="lifestyle-type">' + categoryIcon(section, item.type) + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(/passung/i.test(item.badge||'')?'Inhaltlich vorgeprüft':item.badge) + '</span></div>' +
-      (section==='restaurants'?'<div class="opening-label">'+dataEscape(foodOpeningLabel(item))+'</div>':'<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div>') +
+      '<div class="lifestyle-top"><span class="lifestyle-type">' + categoryIcon(section, item.type) + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(section==='restaurants'?item.badge:'Neu') + '</span></div>' +
+      (section==='restaurants'?'<div class="opening-label">'+dataEscape(foodOpeningLabel(item))+'</div>':'<div class="media-release">'+dataEscape(mediaReleaseLabel({...item,kind:section==='cinema'?'cinema':'stream'}))+'</div>') +
       '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item, section) + '<p>' + dataEscape(neutralDescription(item.description).replace(section==='cinema'?/Heute/gi:/$^/g,'Gespeicherte Vorstellung')) + '</p>' +
       '<div class="lifestyle-meta">' + (section==='stream'||section==='cinema'?streamingCardMeta(item.meta):item.meta).filter(v=>section!=='stream'||v.trim()!==recommendationPlace(item,section)).map(v => '<span>' + dataEscape(v.replace(/^Neu seit (\d{2})\.(\d{2})\.\d{4}$/, "Seit $1.$2.")) + '</span>').join('') +
       (['cinema','stream'].includes(section)?imdbMarkup(item):'') +
       (['cinema','stream'].includes(section)?germanTrailerMarkup(item):'') + '</div>' +
       '<div class="lifestyle-actions"><div class="lifestyle-links"><a class="info-link" href="' + dataEscape(section==='restaurants'?googleMapsPlaceUrl(item):item.url) + '" target="_blank" rel="noopener noreferrer">'+(section==='restaurants'?'Google Maps öffnen':'Mehr erfahren')+'</a></div>' +
-      '<div class="lifestyle-card-buttons">' + (section==='restaurants'?'':ratingMarkup(item.id, item.title, section)) + (section==='restaurants'?stockCopyMarkup({id:'lifestyle-'+item.id,title:item.title,category:({cafe:'Café',restaurant:'Restaurant','beer-garden':'Biergarten'})[discoveryFoodKind(item)],description:item.description,url:item.url},item.meta,item):lifestyleFavoriteMarkup(item,section)) +
+      '<div class="lifestyle-card-buttons">' + (section==='restaurants'?stockCopyMarkup({id:'lifestyle-'+item.id,title:item.title,category:({cafe:'Café',restaurant:'Restaurant','beer-garden':'Biergarten'})[discoveryFoodKind(item)],description:item.description,url:item.url},item.meta,item):lifestyleFavoriteMarkup(item,section)) +
       '<button class="hide-card-btn" type="button" data-hide-card data-id="' + dataEscape(item.id) + '" data-section="' + section + '" data-title="' + dataEscape(item.title) + '">Ausblenden</button></div></div></article>'
     ).join('');
   };
@@ -236,21 +238,22 @@ function applyPersonalTasteScores(){
     const id=card.dataset.lifestyleId||card.querySelector<HTMLElement>('[data-taste-wrap]')?.dataset.tasteWrap;
     if(!id)return;
     const item=tasteItems.get(id);if(!item)return;
-    const fit=adjustedTaste(item),label=card.querySelector<HTMLElement>('.collection-fit');
+    const label=card.querySelector<HTMLElement>('.collection-fit');
     const facts=recommendationFacts.get(id);
     if(!facts)return; // Personal stock and standard activities are not discovery recommendations.
-    const allowed=recommendationAllowed(facts,facts.kind==='restaurant'?null:profileAssessment(item));
+    const allowed=!mediaHidden({...facts,id},currentHiddenIds)&&recommendationAllowed(facts,['restaurant','cinema','stream'].includes(facts.kind)?null:profileAssessment(item));
     card.dataset.profileRejected=String(!allowed);
     card.hidden=!allowed;
     if(allowed)card.style.removeProperty('display');else card.style.setProperty('display','none','important');
-    if(facts.kind==='restaurant')return;
+    if(['restaurant','cinema','stream'].includes(facts.kind))return;
+    const fit=adjustedTaste(item);
     if(label){let explanation=card.querySelector<HTMLElement>('.profile-fit-reason');if(!explanation){explanation=document.createElement('p');explanation.className='profile-fit-reason';label.after(explanation);}explanation.textContent=fit.reason;label.textContent=fit.confidence==='strong'?'Passt zu deinem Geschmack':fit.confidence==='qualified'?'Passend mit Vorbehalt':fit.confidence==='rejected'?'Passt derzeit nicht zum Profil':'Profilabgleich ausstehend';label.title=fit.reason+' · Rangfolge nach Geschmack; keine Wahrscheinlichkeit und keine Termin- oder Sicherheitsfreigabe.';}
     if(card.classList.contains('discovery-item'))card.dataset.fitScore=allowed&&!item.imported&&Number.isFinite(item.fitScore)?String(item.fitScore):'';
   });
   for(const selector of ['#cinemaList','#streamFilmList','#streamSeriesList','#restaurantList','#cafeList','#beerGardenList','#hikeGroup .tour-list','#bikeGroup .tour-list','#walkGroup .tour-list']){
     const list=document.querySelector<HTMLElement>(selector);if(!list)continue;
     let empty=list.querySelector<HTMLElement>('.profile-empty');
-    if(!empty){empty=document.createElement('p');empty.className='profile-empty';empty.textContent=['#restaurantList','#cafeList','#beerGardenList'].includes(selector)?'Noch keine bestätigten Neueröffnungen in Augsburg innerhalb der letzten60Tage gelistet.':'Aktuell keine Vorschläge mit bestätigter persönlicher Passung. Es werden nur klar passende Empfehlungen zu deinem aktuellen Profil angezeigt.';list.append(empty);}
+    if(!empty){empty=document.createElement('p');empty.className='profile-empty';empty.textContent=['#restaurantList','#cafeList','#beerGardenList'].includes(selector)?'Noch keine bestätigten Neueröffnungen in Augsburg innerhalb der letzten60Tage gelistet.':['#cinemaList','#streamFilmList','#streamSeriesList'].includes(selector)?'Keine neuen Titel der letzten 30 Tage mit IMDb über 7,8 verfügbar.':'Aktuell keine Vorschläge mit bestätigter persönlicher Passung. Es werden nur klar passende Empfehlungen zu deinem aktuellen Profil angezeigt.';list.append(empty);}
     empty.hidden=Array.from(list.querySelectorAll<HTMLElement>('.lifestyle-card,.tour-card')).some(card=>card.dataset.profileRejected!=='true');
   }
   refreshOutdoorPicks();
@@ -412,16 +415,22 @@ void loadFavorites();
       if (!id || !['restaurants', 'cinema', 'stream','catalog'].includes(section)) return;
       button.disabled = true;
       button.textContent = 'Wird ausgeblendet …';
-      const { error } = await supabase.from('hidden_recommendations').upsert({
-        suggestion_id: id, section, title, hidden_at: new Date().toISOString(),
-      }, { onConflict: 'suggestion_id' });
+      const facts=recommendationFacts.get(id);
+      const keys=[...new Set([id,...(facts&&['cinema','stream'].includes(facts.kind)&&mediaIdentityKey(facts)?[mediaIdentityKey(facts)]:[])])];
+      const results=await Promise.all(keys.map(suggestion_id=>supabase.from('hidden_recommendations').upsert({
+        suggestion_id, section, title, hidden_at: new Date().toISOString(),
+      }, { onConflict: 'suggestion_id' })));
+      const error=results.find(r=>r.error)?.error;
       if (error) {
         console.error('Recommendation could not be hidden', error);
         button.disabled = false;
         button.textContent = 'Ausblenden';
         return;
       }
+      keys.forEach(key=>currentHiddenIds.add(key));
       blockStockSource(id);
+      applyPersonalTasteScores();
+      renderFavorites();
       button.closest<HTMLElement>('.lifestyle-card,.discovery-item,.tour-card,.idea-card,.card')?.remove();
       refreshOutdoorPicks();
       refreshEventHighlights();
@@ -812,7 +821,7 @@ function renderFavorites() {
   const favoriteMediaAllowed=(item:Favorite)=>{
     if(finderView==='ideas')return true;
     const id=item.suggestionId.replace(/^lifestyle-/,''),facts=recommendationFacts.get(id),candidate=tasteItems.get(id);
-    return !!facts&&!!candidate&&recommendationAllowed(facts,profileAssessment(candidate));
+    return !!facts&&!!candidate&&!mediaHidden({...facts,id},currentHiddenIds)&&recommendationAllowed(facts,profileAssessment(candidate));
 
   };
   const filtered = favorites.filter(item => favoriteMediaAllowed(item) && !excludedMediaIds.has(item.suggestionId) && favoriteArea(item.category,savedEventDates.get(item.suggestionId)) === finderView && !renderedIds.has(item.suggestionId) && (finderView==='ideas'||['events','music'].includes(currentKind.value)&&! /kino|stream/i.test(item.category)&&eventSection(item)===currentKind.value||currentKind.value==='cinema'&&/kino/i.test(item.category)||currentKind.value==='stream'&&/stream/i.test(item.category)));
@@ -845,7 +854,7 @@ function renderFavorites() {
       try {
         const { error } = await supabase.from('favorites').delete().eq('id', id);
         if (error) throw error;
-      blockStockSource(id);
+        blockStockSource(id);
 
         favorites = favorites.filter(item => item.id !== id);
         renderFavorites();
@@ -1157,3 +1166,6 @@ function refreshOutdoorPicks(){
 document.addEventListener('activity-stock-sources',refreshOutdoorPicks);
 document.addEventListener('outdoor-library-changed',refreshOutdoorPicks);
 
+
+// Re-evaluate calendar-day expiry when returning to an already open app.
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)applyPersonalTasteScores();});

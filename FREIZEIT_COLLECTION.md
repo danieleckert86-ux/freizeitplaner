@@ -416,3 +416,21 @@ Knöpfe sind mindestens 44px hoch, Texte dürfen umbrechen und ausgeblendete
 Detailpanels bleiben aus dem Layout entfernt. Keine Änderung an Klickfunktionen,
 gespeicherten Daten oder der Recherche. Mobile Sichtprüfung bei 320/390px,
 mit langer Adresse, Filmmetadaten sowie geöffneten Details vor Integration nötig.
+
+
+## Kino und Streaming: einfache IMDb-Auswahl ·22.10.2026
+
+Aktuell ausschließlich bestätigte IMDb>7,8 und Veröffentlichung jünger als30
+Berliner Kalendertage; genau7,8 oder fehlende Wertung ausgeschlossen.
+Streaming: deutscher Start beim Dienst. Kino: deutscher Kinostart und aktueller
+Augsburger Filmprogrammeintrag, keine konkrete Vorstellung nötig.
+Kein Profil-/Kritikabgleich; Datum und Trailerlink sichtbar. Deutscher Trailer
+bei Beleg, sonst ausdrücklich YouTube-Suche. Angebote verschwinden an Tag30
+auch ohne neue Recherche, Sammlung und Vormerkungen bleiben gespeichert.
+Ausblenden speichert Angebots-ID plus dauerhaften media/imdb/tt...-Schlüssel
+in hidden_recommendations; andere Dienste/neue Angebots-IDs heben ihn nicht auf.
+Gemeinsame Eligibility-Datei mit Backend byte-identisch halten. Additive
+releaseDate/releaseSourceUrl/cinemaProgramUrl/cinemaProgramCheckedAt/availableUntil
+im Katalog; keine Migration oder Änderung privater Profile/Bewertungen.
+Backend/App gemeinsam durch00integrieren; Hauptvertrag und Aktivierung stehen
+in fahrrad-zur-arbei/docs/validation/leisure-media-simple-20261022.md.

@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {imdbRating,mediaRecommendationAllowed,imdbMarkup,imdbTitleUrl,germanTrailerMarkup,youtubeTrailerSearchUrl} from '../src/media-rating.ts';
-test('IMDb requires a confirmed rating at least 7.8; unknown is not approved',()=>{
- for(const value of [0,7,7.6,7.79,undefined,null,NaN,Infinity,-1,11,'8.5'])assert.equal(mediaRecommendationAllowed({imdbRating:value}),false);
- for(const value of [7.8,8,10])assert.equal(mediaRecommendationAllowed({imdbRating:value}),true);
+test('IMDb requires a confirmed rating strictly above 7.8; unknown is not approved',()=>{
+ for(const value of [0,7,7.6,7.79,7.8,undefined,null,NaN,Infinity,-1,11,'8.5'])assert.equal(mediaRecommendationAllowed({imdbRating:value}),false);
+ for(const value of [7.9,8,10])assert.equal(mediaRecommendationAllowed({imdbRating:value}),true);
  assert.equal(imdbRating(0),0);assert.equal(imdbRating('7'),null);
 });
 test('rating markup uses German decimal and only a genuine IMDb title link',()=>{

@@ -2,7 +2,7 @@ export function imdbRating(value:unknown):number|null {
  return typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=10?value:null;
 }
 export function mediaRecommendationAllowed(item:{imdbRating?:unknown}){
- const rating=imdbRating(item.imdbRating);return rating!==null&&rating>=7.8;
+ const rating=imdbRating(item.imdbRating);return rating!==null&&rating>7.8;
 }
 export function imdbTitleUrl(value:unknown):string {
  if(typeof value!=='string')return '';
@@ -27,4 +27,9 @@ export function germanTrailerMarkup(item:{title?:unknown;trailerUrl?:unknown;tra
  }
  const search=youtubeTrailerSearchUrl(item.title);
  return search?`<a class="trailer-link trailer-meta" href="${escape(search)}" target="_blank" rel="noopener noreferrer">▶ Trailer auf YouTube suchen</a>`:'';
+}
+
+export function mediaReleaseLabel(item:{releaseDate?:string;date?:string;kind?:string}){
+ const day=item.releaseDate||(item.kind==='stream'?item.date:'')||'';
+ return /^\d{4}-\d{2}-\d{2}$/.test(day)?(item.kind==='cinema'?'Kinostart: ':'Beim Dienst seit: ')+day.split('-').reverse().join('.'):'';
 }

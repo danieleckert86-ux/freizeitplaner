@@ -1,5 +1,13 @@
 # Freizeitvorrat statt Wochenplaner
 
+Aktueller Stand22.10.2026: Musik/Kultur ausschließlich aktuelle Berliner Woche,
+keine Frühzeitig-buchen-Kategorie oder Preisgrenze; alte spätere Einträge und
+Buchungsbelege bleiben gespeichert. Wochenliste ohne Punkte chronologisch.
+Outdoor täglich gespeicherten Vorrat prüfen, bei weniger als zwei geeigneten
+unentschiedenen Vorschlägen je Kategorie nachfüllen. Kino Mo/Do, Streaming Di/Fr.
+YouTube-Suchlink Titel+Trailer+deutsch genügt, keine Trailerrecherche.
+Diese Regeln ersetzen die historischen Vorschau-/Rhythmusangaben unten.
+
 ## Musik/Kultur: einfacher Recherchefilter · 22.10.2026
 
 Der zentrale Rechercheauftrag verwendet `event-simple-app-only-20261022-v2`: belegter

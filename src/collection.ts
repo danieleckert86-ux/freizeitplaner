@@ -1,4 +1,4 @@
-import {advanceBookingReason,type AdvanceBooking,type TicketPrice} from './event-planning.ts';
+import {type AdvanceBooking,type TicketPrice} from './event-planning.ts';
 import {eventSection} from './finder-navigation.ts';
 export type CollectionItem={ticketPrice?:TicketPrice;bookingDeadline?:string|null;advanceBooking?:AdvanceBooking;title:string;location?:string;category?:string;date?:string;time?:string;fitScore?:number;favorite?:{id:string};id?:string;verifiedAt?:string;imported?:boolean;closed?:boolean|null};
 export function upcomingEvents<T extends CollectionItem>(items:T[],today:string,hidden:Set<string>):T[]{
@@ -30,7 +30,7 @@ export function weeklyBookingView<T extends CollectionItem & {saved?:boolean}>(i
  const rank=byDate;
  const visible=upcomingEvents(items.filter(x=>(!section||eventSection(x)===section)&&(!savedOnly||x.saved)),today,new Set());
  const highlights=visible.filter(x=>eventInPeriod(x.date||'',today,'week')).sort(rank);
- const others=visible.filter(x=>!eventInPeriod(x.date||'',today,'week')&&!!advanceBookingReason(x,today)).sort(rank);
+ const others:T[]=[]; // Advance-booking category retired; stored future events stay archived.
  return {highlights,others};
 }
 export function catalogueFitLabel(item:CollectionItem){

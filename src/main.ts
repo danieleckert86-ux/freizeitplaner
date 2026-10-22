@@ -1,4 +1,4 @@
-import {advanceBookingReason,type AdvanceBooking,type TicketPrice} from './event-planning';
+import {type AdvanceBooking,type TicketPrice} from './event-planning';
 import {outdoorPicks} from './outdoor-selection';
 import {recommendationAllowed,foodOpeningLabel,mediaIdentityKey,mediaHidden,type RecommendationFacts} from './recommendation-eligibility';
 import {profileAssessment} from './taste-settings-ui';
@@ -189,7 +189,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   if(discoveries)document.querySelector<HTMLElement>('#topEventList')?.replaceChildren();
   if (discoveries) discoveries.innerHTML = upcomingEvents([...data.top,...data.ideas,...data.discoveries], new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date()),hiddenIds).map(item =>
     '<article class="discovery-item filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '" data-ticket-price="' + dataEscape(JSON.stringify(item.ticketPrice||null)) + '" data-booking-deadline="' + dataEscape(item.bookingDeadline||'') + '" data-event-location="' + dataEscape(item.location || '') + '" data-event-time="' + dataEscape(item.time || '') + '" data-fit-score="' + '' + '"><div><div class="discovery-header"><time datetime="' + dataEscape(item.date) + '">' + dataEscape(new Intl.DateTimeFormat('de-DE', {weekday:'short',day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(new Date(item.date + 'T12:00:00Z'))) + (/^\d{2}:\d{2}$/.test(item.time || '') ? ' · ' + dataEscape(item.time) : '') + '</time><span class="mini-badge">' + categoryIcon(item.category, item.badge || item.title) + '<span class="category-label">' + dataEscape((item.badge || item.label || item.favorite.categoryLabel).split(/\s*[·×]\s*/)[0]) + '</span></span></div>' +
-    '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' + (advanceBookingReason(item,new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date()))?'<p class="collection-condition">'+dataEscape(advanceBookingReason(item,new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date()))||'')+'</p>':'') + '<div class="item-actions">' +
+    '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' + '<div class="item-actions">' +
     sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, 'discoveries') + favoriteMarkup(item, true) + '</div></div></article>'
   ).join('');
 
@@ -1081,7 +1081,6 @@ function refreshEventHighlights() {
   const heading=section==='music'?'Musik & Konzerte':'Kultur & Veranstaltungen';
   document.querySelector<HTMLElement>('#discoveriesHeading')!.textContent=heading;
   block.querySelector('h3')!.textContent='Diese Woche · '+heading;
-  document.querySelector<HTMLElement>('#discoveries .event-list-heading')!.textContent='Frühzeitig buchen · nächste 90 Tage';
   const view=weeklyBookingView(cards.filter(card=>card.dataset.profileRejected!=='true').map(card=>({card,location:card.dataset.eventLocation,category:card.dataset.category,title:card.querySelector('h3')?.textContent||'',date:card.dataset.date,time:card.dataset.eventTime,bookingDeadline:card.dataset.bookingDeadline,ticketPrice:JSON.parse(card.dataset.ticketPrice||'null')||undefined,fitScore:card.dataset.fitScore?Number(card.dataset.fitScore):undefined,saved:!!card.querySelector('[data-favorite].saved')})),today,sort,savedOnly,section);
   const visible=new Set([...view.highlights,...view.others].map(x=>x.card));
   for(const card of cards){
@@ -1097,7 +1096,7 @@ function refreshEventHighlights() {
   const weekEmpty=document.querySelector<HTMLElement>('#weekEventsEmpty');if(weekEmpty)weekEmpty.hidden=view.highlights.length>0;
   const bookingEmpty=document.querySelector<HTMLElement>('#bookingEventsEmpty');if(bookingEmpty)bookingEmpty.hidden=view.others.length>0;
   const empty=document.querySelector<HTMLElement>('#eventsEmpty');
-  if(empty){empty.hidden=true;empty.textContent='Aktuell keine passenden '+heading+' für diese Woche oder mit belegtem Grund zum frühzeitigen Buchen.';}
+  if(empty){empty.hidden=true;empty.textContent='Aktuell keine passenden '+heading+' für diese Woche.';}
 }
 
 function quietCardActions() {

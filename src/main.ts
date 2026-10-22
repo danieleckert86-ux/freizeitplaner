@@ -188,8 +188,8 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   const discoveries = document.querySelector<HTMLElement>('#discoveries > .discovery-timeline');
   if(discoveries)document.querySelector<HTMLElement>('#topEventList')?.replaceChildren();
   if (discoveries) discoveries.innerHTML = upcomingEvents([...data.top,...data.ideas,...data.discoveries], new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date()),hiddenIds).map(item =>
-    '<article class="discovery-item filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '" data-ticket-price="' + dataEscape(JSON.stringify(item.ticketPrice||null)) + '" data-booking-deadline="' + dataEscape(item.bookingDeadline||'') + '" data-event-location="' + dataEscape(item.location || '') + '" data-event-time="' + dataEscape(item.time || '') + '" data-fit-score="' + (item.imported || !Number.isFinite(item.fitScore) ? '' : item.fitScore) + '"><div><div class="discovery-header"><time datetime="' + dataEscape(item.date) + '">' + dataEscape(new Intl.DateTimeFormat('de-DE', {weekday:'short',day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(new Date(item.date + 'T12:00:00Z'))) + (/^\d{2}:\d{2}$/.test(item.time || '') ? ' · ' + dataEscape(item.time) : '') + '</time><span class="mini-badge">' + categoryIcon(item.category, item.badge || item.title) + '<span class="category-label">' + dataEscape((item.badge || item.label || item.favorite.categoryLabel).split(/\s*[·×]\s*/)[0]) + '</span></span></div>' +
-    '<div class="collection-fit">' + dataEscape(catalogueFitLabel(item)) + '</div><h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' + (advanceBookingReason(item,new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date()))?'<p class="collection-condition">'+dataEscape(advanceBookingReason(item,new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date()))||'')+'</p>':'') + '<div class="item-actions">' +
+    '<article class="discovery-item filterable" data-day="' + dataEscape(item.day) + '" data-category="' + dataEscape(item.category) + '" data-date="' + dataEscape(item.date) + '" data-ticket-price="' + dataEscape(JSON.stringify(item.ticketPrice||null)) + '" data-booking-deadline="' + dataEscape(item.bookingDeadline||'') + '" data-event-location="' + dataEscape(item.location || '') + '" data-event-time="' + dataEscape(item.time || '') + '" data-fit-score="' + '' + '"><div><div class="discovery-header"><time datetime="' + dataEscape(item.date) + '">' + dataEscape(new Intl.DateTimeFormat('de-DE', {weekday:'short',day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(new Date(item.date + 'T12:00:00Z'))) + (/^\d{2}:\d{2}$/.test(item.time || '') ? ' · ' + dataEscape(item.time) : '') + '</time><span class="mini-badge">' + categoryIcon(item.category, item.badge || item.title) + '<span class="category-label">' + dataEscape((item.badge || item.label || item.favorite.categoryLabel).split(/\s*[·×]\s*/)[0]) + '</span></span></div>' +
+    '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item) + '<p>' + dataEscape(neutralDescription(item.description)) + '</p>' + (advanceBookingReason(item,new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date()))?'<p class="collection-condition">'+dataEscape(advanceBookingReason(item,new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date()))||'')+'</p>':'') + '<div class="item-actions">' +
     sourceMarkup(item) + ratingMarkup(item.favorite.id, item.title, 'discoveries') + favoriteMarkup(item, true) + '</div></div></article>'
   ).join('');
 
@@ -248,7 +248,7 @@ function applyPersonalTasteScores(){
     if(['restaurant','cinema','stream'].includes(facts.kind))return;
     const fit=adjustedTaste(item);
     if(label){let explanation=card.querySelector<HTMLElement>('.profile-fit-reason');if(!explanation){explanation=document.createElement('p');explanation.className='profile-fit-reason';label.after(explanation);}explanation.textContent=fit.reason;label.textContent=fit.confidence==='strong'?'Passt zu deinem Geschmack':fit.confidence==='qualified'?'Passend mit Vorbehalt':fit.confidence==='rejected'?'Passt derzeit nicht zum Profil':'Profilabgleich ausstehend';label.title=fit.reason+' · Rangfolge nach Geschmack; keine Wahrscheinlichkeit und keine Termin- oder Sicherheitsfreigabe.';}
-    if(card.classList.contains('discovery-item'))card.dataset.fitScore=allowed&&!item.imported&&Number.isFinite(item.fitScore)?String(item.fitScore):'';
+    if(card.classList.contains('discovery-item'))card.dataset.fitScore='';
   });
   for(const selector of ['#cinemaList','#streamFilmList','#streamSeriesList','#restaurantList','#cafeList','#beerGardenList','#hikeGroup .tour-list','#bikeGroup .tour-list','#walkGroup .tour-list']){
     const list=document.querySelector<HTMLElement>(selector);if(!list)continue;
@@ -1075,7 +1075,7 @@ function refreshEventHighlights() {
   if(!topList||!rest||!block)return;
   const cards=Array.from(document.querySelectorAll<HTMLElement>('#discoveries .discovery-item'));
   const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin'}).format(new Date());
-  const sort=document.querySelector<HTMLSelectElement>('#eventSort')?.value==='fit'?'fit':'date';
+  const sort='date' as const;
   const savedOnly=!!document.querySelector<HTMLInputElement>('#onlySaved')?.checked;
   const section=document.querySelector<HTMLSelectElement>('#currentKind')?.value==='music'?'music':'events';
   const heading=section==='music'?'Musik & Konzerte':'Kultur & Veranstaltungen';

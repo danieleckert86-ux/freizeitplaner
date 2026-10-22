@@ -3,6 +3,14 @@ import assert from 'node:assert/strict';
 import {withTasteRating,withExistingTasteRatings,validTasteRating,personalTasteFit,starsMarkup,tasteFeatures} from '../src/taste-profile.ts';
 const item={id:'a',title:'Band A',category:'Livemusik · Indie',description:'Persönliche Texte, akustische Instrumente und eine markante Stimme',kind:'event',url:'https://example.com/a',date:'2026-10-12',fitScore:92};
 const rating=(id,stars,title='Band '+id)=>({...item,id,title,stars,reason:'Eigene Stimme gefällt mir',ratedAt:'2026-10-11T10:00:00Z'});
+test('concert atmosphere and venue size no longer contribute taste features or learned ranking',()=>{
+ const plain={...item,description:'Indie Konzert'};
+ const atmospheric={...plain,description:'Indie Konzert als Wohnzimmerkonzert auf kleiner Bühne mit intimer Atmosphäre'};
+ assert.deepEqual(tasteFeatures(atmospheric),tasteFeatures(plain));
+ assert.deepEqual(personalTasteFit(atmospheric,[]),personalTasteFit(plain,[]));
+ const ratings=[1,2].map(n=>({...atmospheric,id:'old'+n,title:'Band '+n,score:100,reason:'kleiner Saal',ratedAt:'2026-10-11T10:00:00Z'}));
+ assert.deepEqual(personalTasteFit(atmospheric,ratings),personalTasteFit(plain,ratings));
+});
 test('all legacy stars map consistently while precise new scores and reasons win',()=>{
  const old={tasteRatings:[1,2,3,4,5].map(n=>rating('old'+n,n)),checks:['keep']};
  const migrated=withExistingTasteRatings(old);assert.deepEqual(migrated.tasteRatings.map(x=>x.score),[0,25,50,75,100]);assert.deepEqual(old.tasteRatings.map(x=>x.stars),[1,2,3,4,5]);

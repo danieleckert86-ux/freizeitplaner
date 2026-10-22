@@ -11,13 +11,13 @@ test('source evidence shows missing, failed and stale separately and never subst
  assert.equal(states[0].checkedAt,'');assert.equal(states[1].checkedAt,'');
  assert.equal(states[2].label,'Prüfung veraltet');assert.equal(states[3].checkedAt,'2026-10-09T05:00:00Z');
 });
-test('90-day collection retains early finds, hides expired and excluded events, sorts fit before date',()=>{
+test('90-day collection retains early finds, hides expired and excluded events, sorts chronologically ignoring legacy scores',()=>{
  const list=[{id:'past',title:'Past',date:'2026-10-08'},{id:'near',title:'Near',date:'2026-10-10',fitScore:80},{id:'far',title:'Far',date:'2026-12-01',fitScore:95},{id:'hidden',title:'Hidden',date:'2026-10-11',fitScore:100},{id:'too-far',title:'Too far',date:'2027-02-01'}];
- assert.deepEqual(upcomingEvents(list,'2026-10-09',new Set(['hidden'])).map(x=>x.id),['far','near']);
+ assert.deepEqual(upcomingEvents(list,'2026-10-09',new Set(['hidden'])).map(x=>x.id),['near','far']);
 });
-test('deduplication keeps highest fit, normalized names compare; missing score is honest',()=>{
+test('deduplication keeps a stable event, normalized names compare; missing score is honest',()=>{
  const list=[{id:'a',title:' Event ',date:'2026-10-10',time:'19:00',fitScore:70},{id:'b',title:'event',date:'2026-10-10',time:'19:00',fitScore:90}];
- assert.deepEqual(upcomingEvents(list,'2026-10-09',new Set()).map(x=>x.id),['b']);
+ assert.deepEqual(upcomingEvents(list,'2026-10-09',new Set()).map(x=>x.id),['a']);
  assert.equal(catalogueFitLabel({title:'Unknown'}),'Passung noch nicht bewertet');
 });
 test('event filters cover Friday through Sunday and the month horizon',()=>{
@@ -45,16 +45,16 @@ test('explicit cancellation preserves stored IDs and favorites while excluding t
 });
 
 
-test('taste top three automatically replace the weakest event when a better new event arrives',()=>{
+test('legacy taste top-three selection is retired',()=>{
  const events=[{id:'a',title:'A',date:'2026-10-20',fitScore:90},{id:'b',title:'B',date:'2026-10-12',fitScore:85},{id:'c',title:'C',date:'2026-11-01',fitScore:80}];
- assert.deepEqual(topTasteEvents(events,'2026-10-11',new Set()).map(x=>x.id),['a','b','c']);
+ assert.deepEqual(topTasteEvents(events,'2026-10-11',new Set()).map(x=>x.id),[]);
  const added={id:'new',title:'New',date:'2026-12-01',fitScore:95};
- assert.deepEqual(topTasteEvents([...events,added],'2026-10-11',new Set()).map(x=>x.id),['new','a','b']);
+ assert.deepEqual(topTasteEvents([...events,added],'2026-10-11',new Set()).map(x=>x.id),[]);
  assert.equal(events.length,3);
 });
-test('top taste excludes unknown imports, cancelled, expired, distant and hidden events; deduplicates and allows fewer than three',()=>{
+test('legacy top-three never resurrects any event',()=>{
  const rows=[{id:'ok',title:'Good',date:'2026-10-12',fitScore:70},{id:'duplicate',title:' good ',date:'2026-10-12',fitScore:60},{id:'unknown',title:'Unknown',date:'2026-10-12'},{id:'import',title:'Import',date:'2026-10-12',fitScore:100,imported:true},{id:'closed',title:'Closed',date:'2026-10-12',fitScore:99,closed:true},{id:'past',title:'Past',date:'2026-10-10',fitScore:99},{id:'far',title:'Far',date:'2027-03-01',fitScore:99},{id:'hidden',title:'Hidden',date:'2026-10-12',fitScore:99}];
- assert.deepEqual(topTasteEvents(rows,'2026-10-11',new Set(['hidden'])).map(x=>x.id),['ok']);
+ assert.deepEqual(topTasteEvents(rows,'2026-10-11',new Set(['hidden'])).map(x=>x.id),[]);
 });
 
 test('period filtering includes top picks and repeated changes restore the eligible cards',()=>{
@@ -70,17 +70,17 @@ test('period filtering includes top picks and repeated changes restore the eligi
  assert.equal(eventInPeriod('bad',today,'all'),false);
  assert.deepEqual(ids(eventView(rows,today,'weekend')),['fri','sat','sun']);
 });
-test('remaining events sort by date or personal fit; ties and unknown scores stay deterministic without mutation',()=>{
+test('events sort chronologically even with legacy fit settings and no score',()=>{
  const rows=[{id:'t1',title:'Top1',date:'2026-10-21',fitScore:100},{id:'t2',title:'Top2',date:'2026-10-22',fitScore:99},{id:'t3',title:'Top3',date:'2026-10-23',fitScore:98},{id:'near',title:'Near',date:'2026-10-16',time:'20:00',fitScore:50},{id:'far',title:'Far',date:'2026-10-20',fitScore:80},{id:'early',title:'Earlier',date:'2026-10-16',time:'18:00'},{id:'zero',title:'Zero',date:'2026-10-17',fitScore:0}];
  const before=JSON.stringify(rows);
- assert.deepEqual(eventView(rows,'2026-10-16','all','date').others.map(x=>x.id),['early','near','zero','far']);
- assert.deepEqual(eventView(rows,'2026-10-16','all','fit').others.map(x=>x.id),['far','near','zero','early']);
- assert.deepEqual(eventView(rows,'2026-10-16','all','fit').highlights.map(x=>x.id),['t1','t2','t3']);
+ assert.deepEqual(eventView(rows,'2026-10-16','all','date').others.map(x=>x.id),['early','near','zero','far','t1','t2','t3']);
+ assert.deepEqual(eventView(rows,'2026-10-16','all','fit').others.map(x=>x.id),['early','near','zero','far','t1','t2','t3']);
+ assert.deepEqual(eventView(rows,'2026-10-16','all','fit').highlights.map(x=>x.id),[]);
  assert.equal(JSON.stringify(rows),before);
 });
 test('saved-only and empty periods apply to both highlights and remaining list',()=>{
  const rows=[{id:'a',title:'A',date:'2026-10-17',fitScore:90,saved:true},{id:'b',title:'B',date:'2026-10-17',fitScore:95,saved:false}];
- assert.deepEqual(eventView(rows,'2026-10-16','weekend','fit',true).highlights.map(x=>x.id),['a']);
+ assert.deepEqual(eventView(rows,'2026-10-16','weekend','fit',true).others.map(x=>x.id),['a']);
  assert.deepEqual(eventView(rows,'2026-10-16','today'),{highlights:[],others:[]});
  assert.equal(rows.length,2);
  assert.equal(eventInPeriod('2026-10-18','2026-10-18','weekend'),true);
@@ -139,12 +139,12 @@ test('German partial-coverage reports are incomplete research, never a total sou
  assert.equal(s.state,'partial');assert.match(s.label,/unvollständig.*Programm lesbar/);assert.equal(s.accepted,6);assert.equal(s.returned,42);assert.equal(s.pending,1);assert.equal(JSON.stringify(check),before);
 });
 
-test('music and culture each have their own top three without cross-category competition',()=>{
+test('music and culture retain all matching events without points or top-three picks',()=>{
  const rows=[...Array.from({length:4},(_,i)=>({id:'m'+i,title:'Musik '+i,category:'Indie-Konzert',date:'2026-10-20',fitScore:99-i})),...Array.from({length:4},(_,i)=>({id:'c'+i,title:'Kultur '+i,category:'Lesung',date:'2026-10-21',fitScore:89-i}))];
  const music=eventView(rows,'2026-10-17','all','date',false,'music'),culture=eventView(rows,'2026-10-17','all','date',false,'events');
- assert.deepEqual(music.highlights.map(x=>x.id),['m0','m1','m2']);assert.deepEqual(culture.highlights.map(x=>x.id),['c0','c1','c2']);
- assert.deepEqual(music.others.map(x=>x.id),['m3']);assert.deepEqual(culture.others.map(x=>x.id),['c3']);
- assert.equal(eventView(rows.slice(0,1),'2026-10-17','all','date',false,'music').highlights.length,1);
+ assert.deepEqual(music.highlights,[]);assert.deepEqual(culture.highlights,[]);
+ assert.deepEqual(music.others.map(x=>x.id),['m0','m1','m2','m3']);assert.deepEqual(culture.others.map(x=>x.id),['c0','c1','c2','c3']);
+ assert.equal(eventView(rows.slice(0,1),'2026-10-17','all','date',false,'music').others.length,1);
  assert.equal(eventView(rows,'2026-10-17','today','date',false,'music').highlights.length,0);
  assert.equal(eventView(rows,'2026-10-17','all','date',true,'events').highlights.length,0);
 });
@@ -153,14 +153,14 @@ test('cabaret and literature keep cultural priority over incidental music or jaz
  const categories=['Kabarett · Musik-Comedy','Liedermacher · Musikkabarett','Folk · Musikkabarett','Literatur · Lesung und Musik','Literatur · Gespräch · Musik','Literatur · Jazz · Livemusik','Lesung · Live-Musik · Bildprojektion'];
  const rows=categories.map((category,i)=>({id:String(i),title:category,category,date:'2026-11-01',fitScore:90}));
  assert.equal(eventView(rows,'2026-10-17','all','date',false,'music').highlights.length,0);
- const culture=eventView(rows,'2026-10-17','all','date',false,'events');assert.equal(culture.highlights.length,3);assert.equal(culture.others.length,4);
+ const culture=eventView(rows,'2026-10-17','all','date',false,'events');assert.equal(culture.highlights.length,0);assert.equal(culture.others.length,7);
  const music=[{title:'Song Slam',category:'Song Slam · Konzert',date:'2026-11-01',fitScore:90},{title:'Band',category:'Indie-Folk Konzert',date:'2026-11-01',fitScore:89}];
- assert.equal(eventView(music,'2026-10-17','all','date',false,'music').highlights.length,2);
+ assert.equal(eventView(music,'2026-10-17','all','date',false,'music').others.length,2);
 });
 
-test('Top 3 use distinct formats while second performance remains visible',()=>{
+test('all formats and their second performances remain visible chronologically',()=>{
  const rows=[{title:'Designmarkt',location:'Gaswerk',date:'2026-10-18',fitScore:99},{title:'Designmarkt',location:'Gaswerk',date:'2026-10-19',fitScore:98},{title:'Lesung',date:'2026-10-20',fitScore:95},{title:'Kabarett',date:'2026-10-21',fitScore:94}];
- const view=eventView(rows,'2026-10-18');assert.deepEqual(view.highlights.map(x=>x.title),['Designmarkt','Lesung','Kabarett']);assert.equal(view.others[0].date,'2026-10-19');
+ const view=eventView(rows,'2026-10-18');assert.deepEqual(view.highlights,[]);assert.deepEqual(view.others.map(x=>x.title),['Designmarkt','Designmarkt','Lesung','Kabarett']);assert.equal(view.others[1].date,'2026-10-19');
 });
 
 

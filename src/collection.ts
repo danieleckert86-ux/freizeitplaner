@@ -4,16 +4,10 @@ export type CollectionItem={ticketPrice?:TicketPrice;bookingDeadline?:string|nul
 export function upcomingEvents<T extends CollectionItem>(items:T[],today:string,hidden:Set<string>):T[]{
  const max=new Date(today+'T12:00:00Z');max.setUTCDate(max.getUTCDate()+90);const last=max.toISOString().slice(0,10);
  const seen=new Set<string>();
- return [...items].filter(x=>x.closed!==true&&x.date&&x.date>=today&&x.date<=last&&!hidden.has(x.id||x.favorite?.id||'')).sort((a,b)=>(b.fitScore||0)-(a.fitScore||0)||(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||'')).filter(x=>{const key=[x.title.trim().replace(/\s+/g,' ').toLocaleLowerCase('de'),x.date,x.time||''].join('|');if(seen.has(key))return false;seen.add(key);return true;});
+ return [...items].filter(x=>x.closed!==true&&x.date&&x.date>=today&&x.date<=last&&!hidden.has(x.id||x.favorite?.id||'')).sort((a,b)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||'')||a.title.localeCompare(b.title,'de')).filter(x=>{const key=[x.title.trim().replace(/\s+/g,' ').toLocaleLowerCase('de'),x.date,x.time||''].join('|');if(seen.has(key))return false;seen.add(key);return true;});
 }
-/** Ranked independently of the list's period filter; unknown taste is never a top pick. */
-export function topTasteEvents<T extends CollectionItem>(items:T[],today:string,hidden:Set<string>):T[]{
- const groups=new Set<string>();
- return upcomingEvents(items.filter(x=>!x.imported&&Number.isFinite(x.fitScore)&&x.fitScore!>=0&&x.fitScore!<=100),today,hidden).filter(x=>{
-  const key=[x.title,x.location||''].map(v=>v.normalize('NFKC').toLocaleLowerCase('de').replace(/[^\p{L}\p{N}]+/gu,' ').trim()).join('|');
-  if(groups.has(key))return false;groups.add(key);return true;
- }).slice(0,3);
-}
+/** Compatibility export: automatic event top picks have been retired. */
+export function topTasteEvents<T extends CollectionItem>(_items:T[],_today:string,_hidden:Set<string>):T[]{return [];}
 export function eventInPeriod(date:string,today:string,period:string){
  const sunday=new Date(today+'T12:00:00Z');sunday.setUTCDate(sunday.getUTCDate()+(7-sunday.getUTCDay())%7);
  const weekEnd=sunday.toISOString().slice(0,10);const friday=new Date(sunday);friday.setUTCDate(friday.getUTCDate()-2);
@@ -22,18 +16,18 @@ export function eventInPeriod(date:string,today:string,period:string){
  return /^\d{4}-\d{2}-\d{2}$/.test(date)&&date>=today&&date<=horizon.toISOString().slice(0,10)&&(period==='today'?date===today:period==='week'?date<=weekEnd:period==='weekend'?date>=friday.toISOString().slice(0,10)&&date<=weekEnd:period==='month'?date<=month.toISOString().slice(0,10):true);
 }
 export type EventSort='date'|'fit';
-export function eventView<T extends CollectionItem & {saved?:boolean}>(items:T[],today:string,period='all',sort:EventSort='date',savedOnly=false,section?:'music'|'events'){
+export function eventView<T extends CollectionItem & {saved?:boolean}>(items:T[],today:string,period='all',_sort:EventSort='date',savedOnly=false,section?:'music'|'events'){
  const visible=upcomingEvents(items.filter(x=>!section||eventSection(x)===section),today,new Set()).filter(x=>eventInPeriod(x.date||'',today,period)&&(!savedOnly||x.saved));
- const highlights=topTasteEvents(visible,today,new Set()),top=new Set(highlights);
- const score=(x:T)=>!x.imported&&Number.isFinite(x.fitScore)?x.fitScore!:-1;
+ const highlights:T[]=[];
  const byDate=(a:T,b:T)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||'')||a.title.localeCompare(b.title,'de');
- const others=visible.filter(x=>!top.has(x)).sort((a,b)=>sort==='fit'?score(b)-score(a)||byDate(a,b):byDate(a,b)||score(b)-score(a));
+ const others=visible.sort(byDate);
  return {highlights,others};
 }
 /** Current calendar week, then only later events with concrete booking evidence. */
-export function weeklyBookingView<T extends CollectionItem & {saved?:boolean}>(items:T[],today:string,sort:EventSort='date',savedOnly=false,section?:'music'|'events'){
+export function weeklyBookingView<T extends CollectionItem & {saved?:boolean}>(items:T[],today:string,_sort:EventSort='date',savedOnly=false,section?:'music'|'events'){
  const byDate=(a:T,b:T)=>(a.date||'').localeCompare(b.date||'')||(a.time||'').localeCompare(b.time||'')||a.title.localeCompare(b.title,'de');
- const rank=(a:T,b:T)=>sort==='fit'?(b.fitScore??-1)-(a.fitScore??-1)||byDate(a,b):byDate(a,b);
+ // Legacy sort=fit is accepted for old saved UI state, but scores are ignored.
+ const rank=byDate;
  const visible=upcomingEvents(items.filter(x=>(!section||eventSection(x)===section)&&(!savedOnly||x.saved)),today,new Set());
  const highlights=visible.filter(x=>eventInPeriod(x.date||'',today,'week')).sort(rank);
  const others=visible.filter(x=>!eventInPeriod(x.date||'',today,'week')&&!!advanceBookingReason(x,today)).sort(rank);

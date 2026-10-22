@@ -1,8 +1,27 @@
 # Freizeitvorrat statt Wochenplaner
 
+## Musik/Kultur: einfacher Recherchefilter · 22.10.2026
+
+Der zentrale Rechercheauftrag verwendet `event-simple-app-only-20261022-v2`: belegter
+Lieblingskünstler oder bevorzugter Musikstil; Kultur über bevorzugte Formate
+und kurze konkrete Themenbezüge. Kein zusätzlicher vollständiger Geschmackspass.
+Die App behält vorhandene Profile, Assessments, Bewertungen, Ausblendungen und
+Sammlung. Der bestehende strong-Vertrag wird durch tatsächliche kurze belegte
+Regelentscheidungen erfüllt, niemals durch einen Import oder bloßen Score.
+
+Automatische Eventpunkte und Sortieren nach persönlicher Passung entfallen.
+Wochenliste und Preisvorschau sind chronologisch, auch bei alter sort=fit-Einstellung.
+Alte numerische Katalogwerte bleiben gespeichert und werden in Eventkarten
+nicht angezeigt oder als Freigabe verwendet. Konzertatmosphäre, kleine Bühne/
+Location und Wohnzimmerformat sind keine Features mehr. Manuelle
+Bewertungen bleiben exakt erhalten. Quellenzeiten und Empfehlungen werden
+hier nicht automatisch erneuert. Wochenansicht/Preisvorschau bleiben; Musik-/Kulturveranstaltungen
+werden künftig ausschließlich in der App angezeigt und entfallen in der Mail. Die Recherche-Statistik bleibt im Aufgabenbericht, gleiche Spalten
+wie Kino/Streaming; kein zusätzlicher Statistikblock in Karten oder Mail.
+
 Die bestehende App zeigt Events, Touren & Ideen und Gemerkt. Die tägliche Morgenmail wählt im Code höchstens drei Tipps aus gespeicherten belegten Inhalten. Favoriten, Bewertungen, ausgeblendete Ideen, Routinen und Kalenderdaten bleiben in den bisherigen Supabase-Tabellen; keine Datenrücksetzung und keine neue Schreibberechtigung.
 
-Events haben einen 90-Tage-Horizont, Fitscore vor Termin, Filter heute/Woche/Wochenende/30/90 Tage. Unbekannte Passung bleibt unbekannt. Wanderungen/Fahrradtouren sind dauerhafte Sammlung; grundsätzliche Passung und konkrete Wetter-/Sperr-/Routeneignung bleiben getrennt. Ungeprüfte Importtouren sind keine sicheren Ausflugsempfehlungen. Restaurants, Kino und Streaming bleiben gespeichert; aktuelle Verfügbarkeit beim Anbieter prüfen. Scheitert das Laden der Ausschlüsse, werden keine versteckten Ideen wiederhergestellt.
+Events haben einen 90-Tage-Horizont und werden chronologisch ohne Punkte sortiert; Filter heute/Woche/Wochenende/30/90 Tage. Unbekannte Passung bleibt unbekannt. Wanderungen/Fahrradtouren sind dauerhafte Sammlung; grundsätzliche Passung und konkrete Wetter-/Sperr-/Routeneignung bleiben getrennt. Ungeprüfte Importtouren sind keine sicheren Ausflugsempfehlungen. Restaurants, Kino und Streaming bleiben gespeichert; aktuelle Verfügbarkeit beim Anbieter prüfen. Scheitert das Laden der Ausschlüsse, werden keine versteckten Ideen wiederhergestellt.
 
 Der Katalog kommt bevorzugt aus `https://fahrrad-zur-arbei.vercel.app/api/leisure/catalog`, optional über `VITE_MORNING_CATALOG_URL`. Bei Nichterreichbarkeit bleiben der bisherige Supabase-Katalog und vorhandene JSON-Datei als Rückfall. Das Frontend recherchiert keine neuen Events. Die öffentliche Schnittstelle enthält keine Kalender, Profile, Routinen, Feedbackdaten, Häkchen oder Zugangsdaten.
 

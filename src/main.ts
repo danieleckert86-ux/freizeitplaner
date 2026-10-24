@@ -30,11 +30,11 @@ type Recommendation = {
 type LifestyleRecommendation = {
   id: string; kind?:string;releaseDate?:string;date?:string; openingDate?:string;openingCity?:string;openingSourceUrl?:string;mediaType?: 'film'|'series'; title: string; type: string; description: string; meta: string[];
   fitScore?: number; imported?: boolean; category?:string; favorite?:{id:string;categoryLabel?:string};
-  url: string; badge: string; location?: string; venue?: string; city?: string; address?: string; platform?: string; imdbRating?: number|null; imdbUrl?: string; moviepilotRating?:number|null;moviepilotUrl?:string; trailerUrl?: string; trailerLanguage?: 'de'|'en'|'other';
+  url: string; badge: string; location?: string; venue?: string; city?: string; address?: string; platform?: string; imdbRating?: number|null; imdbUrl?: string; moviepilotRating?:number|null;moviepilotUrl?:string;streamListingUrl?:string;streamListingCheckedAt?:string;streamListingSection?:string; trailerUrl?: string; trailerLanguage?: 'de'|'en'|'other';
 };
 
 type StreamRecommendation = LifestyleRecommendation & {
-  platform: string; releaseDate: string;
+  platform: string; releaseDate?: string;
 };
 
 type RecommendationData = {
@@ -198,7 +198,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   const renderLifestyle = (selector: string, items: LifestyleRecommendation[], section: 'restaurants' | 'cinema' | 'stream') => {
     const list = document.querySelector<HTMLElement>(selector);
     if (!list) return;
-    list.innerHTML = [...items].filter(item => !mediaHidden(item,hiddenIds)&&(section==='restaurants'?recommendationAllowed({...item,kind:'restaurant',verifiedAt:(item as any).verifiedAt,closed:(item as any).closed},null):mediaRecommendationAllowed({...item,kind:section}))).sort((a,b)=>section==='restaurants'?(b.openingDate||'').localeCompare(a.openingDate||'')||a.title.localeCompare(b.title):(section==='cinema'?(b.moviepilotRating||0)-(a.moviepilotRating||0):(b.imdbRating||0)-(a.imdbRating||0))||(b.releaseDate||'').localeCompare(a.releaseDate||'')||a.title.localeCompare(b.title)).map(item =>
+    list.innerHTML = [...items].filter(item => !mediaHidden(item,hiddenIds)&&(section==='restaurants'?recommendationAllowed({...item,kind:'restaurant',verifiedAt:(item as any).verifiedAt,closed:(item as any).closed},null):mediaRecommendationAllowed({...item,kind:section}))).sort((a,b)=>section==='restaurants'?(b.openingDate||'').localeCompare(a.openingDate||'')||a.title.localeCompare(b.title):(b.moviepilotRating||0)-(a.moviepilotRating||0)||(b.releaseDate||'').localeCompare(a.releaseDate||'')||a.title.localeCompare(b.title)).map(item =>
       '<article class="lifestyle-card" '+'data-profile-rejected="true" style="display:none!important" '+'data-lifestyle-id="' + dataEscape(item.id) + '">' +
       '<div class="lifestyle-top"><span class="lifestyle-type">' + categoryIcon(section, item.type) + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(section==='restaurants'?item.badge:'Neu') + '</span></div>' +
       (section==='restaurants'?'<div class="opening-label">'+dataEscape(foodOpeningLabel(item))+'</div>':'<div class="media-release">'+dataEscape(mediaReleaseLabel({...item,kind:section==='cinema'?'cinema':'stream'}))+'</div>') +
@@ -253,7 +253,7 @@ function applyPersonalTasteScores(){
   for(const selector of ['#cinemaList','#streamFilmList','#streamSeriesList','#restaurantList','#cafeList','#beerGardenList','#hikeGroup .tour-list','#bikeGroup .tour-list','#walkGroup .tour-list']){
     const list=document.querySelector<HTMLElement>(selector);if(!list)continue;
     let empty=list.querySelector<HTMLElement>('.profile-empty');
-    if(!empty){empty=document.createElement('p');empty.className='profile-empty';empty.textContent=['#restaurantList','#cafeList','#beerGardenList'].includes(selector)?'Noch keine bestätigten Neueröffnungen in Augsburg innerhalb der letzten60Tage gelistet.':selector==='#cinemaList'?'Keine aktuellen Kinofilme mit Moviepilot-Nutzerwertung ab 7,0 gespeichert.':['#streamFilmList','#streamSeriesList'].includes(selector)?'Keine neuen Titel der letzten 30 Tage mit IMDb über 7,8 verfügbar.':'Aktuell keine Vorschläge mit bestätigter persönlicher Passung. Es werden nur klar passende Empfehlungen zu deinem aktuellen Profil angezeigt.';list.append(empty);}
+    if(!empty){empty=document.createElement('p');empty.className='profile-empty';empty.textContent=['#restaurantList','#cafeList','#beerGardenList'].includes(selector)?'Noch keine bestätigten Neueröffnungen in Augsburg innerhalb der letzten60Tage gelistet.':selector==='#cinemaList'?'Keine aktuellen Kinofilme mit Moviepilot-Nutzerwertung ab 7,0 gespeichert.':['#streamFilmList','#streamSeriesList'].includes(selector)?'Keine Streaming-Neuerscheinungen deiner Anbieter mit Moviepilot-Nutzerwertung ab 7,0 gespeichert.':'Aktuell keine Vorschläge mit bestätigter persönlicher Passung. Es werden nur klar passende Empfehlungen zu deinem aktuellen Profil angezeigt.';list.append(empty);}
     empty.hidden=Array.from(list.querySelectorAll<HTMLElement>('.lifestyle-card,.tour-card')).some(card=>card.dataset.profileRejected!=='true');
   }
   refreshOutdoorPicks();

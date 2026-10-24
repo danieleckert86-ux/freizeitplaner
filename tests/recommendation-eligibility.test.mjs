@@ -11,12 +11,12 @@ test('all discovery categories require a sourced strong decision; hard rejection
  assert.equal(recommendationAllowed({...x,contentChangedAt:'2026-10-17T13:00:00Z'},a,now),false);
  assert.equal(currentAssessment('a','culture',{culture:{...defaultTasteProfiles.culture,updatedAt:'2026-10-18T00:00:00Z'}},{a}),null);
 });
-test('stream 30-day and rating/identity boundaries are enforced in the browser',()=>{
- const stream={...x,kind:'stream',mediaType:'film',location:'Netflix Deutschland',imdbRating:7.9,imdbUrl:'https://www.imdb.com/title/tt1234567/'};
+test('stream Moviepilot section, own services and rating boundaries are enforced in the browser',()=>{
+ const stream={...x,kind:'stream',mediaType:'film',location:'Netflix Deutschland',moviepilotRating:7,moviepilotUrl:'https://www.moviepilot.de/movies/testfilm',streamListingUrl:'https://www.moviepilot.de/streaming/neuerscheinungen',streamListingCheckedAt:at,streamListingSection:'Neuerscheinungen'};
  for(const date of ['2026-10-17','2026-09-18'])assert.equal(recommendationAllowed({...stream,date},a,now),true);
- for(const date of ['2026-09-17','2026-10-18',null,''])assert.equal(recommendationAllowed({...stream,date},a,now),false);
- assert.equal(recommendationAllowed({...stream,imdbRating:7.7},a,now),false);
- assert.equal(recommendationAllowed({...stream,imdbUrl:''},a,now),false);
+ for(const date of ['2026-09-17','2026-10-18',null,''])assert.equal(recommendationAllowed({...stream,date},a,now),true);
+ assert.equal(recommendationAllowed({...stream,moviepilotRating:6.99},a,now),false);
+ assert.equal(recommendationAllowed({...stream,moviepilotUrl:''},a,now),false);
 });
 test('old low-ascent imports and long bicycle routes cannot return through a strong review',()=>{
  const hike={...x,routeEvidence:{durationActivity:'walking',ascentMetric:'totalAscent',ascentSourceUrl:'https://example.org/event',ascentVerifiedAt:at,startMunicipality:'Augsburg',startSourceUrl:'https://example.org/event',startVerifiedAt:at,travelMode:'car',travelReference:'augsburg-centre',travelSourceUrl:'https://example.org/event',travelVerifiedAt:at,specialAppeal:'Historischer Natur- und Kulturweg am Kanal',appealSourceUrls:['https://example.org/event'],appealVerifiedAt:at,wayCharacter:'Fester, nicht ausgesetzter Weg',waySourceUrls:['https://example.org/event'],wayVerifiedAt:at,safetySourceUrls:['https://example.org/event'],safetyVerifiedAt:at,surface:'firm'},kind:'hike',km:12,ascent:500,minutes:240,travelMinutes:90,closed:false,exposed:false,climbing:false};

@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {imdbRating,mediaRecommendationAllowed,imdbMarkup,imdbTitleUrl,germanTrailerMarkup,youtubeTrailerSearchUrl,mediaRatingMarkup} from '../src/media-rating.ts';
-test('IMDb requires a confirmed rating strictly above 7.8; unknown is not approved',()=>{
- for(const value of [0,7,7.6,7.79,7.8,undefined,null,NaN,Infinity,-1,11,'8.5'])assert.equal(mediaRecommendationAllowed({imdbRating:value}),false);
- for(const value of [7.9,8,10])assert.equal(mediaRecommendationAllowed({imdbRating:value}),true);
+test('Moviepilot requires a confirmed user rating at least 7.0; unknown is not approved',()=>{
+ for(const value of [0,6.99,undefined,null,NaN,Infinity,-1,11,'8.5'])assert.equal(mediaRecommendationAllowed({moviepilotRating:value}),false);
+ for(const value of [7,7.9,8,10])assert.equal(mediaRecommendationAllowed({moviepilotRating:value}),true);
  assert.equal(imdbRating(0),0);assert.equal(imdbRating('7'),null);
 });
 test('rating markup uses German decimal and only a genuine IMDb title link',()=>{
@@ -42,10 +42,10 @@ test('missing or unconfirmed German trailers link to an encoded YouTube title se
  assert.doesNotMatch(germanTrailerMarkup({title,trailerLanguage:'de',trailerUrl:'https://example.org/trailer'}),/YouTube suchen/);
 });
 
-test('cinema rating gate accepts Moviepilot exactly 7.0 but keeps IMDb streaming above 7.8',()=>{
+test('both media gates accept Moviepilot exactly 7.0 independently of IMDb',()=>{
  for(const imdbRating of [7,7.6,7.8,7.9,10])assert.equal(mediaRecommendationAllowed({kind:'cinema',moviepilotRating:imdbRating}),true);
  for(const imdbRating of [6.99,undefined,null,NaN,11])assert.equal(mediaRecommendationAllowed({kind:'cinema',moviepilotRating:imdbRating}),false);
- assert.equal(mediaRecommendationAllowed({kind:'stream',imdbRating:7.6}),false);
+ assert.equal(mediaRecommendationAllowed({kind:'stream',moviepilotRating:7,imdbRating:7.6}),true);
 });
 
 test('Moviepilot markup never labels its user rating as IMDb',()=>{

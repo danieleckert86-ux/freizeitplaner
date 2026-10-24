@@ -1,8 +1,8 @@
 export function imdbRating(value:unknown):number|null {
  return typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=10?value:null;
 }
-export function mediaRecommendationAllowed(item:{imdbRating?:unknown;kind?:string}){
- const rating=imdbRating(item.imdbRating);return rating!==null&&rating>(item.kind==='cinema'?7.5:7.8);
+export function mediaRecommendationAllowed(item:{imdbRating?:unknown;moviepilotRating?:unknown;kind?:string}){
+ const rating=imdbRating(item.kind==='cinema'?item.moviepilotRating:item.imdbRating);return rating!==null&&(item.kind==='cinema'?rating>=7:rating>7.8);
 }
 export function imdbTitleUrl(value:unknown):string {
  if(typeof value!=='string')return '';
@@ -30,7 +30,15 @@ export function germanTrailerMarkup(item:{title?:unknown;trailerUrl?:unknown;tra
 }
 
 export function mediaReleaseLabel(item:{releaseDate?:string;date?:string;kind?:string}){
- if(item.kind==='cinema')return 'In der IMDb-Kinoliste';
+ if(item.kind==='cinema')return 'Aktuell im Kino · Moviepilot';
  const day=item.releaseDate||(item.kind==='stream'?item.date:'')||'';
  return /^\d{4}-\d{2}-\d{2}$/.test(day)?'Beim Dienst seit: '+day.split('-').reverse().join('.'):'';
+}
+
+export function mediaRatingMarkup(item:{kind?:string;moviepilotRating?:unknown;moviepilotUrl?:unknown;imdbRating?:unknown;imdbUrl?:unknown}){
+ if(item.kind!=='cinema')return imdbMarkup(item);
+ const rating=imdbRating(item.moviepilotRating);if(rating===null)return '';
+ const label='Moviepilot '+rating.toFixed(1).replace('.',',')+'/10';
+ try{const u=new URL(String(item.moviepilotUrl));if(u.protocol==='https:'&&!u.username&&!u.password&&['moviepilot.de','www.moviepilot.de'].includes(u.hostname)&&/^\/movies\/[^/]+\/?$/.test(u.pathname))return `<a class="imdb-rating" href="${escape(u.href)}" target="_blank" rel="noopener noreferrer">${label}</a>`;}catch{}
+ return `<span class="imdb-rating">${label}</span>`;
 }

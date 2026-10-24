@@ -1,7 +1,7 @@
 // Kept byte-identical with freizeitplaner/src/recommendation-eligibility.ts.
 // Media use release/IMDb facts; other personal recommendations retain their approval gate.
 export type RouteEvidence={durationActivity:'walking'|'cycling';ascentMetric?:'totalAscent'|'heightDifference'|'unknown';ascentSourceUrl?:string;ascentVerifiedAt?:string;startMunicipality:string;startSourceUrl:string;startVerifiedAt:string;travelMode:'walk'|'bike'|'transit'|'car';travelReference?:'augsburg-centre';travelSourceUrl?:string;travelVerifiedAt?:string;specialAppeal?:string;appealSourceUrls?:string[];appealVerifiedAt?:string;wayCharacter:string;waySourceUrls:string[];wayVerifiedAt:string;surface?:'asphalt'|'firm'|'mixed'|'unknown';surfaceComponents?:('asphalt'|'firm'|'unsuitable')[];safetySourceUrls:string[];safetyVerifiedAt:string};
-export type RecommendationFacts={kind:string;openingDate?:string;openingCity?:string;openingSourceUrl?:string;routeEvidence?:RouteEvidence;contentChangedAt?:string;date?:string|null;releaseDate?:string|null;releaseSourceUrl?:string;cinemaProgramUrl?:string;cinemaProgramCheckedAt?:string;availableUntil?:string;time?:string|null;location?:string;platform?:string;mediaType?:string;imdbRating?:number|null;imdbUrl?:string;imported?:boolean;closed?:boolean|null;verifiedAt?:string;km?:number|null;ascent?:number|null;minutes?:number|null;travelMinutes?:number|null;exposed?:boolean|null;climbing?:boolean|null;latitude?:number|null;longitude?:number|null};
+export type RecommendationFacts={kind:string;openingDate?:string;openingCity?:string;openingSourceUrl?:string;routeEvidence?:RouteEvidence;contentChangedAt?:string;date?:string|null;releaseDate?:string|null;releaseSourceUrl?:string;cinemaProgramUrl?:string;cinemaProgramCheckedAt?:string;availableUntil?:string;time?:string|null;location?:string;platform?:string;mediaType?:string;imdbRating?:number|null;imdbUrl?:string;moviepilotRating?:number|null;moviepilotUrl?:string;imported?:boolean;closed?:boolean|null;verifiedAt?:string;km?:number|null;ascent?:number|null;minutes?:number|null;travelMinutes?:number|null;exposed?:boolean|null;climbing?:boolean|null;latitude?:number|null;longitude?:number|null};
 export type Approval={status:string;reason:string;caveat?:string;profileUpdatedAt:string;reviewedAt:string;sourceUrls:string[]};
 const timestamp=(v:unknown)=>typeof v==='string'&&v.includes('T')&&Number.isFinite(Date.parse(v));
 const isoDay=(v:unknown):v is string=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v))&&new Date(v).toISOString().slice(0,10)===v;
@@ -22,7 +22,8 @@ export function hardEligibilityReason(x:RecommendationFacts,now=new Date()):stri
   const clock=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(now);
   if(age<0||age>90||age===0&&/^([01]\d|2[0-3]):[0-5]\d$/.test(x.time||'')&&x.time!<=clock)return 'outside_event_window';
  }
- if(['cinema','stream'].includes(x.kind)&&number(x.imdbRating)&&x.imdbRating>=0&&x.imdbRating<=(x.kind==='cinema'?7.5:7.8))return 'imdb_threshold';
+ if(x.kind==='stream'&&number(x.imdbRating)&&x.imdbRating>=0&&x.imdbRating<=7.8)return 'imdb_threshold';
+ if(x.kind==='cinema'&&number(x.moviepilotRating)&&x.moviepilotRating>=0&&x.moviepilotRating<7)return 'moviepilot_threshold';
  if(x.imported===true||!timestamp(x.verifiedAt))return 'unverified';
  if(x.kind==='restaurant'){
   if(x.openingCity!=='Augsburg'||!x.location?.trim())return 'opening_location_unconfirmed';
@@ -52,16 +53,20 @@ export function hardEligibilityReason(x:RecommendationFacts,now=new Date()):stri
   if(!/^(Netflix(?: Deutschland)?|Disney\+(?: Deutschland)?|RTL\+(?: Deutschland)?|ARD Mediathek|ZDFmediathek)$/i.test(x.platform||x.location||''))return 'service_unknown';
  }
  if(['stream','cinema'].includes(x.kind)){
-  // Cinema uses only the IMDb showtimes list, independently of release age.
+  // Cinema uses Moviepilot user ratings; streaming keeps its IMDb policy.
   if(x.availableUntil!==undefined&&(!timestamp(x.availableUntil)||Date.parse(x.availableUntil)<=now.getTime()))return 'unavailable';
   if(x.kind==='cinema'){
    if(!source(x.cinemaProgramUrl)||!timestamp(x.cinemaProgramCheckedAt)||Date.parse(x.cinemaProgramCheckedAt!)>now.getTime()||now.getTime()-Date.parse(x.cinemaProgramCheckedAt!)>120*3600000)return 'cinema_program_unconfirmed';
    const programme=new URL(x.cinemaProgramUrl!);
-   if(!['imdb.com','www.imdb.com'].includes(programme.hostname)||!/^\/(?:de\/)?showtimes\/?$/.test(programme.pathname))return 'cinema_source_not_allowed';
-  }
+   if(!['moviepilot.de','www.moviepilot.de'].includes(programme.hostname)||programme.pathname.replace(/\/$/,'')!=='/filme/beste/aktuell-kino')return 'cinema_source_not_allowed';
+   if(!number(x.moviepilotRating)||x.moviepilotRating<0||x.moviepilotRating>10)return 'moviepilot_unknown';
+   if(x.moviepilotRating<7)return 'moviepilot_threshold';
+   if(!source(x.moviepilotUrl)||!/^https:\/\/(www\.)?moviepilot\.de\/movies\/[^/?#]+\/?$/.test(x.moviepilotUrl!))return 'moviepilot_identity_unknown';
+  }else{
   if(!number(x.imdbRating)||x.imdbRating<0||x.imdbRating>10)return 'imdb_unknown';
-  if(x.imdbRating<=(x.kind==='cinema'?7.5:7.8))return 'imdb_threshold';
+  if(x.imdbRating<=7.8)return 'imdb_threshold';
   if(!/^https:\/\/(www\.)?imdb\.com\/title\/tt\d+(?:\/|$)/.test(x.imdbUrl||''))return 'imdb_identity_unknown';
+  }
  }
  if(['hike','bike','walk'].includes(x.kind)){
   // Reject known hard failures before spending effort on missing descriptive evidence.
@@ -97,13 +102,20 @@ export function recommendationAllowed(x:RecommendationFacts,a:Approval|null|unde
 }
 
 // Persist this key in the existing hidden_recommendations table, across offer IDs.
-export function mediaIdentityKey(x:{imdbUrl?:string}){
- if(!source(x.imdbUrl))return '';
- const u=new URL(x.imdbUrl!);if(!['imdb.com','www.imdb.com'].includes(u.hostname))return '';
- const id=/^\/title\/(tt\d+)(?:\/|$)/.exec(u.pathname)?.[1];
- return id?'media/imdb/'+id:'';
+export function mediaIdentityKeys(x:{imdbUrl?:string;moviepilotUrl?:string}){
+ const keys:string[]=[];
+ if(source(x.imdbUrl)){
+  const u=new URL(x.imdbUrl!);const id=/^\/title\/(tt\d+)(?:\/|$)/.exec(u.pathname)?.[1];
+  if(['imdb.com','www.imdb.com'].includes(u.hostname)&&id)keys.push('media/imdb/'+id);
+ }
+ if(source(x.moviepilotUrl)){
+  const u=new URL(x.moviepilotUrl!);const slug=/^\/movies\/([^/]+)\/?$/.exec(u.pathname)?.[1];
+  if(['moviepilot.de','www.moviepilot.de'].includes(u.hostname)&&slug)keys.push('media/moviepilot/'+slug);
+ }
+ return keys;
 }
-export function mediaHidden(x:{id?:string;imdbUrl?:string},hidden:ReadonlySet<string>){return !!x.id&&(hidden.has(x.id)||hidden.has('lifestyle-'+x.id))||!!mediaIdentityKey(x)&&hidden.has(mediaIdentityKey(x));}
+export function mediaIdentityKey(x:{imdbUrl?:string;moviepilotUrl?:string}){return mediaIdentityKeys(x)[0]||'';}
+export function mediaHidden(x:{id?:string;imdbUrl?:string;moviepilotUrl?:string},hidden:ReadonlySet<string>){return !!x.id&&(hidden.has(x.id)||hidden.has('lifestyle-'+x.id))||mediaIdentityKeys(x).some(key=>hidden.has(key));}
 
 export function foodOpeningLabel(x:{openingDate?:string}){
  const value=x.openingDate||'';

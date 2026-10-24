@@ -1,8 +1,8 @@
 import {type AdvanceBooking,type TicketPrice} from './event-planning';
 import {outdoorPicks} from './outdoor-selection';
-import {recommendationAllowed,foodOpeningLabel,mediaIdentityKey,mediaHidden,type RecommendationFacts} from './recommendation-eligibility';
+import {recommendationAllowed,foodOpeningLabel,mediaIdentityKeys,mediaHidden,type RecommendationFacts} from './recommendation-eligibility';
 import {profileAssessment} from './taste-settings-ui';
-import {imdbMarkup,mediaRecommendationAllowed,germanTrailerMarkup,mediaReleaseLabel} from './media-rating';
+import {mediaRatingMarkup,mediaRecommendationAllowed,germanTrailerMarkup,mediaReleaseLabel} from './media-rating';
 import {registerTasteSuggestion,tasteRatingMarkup,setLegacyTasteRatings,effectiveLegacyRatings,adjustedTaste,initTasteUI,openTasteDetails,closeTasteDetails,setTasteArchiveScope} from './taste-ui';
 import {outdoorLibrary,stockSources,publishStockFavorites,publishStockDecisions,publishStockRatings,blockStockSource} from './activity-stock';
 import { favoriteArea,finderSectionVisible,eventSection,discoveryFoodKind,discoveryRouteKind,hikeAscentAllowed,streamingFormat,streamingCardMeta,type NewCategory } from './finder-navigation';
@@ -30,7 +30,7 @@ type Recommendation = {
 type LifestyleRecommendation = {
   id: string; kind?:string;releaseDate?:string;date?:string; openingDate?:string;openingCity?:string;openingSourceUrl?:string;mediaType?: 'film'|'series'; title: string; type: string; description: string; meta: string[];
   fitScore?: number; imported?: boolean; category?:string; favorite?:{id:string;categoryLabel?:string};
-  url: string; badge: string; location?: string; venue?: string; city?: string; address?: string; platform?: string; imdbRating?: number|null; imdbUrl?: string; trailerUrl?: string; trailerLanguage?: 'de'|'en'|'other';
+  url: string; badge: string; location?: string; venue?: string; city?: string; address?: string; platform?: string; imdbRating?: number|null; imdbUrl?: string; moviepilotRating?:number|null;moviepilotUrl?:string; trailerUrl?: string; trailerLanguage?: 'de'|'en'|'other';
 };
 
 type StreamRecommendation = LifestyleRecommendation & {
@@ -198,13 +198,13 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   const renderLifestyle = (selector: string, items: LifestyleRecommendation[], section: 'restaurants' | 'cinema' | 'stream') => {
     const list = document.querySelector<HTMLElement>(selector);
     if (!list) return;
-    list.innerHTML = [...items].filter(item => !mediaHidden(item,hiddenIds)&&(section==='restaurants'?recommendationAllowed({...item,kind:'restaurant',verifiedAt:(item as any).verifiedAt,closed:(item as any).closed},null):mediaRecommendationAllowed({...item,kind:section}))).sort((a,b)=>section==='restaurants'?(b.openingDate||'').localeCompare(a.openingDate||'')||a.title.localeCompare(b.title):(b.imdbRating||0)-(a.imdbRating||0)||(b.releaseDate||'').localeCompare(a.releaseDate||'')||a.title.localeCompare(b.title)).map(item =>
+    list.innerHTML = [...items].filter(item => !mediaHidden(item,hiddenIds)&&(section==='restaurants'?recommendationAllowed({...item,kind:'restaurant',verifiedAt:(item as any).verifiedAt,closed:(item as any).closed},null):mediaRecommendationAllowed({...item,kind:section}))).sort((a,b)=>section==='restaurants'?(b.openingDate||'').localeCompare(a.openingDate||'')||a.title.localeCompare(b.title):(section==='cinema'?(b.moviepilotRating||0)-(a.moviepilotRating||0):(b.imdbRating||0)-(a.imdbRating||0))||(b.releaseDate||'').localeCompare(a.releaseDate||'')||a.title.localeCompare(b.title)).map(item =>
       '<article class="lifestyle-card" '+'data-profile-rejected="true" style="display:none!important" '+'data-lifestyle-id="' + dataEscape(item.id) + '">' +
       '<div class="lifestyle-top"><span class="lifestyle-type">' + categoryIcon(section, item.type) + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(section==='restaurants'?item.badge:'Neu') + '</span></div>' +
       (section==='restaurants'?'<div class="opening-label">'+dataEscape(foodOpeningLabel(item))+'</div>':'<div class="media-release">'+dataEscape(mediaReleaseLabel({...item,kind:section==='cinema'?'cinema':'stream'}))+'</div>') +
       '<h3>' + dataEscape(item.title) + '</h3>' + placeMarkup(item, section) + '<p>' + dataEscape(neutralDescription(item.description).replace(section==='cinema'?/Heute/gi:/$^/g,'Gespeicherte Vorstellung')) + '</p>' +
       '<div class="lifestyle-meta">' + (section==='stream'||section==='cinema'?streamingCardMeta(item.meta):item.meta).filter(v=>section!=='stream'||v.trim()!==recommendationPlace(item,section)).map(v => '<span>' + dataEscape(v.replace(/^Neu seit (\d{2})\.(\d{2})\.\d{4}$/, "Seit $1.$2.")) + '</span>').join('') +
-      (['cinema','stream'].includes(section)?imdbMarkup(item):'') +
+      (['cinema','stream'].includes(section)?mediaRatingMarkup({...item,kind:section}):'') +
       (['cinema','stream'].includes(section)?germanTrailerMarkup(item):'') + '</div>' +
       '<div class="lifestyle-actions"><div class="lifestyle-links"><a class="info-link" href="' + dataEscape(section==='restaurants'?googleMapsPlaceUrl(item):item.url) + '" target="_blank" rel="noopener noreferrer">'+(section==='restaurants'?'Google Maps öffnen':'Mehr erfahren')+'</a></div>' +
       '<div class="lifestyle-card-buttons">' + (section==='restaurants'?stockCopyMarkup({id:'lifestyle-'+item.id,title:item.title,category:({cafe:'Café',restaurant:'Restaurant','beer-garden':'Biergarten'})[discoveryFoodKind(item)],description:item.description,url:item.url},item.meta,item):lifestyleFavoriteMarkup(item,section)) +
@@ -253,7 +253,7 @@ function applyPersonalTasteScores(){
   for(const selector of ['#cinemaList','#streamFilmList','#streamSeriesList','#restaurantList','#cafeList','#beerGardenList','#hikeGroup .tour-list','#bikeGroup .tour-list','#walkGroup .tour-list']){
     const list=document.querySelector<HTMLElement>(selector);if(!list)continue;
     let empty=list.querySelector<HTMLElement>('.profile-empty');
-    if(!empty){empty=document.createElement('p');empty.className='profile-empty';empty.textContent=['#restaurantList','#cafeList','#beerGardenList'].includes(selector)?'Noch keine bestätigten Neueröffnungen in Augsburg innerhalb der letzten60Tage gelistet.':selector==='#cinemaList'?'Keine Filme aus der IMDb-Kinoliste mit Bewertung über 7,5 gespeichert.':['#streamFilmList','#streamSeriesList'].includes(selector)?'Keine neuen Titel der letzten 30 Tage mit IMDb über 7,8 verfügbar.':'Aktuell keine Vorschläge mit bestätigter persönlicher Passung. Es werden nur klar passende Empfehlungen zu deinem aktuellen Profil angezeigt.';list.append(empty);}
+    if(!empty){empty=document.createElement('p');empty.className='profile-empty';empty.textContent=['#restaurantList','#cafeList','#beerGardenList'].includes(selector)?'Noch keine bestätigten Neueröffnungen in Augsburg innerhalb der letzten60Tage gelistet.':selector==='#cinemaList'?'Keine aktuellen Kinofilme mit Moviepilot-Nutzerwertung ab 7,0 gespeichert.':['#streamFilmList','#streamSeriesList'].includes(selector)?'Keine neuen Titel der letzten 30 Tage mit IMDb über 7,8 verfügbar.':'Aktuell keine Vorschläge mit bestätigter persönlicher Passung. Es werden nur klar passende Empfehlungen zu deinem aktuellen Profil angezeigt.';list.append(empty);}
     empty.hidden=Array.from(list.querySelectorAll<HTMLElement>('.lifestyle-card,.tour-card')).some(card=>card.dataset.profileRejected!=='true');
   }
   refreshOutdoorPicks();
@@ -416,7 +416,7 @@ void loadFavorites();
       button.disabled = true;
       button.textContent = 'Wird ausgeblendet …';
       const facts=recommendationFacts.get(id);
-      const keys=[...new Set([id,...(facts&&['cinema','stream'].includes(facts.kind)&&mediaIdentityKey(facts)?[mediaIdentityKey(facts)]:[])])];
+      const keys=[...new Set([id,...(facts&&['cinema','stream'].includes(facts.kind)?mediaIdentityKeys(facts):[])])];
       const results=await Promise.all(keys.map(suggestion_id=>supabase.from('hidden_recommendations').upsert({
         suggestion_id, section, title, hidden_at: new Date().toISOString(),
       }, { onConflict: 'suggestion_id' })));

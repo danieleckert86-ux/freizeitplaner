@@ -41,3 +41,9 @@ test('missing or unconfirmed German trailers link to an encoded YouTube title se
  assert.match(germanTrailerMarkup({title,trailerLanguage:'de',trailerUrl:'https://example.org/trailer'}),/Deutscher Trailer/);
  assert.doesNotMatch(germanTrailerMarkup({title,trailerLanguage:'de',trailerUrl:'https://example.org/trailer'}),/YouTube suchen/);
 });
+
+test('cinema rating gate accepts 7.6 but keeps streaming above 7.8',()=>{
+ for(const imdbRating of [7.6,7.8,7.9,10])assert.equal(mediaRecommendationAllowed({kind:'cinema',imdbRating}),true);
+ for(const imdbRating of [7.5,undefined,null,NaN,11])assert.equal(mediaRecommendationAllowed({kind:'cinema',imdbRating}),false);
+ assert.equal(mediaRecommendationAllowed({kind:'stream',imdbRating:7.6}),false);
+});

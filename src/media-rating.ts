@@ -1,8 +1,8 @@
 export function imdbRating(value:unknown):number|null {
  return typeof value==='number'&&Number.isFinite(value)&&value>=0&&value<=10?value:null;
 }
-export function mediaRecommendationAllowed(item:{imdbRating?:unknown}){
- const rating=imdbRating(item.imdbRating);return rating!==null&&rating>7.8;
+export function mediaRecommendationAllowed(item:{imdbRating?:unknown;kind?:string}){
+ const rating=imdbRating(item.imdbRating);return rating!==null&&rating>(item.kind==='cinema'?7.5:7.8);
 }
 export function imdbTitleUrl(value:unknown):string {
  if(typeof value!=='string')return '';
@@ -30,7 +30,7 @@ export function germanTrailerMarkup(item:{title?:unknown;trailerUrl?:unknown;tra
 }
 
 export function mediaReleaseLabel(item:{releaseDate?:string;date?:string;kind?:string}){
- if(item.kind==='cinema')return 'Diese Woche im Kino';
+ if(item.kind==='cinema')return 'In der IMDb-Kinoliste';
  const day=item.releaseDate||(item.kind==='stream'?item.date:'')||'';
  return /^\d{4}-\d{2}-\d{2}$/.test(day)?'Beim Dienst seit: '+day.split('-').reverse().join('.'):'';
 }

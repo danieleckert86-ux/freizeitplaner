@@ -114,7 +114,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   outdoorIdentities=[...data.hikes,...data.bikes,...(data.walks??[])].map(x=>({id:x.id||x.favorite.id,title:x.title,url:x.url||x.favorite.url}));
   recommendationFacts.clear();
   excludedMediaIds.clear();
-  for(const item of [...(data.cinema??[]),...(data.stream??[])])if(!mediaRecommendationAllowed(item)){excludedMediaIds.add(item.id);excludedMediaIds.add('lifestyle-'+item.id);}
+  for(const item of [...(data.cinema??[]).map(x=>({...x,kind:'cinema'})),...(data.stream??[]).map(x=>({...x,kind:'stream'}))])if(!mediaRecommendationAllowed(item)){excludedMediaIds.add(item.id);excludedMediaIds.add('lifestyle-'+item.id);}
   for(const [kind,items] of Object.entries({event:[...data.top,...data.ideas,...data.discoveries],hike:data.hikes,bike:data.bikes,walk:data.walks??[],restaurant:data.restaurants??[],cinema:data.cinema??[],stream:data.stream??[]})){
     for(const item of items){
       const rec=item as Recommendation & LifestyleRecommendation;
@@ -198,7 +198,7 @@ function renderRecommendationData(data: RecommendationData, hiddenIds = new Set<
   const renderLifestyle = (selector: string, items: LifestyleRecommendation[], section: 'restaurants' | 'cinema' | 'stream') => {
     const list = document.querySelector<HTMLElement>(selector);
     if (!list) return;
-    list.innerHTML = [...items].filter(item => !mediaHidden(item,hiddenIds)&&(section==='restaurants'?recommendationAllowed({...item,kind:'restaurant',verifiedAt:(item as any).verifiedAt,closed:(item as any).closed},null):mediaRecommendationAllowed(item))).sort((a,b)=>section==='restaurants'?(b.openingDate||'').localeCompare(a.openingDate||'')||a.title.localeCompare(b.title):(b.imdbRating||0)-(a.imdbRating||0)||(b.releaseDate||'').localeCompare(a.releaseDate||'')||a.title.localeCompare(b.title)).map(item =>
+    list.innerHTML = [...items].filter(item => !mediaHidden(item,hiddenIds)&&(section==='restaurants'?recommendationAllowed({...item,kind:'restaurant',verifiedAt:(item as any).verifiedAt,closed:(item as any).closed},null):mediaRecommendationAllowed({...item,kind:section}))).sort((a,b)=>section==='restaurants'?(b.openingDate||'').localeCompare(a.openingDate||'')||a.title.localeCompare(b.title):(b.imdbRating||0)-(a.imdbRating||0)||(b.releaseDate||'').localeCompare(a.releaseDate||'')||a.title.localeCompare(b.title)).map(item =>
       '<article class="lifestyle-card" '+'data-profile-rejected="true" style="display:none!important" '+'data-lifestyle-id="' + dataEscape(item.id) + '">' +
       '<div class="lifestyle-top"><span class="lifestyle-type">' + categoryIcon(section, item.type) + dataEscape(item.type) + '</span><span class="lifestyle-badge">' + dataEscape(section==='restaurants'?item.badge:'Neu') + '</span></div>' +
       (section==='restaurants'?'<div class="opening-label">'+dataEscape(foodOpeningLabel(item))+'</div>':'<div class="media-release">'+dataEscape(mediaReleaseLabel({...item,kind:section==='cinema'?'cinema':'stream'}))+'</div>') +
@@ -253,7 +253,7 @@ function applyPersonalTasteScores(){
   for(const selector of ['#cinemaList','#streamFilmList','#streamSeriesList','#restaurantList','#cafeList','#beerGardenList','#hikeGroup .tour-list','#bikeGroup .tour-list','#walkGroup .tour-list']){
     const list=document.querySelector<HTMLElement>(selector);if(!list)continue;
     let empty=list.querySelector<HTMLElement>('.profile-empty');
-    if(!empty){empty=document.createElement('p');empty.className='profile-empty';empty.textContent=['#restaurantList','#cafeList','#beerGardenList'].includes(selector)?'Noch keine bestätigten Neueröffnungen in Augsburg innerhalb der letzten60Tage gelistet.':selector==='#cinemaList'?'Keine Filme dieser Woche aus Thalia, Liliom oder CinemaxX Augsburg mit IMDb über 7,8 gespeichert.':['#streamFilmList','#streamSeriesList'].includes(selector)?'Keine neuen Titel der letzten 30 Tage mit IMDb über 7,8 verfügbar.':'Aktuell keine Vorschläge mit bestätigter persönlicher Passung. Es werden nur klar passende Empfehlungen zu deinem aktuellen Profil angezeigt.';list.append(empty);}
+    if(!empty){empty=document.createElement('p');empty.className='profile-empty';empty.textContent=['#restaurantList','#cafeList','#beerGardenList'].includes(selector)?'Noch keine bestätigten Neueröffnungen in Augsburg innerhalb der letzten60Tage gelistet.':selector==='#cinemaList'?'Keine Filme aus der IMDb-Kinoliste mit Bewertung über 7,5 gespeichert.':['#streamFilmList','#streamSeriesList'].includes(selector)?'Keine neuen Titel der letzten 30 Tage mit IMDb über 7,8 verfügbar.':'Aktuell keine Vorschläge mit bestätigter persönlicher Passung. Es werden nur klar passende Empfehlungen zu deinem aktuellen Profil angezeigt.';list.append(empty);}
     empty.hidden=Array.from(list.querySelectorAll<HTMLElement>('.lifestyle-card,.tour-card')).some(card=>card.dataset.profileRejected!=='true');
   }
   refreshOutdoorPicks();

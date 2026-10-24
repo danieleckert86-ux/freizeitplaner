@@ -22,7 +22,7 @@ export function hardEligibilityReason(x:RecommendationFacts,now=new Date()):stri
   const clock=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Berlin',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(now);
   if(age<0||age>90||age===0&&/^([01]\d|2[0-3]):[0-5]\d$/.test(x.time||'')&&x.time!<=clock)return 'outside_event_window';
  }
- if(['cinema','stream'].includes(x.kind)&&number(x.imdbRating)&&x.imdbRating>=0&&x.imdbRating<=7.8)return 'imdb_threshold';
+ if(['cinema','stream'].includes(x.kind)&&number(x.imdbRating)&&x.imdbRating>=0&&x.imdbRating<=(x.kind==='cinema'?7.5:7.8))return 'imdb_threshold';
  if(x.imported===true||!timestamp(x.verifiedAt))return 'unverified';
  if(x.kind==='restaurant'){
   if(x.openingCity!=='Augsburg'||!x.location?.trim())return 'opening_location_unconfirmed';
@@ -52,19 +52,15 @@ export function hardEligibilityReason(x:RecommendationFacts,now=new Date()):stri
   if(!/^(Netflix(?: Deutschland)?|Disney\+(?: Deutschland)?|RTL\+(?: Deutschland)?|ARD Mediathek|ZDFmediathek)$/i.test(x.platform||x.location||''))return 'service_unknown';
  }
  if(['stream','cinema'].includes(x.kind)){
-  // Cinema is selected from this week's programme, regardless of release age.
+  // Cinema uses only the IMDb showtimes list, independently of release age.
   if(x.availableUntil!==undefined&&(!timestamp(x.availableUntil)||Date.parse(x.availableUntil)<=now.getTime()))return 'unavailable';
   if(x.kind==='cinema'){
-   if(!/augsburg/i.test(x.location||''))return 'cinema_location_unconfirmed';
    if(!source(x.cinemaProgramUrl)||!timestamp(x.cinemaProgramCheckedAt)||Date.parse(x.cinemaProgramCheckedAt!)>now.getTime()||now.getTime()-Date.parse(x.cinemaProgramCheckedAt!)>120*3600000)return 'cinema_program_unconfirmed';
    const programme=new URL(x.cinemaProgramUrl!);
-   if(!((['programmkinosaugsburg.de','www.programmkinosaugsburg.de'].includes(programme.hostname)&&/^\/programm\/(liliom|thalia)(?:\/|$)/.test(programme.pathname))||(['cinemaxx.de','www.cinemaxx.de'].includes(programme.hostname)&&/^\/kinoprogramm\/augsburg(?:\/|$)/.test(programme.pathname))))return 'cinema_source_not_allowed';
-   const weekday=new Date(day+'T12:00:00Z').getUTCDay()||7;
-   const monday=new Date(day+'T12:00:00Z');monday.setUTCDate(monday.getUTCDate()-weekday+1);
-   if(berlinDay(new Date(x.cinemaProgramCheckedAt!))<monday.toISOString().slice(0,10))return 'cinema_program_unconfirmed';
+   if(!['imdb.com','www.imdb.com'].includes(programme.hostname)||!/^\/(?:de\/)?showtimes\/?$/.test(programme.pathname))return 'cinema_source_not_allowed';
   }
   if(!number(x.imdbRating)||x.imdbRating<0||x.imdbRating>10)return 'imdb_unknown';
-  if(x.imdbRating<=7.8)return 'imdb_threshold';
+  if(x.imdbRating<=(x.kind==='cinema'?7.5:7.8))return 'imdb_threshold';
   if(!/^https:\/\/(www\.)?imdb\.com\/title\/tt\d+(?:\/|$)/.test(x.imdbUrl||''))return 'imdb_identity_unknown';
  }
  if(['hike','bike','walk'].includes(x.kind)){

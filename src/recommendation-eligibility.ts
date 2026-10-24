@@ -52,15 +52,16 @@ export function hardEligibilityReason(x:RecommendationFacts,now=new Date()):stri
   if(!/^(Netflix(?: Deutschland)?|Disney\+(?: Deutschland)?|RTL\+(?: Deutschland)?|ARD Mediathek|ZDFmediathek)$/i.test(x.platform||x.location||''))return 'service_unknown';
  }
  if(['stream','cinema'].includes(x.kind)){
-  // Cinema's legacy date is a screening date, never a theatrical release date.
-  const release=x.kind==='cinema'?x.releaseDate:date;
-  if(!isoDay(release))return 'release_unknown';
-  const age=(Date.parse(day)-Date.parse(release))/86400000;
-  if(age<0||age>=30)return x.kind==='cinema'?'outside_cinema_window':'outside_stream_window';
+  // Cinema is selected from this week's programme, regardless of release age.
   if(x.availableUntil!==undefined&&(!timestamp(x.availableUntil)||Date.parse(x.availableUntil)<=now.getTime()))return 'unavailable';
   if(x.kind==='cinema'){
    if(!/augsburg/i.test(x.location||''))return 'cinema_location_unconfirmed';
    if(!source(x.cinemaProgramUrl)||!timestamp(x.cinemaProgramCheckedAt)||Date.parse(x.cinemaProgramCheckedAt!)>now.getTime()||now.getTime()-Date.parse(x.cinemaProgramCheckedAt!)>120*3600000)return 'cinema_program_unconfirmed';
+   const programme=new URL(x.cinemaProgramUrl!);
+   if(!((['programmkinosaugsburg.de','www.programmkinosaugsburg.de'].includes(programme.hostname)&&/^\/programm\/(liliom|thalia)(?:\/|$)/.test(programme.pathname))||(['cinemaxx.de','www.cinemaxx.de'].includes(programme.hostname)&&/^\/kinoprogramm\/augsburg(?:\/|$)/.test(programme.pathname))))return 'cinema_source_not_allowed';
+   const weekday=new Date(day+'T12:00:00Z').getUTCDay()||7;
+   const monday=new Date(day+'T12:00:00Z');monday.setUTCDate(monday.getUTCDate()-weekday+1);
+   if(berlinDay(new Date(x.cinemaProgramCheckedAt!))<monday.toISOString().slice(0,10))return 'cinema_program_unconfirmed';
   }
   if(!number(x.imdbRating)||x.imdbRating<0||x.imdbRating>10)return 'imdb_unknown';
   if(x.imdbRating<=7.8)return 'imdb_threshold';

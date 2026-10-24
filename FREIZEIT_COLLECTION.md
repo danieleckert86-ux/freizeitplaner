@@ -1,5 +1,7 @@
 # Freizeitvorrat statt Wochenplaner
 
+Kino ab24.10.2026: aktuelle Berliner Woche aus Thalia, Liliom, CinemaxX Augsburg; IMDb strikt>7,8. Kein Release-/30-Tage-Filter für Kino. Vergangene Programmwochen ausblenden; Stream-Regeln unverändert.
+
 Aktueller Stand22.10.2026: Musik/Kultur ausschließlich aktuelle Berliner Woche,
 keine Frühzeitig-buchen-Kategorie oder Preisgrenze; alte spätere Einträge und
 Buchungsbelege bleiben gespeichert. Wochenliste ohne Punkte chronologisch.

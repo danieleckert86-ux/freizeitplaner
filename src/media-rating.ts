@@ -30,6 +30,7 @@ export function germanTrailerMarkup(item:{title?:unknown;trailerUrl?:unknown;tra
 }
 
 export function mediaReleaseLabel(item:{releaseDate?:string;date?:string;kind?:string}){
+ if(item.kind==='cinema')return 'Diese Woche im Kino';
  const day=item.releaseDate||(item.kind==='stream'?item.date:'')||'';
- return /^\d{4}-\d{2}-\d{2}$/.test(day)?(item.kind==='cinema'?'Kinostart: ':'Beim Dienst seit: ')+day.split('-').reverse().join('.'):'';
+ return /^\d{4}-\d{2}-\d{2}$/.test(day)?'Beim Dienst seit: '+day.split('-').reverse().join('.'):'';
 }

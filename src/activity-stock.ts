@@ -5,12 +5,12 @@ import type {KnownActivity} from './known-activities';
 import type {GuideAnswers} from './activity-guide';
 
 export const stockKinds = [['bike','Fahrradtouren'],['hike','Wanderungen'],['walk','Spaziergang'],['swim','Schwimmen'],['cafe','Café'],['restaurant','Restaurant'],['beer-garden','Biergarten']] as const;
-export type StockKind = typeof stockKinds[number][0] | 'bike-short' | 'bike-long' | 'hike-short' | 'hike-long';
+export type StockKind = typeof stockKinds[number][0] | 'bike-short' | 'bike-long' | 'hike-short' | 'hike-long' | 'other';
 export const normalizedStockKind=(kind:StockKind)=>kind.startsWith('bike')?'bike':kind.startsWith('hike')?'hike':kind;
 export const placeOnlyKind=(kind:string)=>['swim','cafe','restaurant','beer-garden'].includes(kind);
 // User-provided source lists, not imported or verified places. No automatic fetch.
 export const stockLists:Partial<Record<StockKind,string>>={restaurant:'https://maps.app.goo.gl/WfdLtvt9Mdo6UJor5',swim:'https://maps.app.goo.gl/8e3gtYTg9j1BvQw98',cafe:'https://maps.app.goo.gl/MFDfsD7oW6aF68Yy6','beer-garden':'https://maps.app.goo.gl/S9TPz1PT38783Roq8'};
-export type StockItem = {id:string;title:string;kind:StockKind;url:string;minutes:number|null;travelMinutes:number|null;distanceKm:number|null;elevationM:number|null;setting:ActivitySetting;energy:string;effort:string;note:string;sourceId?:string;unavailable?:boolean;favorite?:boolean;rating?:number;ratingScore?:number;sourceDetails?:Record<string,unknown>[];importedSourceIds?:string[]};
+export type StockItem = {id:string;title:string;kind:StockKind;url:string;minutes:number|null;travelMinutes:number|null;distanceKm:number|null;elevationM:number|null;setting:ActivitySetting;energy:string;effort:string;note:string;sourceId?:string;unavailable?:boolean;favorite?:boolean;rating?:number;ratingScore?:number;sourceDetails?:Record<string,unknown>[];importedSourceIds?:string[];linkedRoutineIds?:string[];address?:string};
 export type StockFavorite = {suggestionId:string;title:string;category:string;description:string;url:string};
 export type StockDecisions = {ready:boolean;hidden:ReadonlySet<string>;ratings:ReadonlyMap<string,number>};
 const bounded=(v:unknown,max:number)=>v===null||typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=max;
@@ -18,11 +18,13 @@ export const safeStockUrl=(s:string)=>{try{const u=new URL(s);return ['http:','h
 export function validStockItem(v:unknown):v is StockItem {
  if(!v||typeof v!=='object')return false;const a=v as StockItem;
  return typeof a.id==='string'&&a.id.length>0&&a.id.length<=100&&typeof a.title==='string'&&a.title.trim().length>0&&a.title.length<=200
-  && (stockKinds.some(([id])=>id===a.kind)||['bike-short','bike-long','hike-short','hike-long'].includes(a.kind))&&typeof a.url==='string'&&a.url.length<=2000&&(!a.url||!!safeStockUrl(a.url))
+  && (stockKinds.some(([id])=>id===a.kind)||['bike-short','bike-long','hike-short','hike-long','other'].includes(a.kind))&&typeof a.url==='string'&&a.url.length<=2000&&(!a.url||!!safeStockUrl(a.url))
   && bounded(a.minutes,1440)&&(a.minutes===null||Number.isInteger(a.minutes)&&a.minutes>=5)&&bounded(a.travelMinutes,1440)&&(a.travelMinutes===null||Number.isInteger(a.travelMinutes))
   && bounded(a.distanceKm,1000)&&bounded(a.elevationM,10000)&&['inside','outside','both'].includes(a.setting)&&['low','medium','high'].includes(a.energy)&&['spontaneous','prepare','trip'].includes(a.effort)
   && (a.unavailable===undefined||typeof a.unavailable==='boolean') && (a.favorite===undefined||typeof a.favorite==='boolean') && (a.ratingScore===undefined||validScore(a.ratingScore)) && (a.rating===undefined||Number.isInteger(a.rating)&&a.rating>=1&&a.rating<=5)
-  && typeof a.note==='string'&&a.note.length<=2000&&(a.sourceId===undefined||typeof a.sourceId==='string'&&a.sourceId.length<=200);
+  && typeof a.note==='string'&&a.note.length<=2000&&(a.sourceId===undefined||typeof a.sourceId==='string'&&a.sourceId.length<=200)
+  && (a.address===undefined||typeof a.address==='string'&&a.address.length<=500)
+  && (a.linkedRoutineIds===undefined||Array.isArray(a.linkedRoutineIds)&&a.linkedRoutineIds.length<=100&&a.linkedRoutineIds.every(x=>typeof x==='string'&&x.length>0&&x.length<=200));
 }
 export function withStockRating(row:StockItem,score:number|null):StockItem {
  if(score!==null&&!validScore(score))throw new Error('Invalid rating');

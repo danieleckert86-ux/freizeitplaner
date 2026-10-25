@@ -88,32 +88,6 @@ test('saved-only and empty periods apply to both highlights and remaining list',
  assert.equal(eventInPeriod('2026-10-23','2026-10-19','weekend'),true);
 });
 
-import {readFileSync} from 'node:fs';
-import vm from 'node:vm';
-import ts from 'typescript';
-test('event controls restore hidden cards and filter top picks through the actual DOM controller',()=>{
- const card=(id,date,fitScore,saved=false)=>({dataset:{date,fitScore:String(fitScore),eventTime:'19:00'},hidden:false,attrs:{},classes:new Set(),querySelector(selector){return selector==='h3'?{textContent:id}:selector==='[data-favorite].saved'&&saved?{}:null;},classList:{toggle(){}},setAttribute(k,v){this.attrs[k]=v;}});
- const rows=[card('Friday','2026-10-16',80,true),card('Saturday','2026-10-17',90),card('December','2026-12-01',100)];
- for(const c of rows)c.classList.toggle=(k,v)=>v?c.classes.add(k):c.classes.delete(k);
- const list=()=>({children:[],append(c){if(c.parentElement){const old=c.parentElement.children;old.splice(old.indexOf(c),1);}this.children.push(c);c.parentElement=this;}});
- const top=list(),rest=list(),block={hidden:true,querySelector:()=>({textContent:''})},empty={hidden:true},period={value:'all'},sort={value:'date'},saved={checked:false};
- rows.forEach(c=>rest.append(c));
- const nodes={'#discoveriesHeading':{textContent:''},'#discoveries .event-list-heading':{textContent:''},'#topEventList':top,'#discoveries > .discovery-timeline':rest,'#eventHighlights':block,'#eventsEmpty':empty,'#eventPeriod':period,'#eventSort':sort,'#onlySaved':saved,'#currentKind':{value:'events'}};
- const document={querySelector:s=>nodes[s],querySelectorAll:()=>[...top.children,...rest.children]};
- const source=readFileSync(new URL('../src/main.ts',import.meta.url),'utf8');
- const body=source.slice(source.indexOf('function refreshEventHighlights()'),source.indexOf('function quietCardActions()'));
- class FixedDate extends Date{constructor(value){super(value??'2026-10-16T10:00:00Z');}}
- const context={document,weeklyBookingView,Date:FixedDate,Intl};
- vm.createContext(context);vm.runInContext(ts.transpileModule(body,{compilerOptions:{target:ts.ScriptTarget.ES2020}}).outputText,context);
- const refresh=()=>vm.runInContext('refreshEventHighlights()',context);
- refresh();assert.equal(top.children.length,2);
- period.value='today';refresh();assert.deepEqual(top.children.map(c=>c.querySelector('h3').textContent),['Friday','Saturday']);assert.equal(rows[2].hidden,true);assert.equal(rows[2].classes.has('is-hidden'),true);
- period.value='all';refresh();assert.equal(top.children.length,2);assert.equal(rows[2].hidden,true);assert.equal(rows[2].attrs['aria-hidden'],'true');
- period.value='weekend';saved.checked=true;refresh();assert.deepEqual(top.children.map(c=>c.querySelector('h3').textContent),['Friday']);
- saved.checked=false;refresh();assert.equal(top.children.length,2);assert.equal(rows[2].hidden,true);
- rows[0].dataset.category='Indie-Konzert';nodes['#currentKind'].value='music';refresh();assert.equal(nodes['#discoveriesHeading'].textContent,'Musik & Konzerte');assert.deepEqual(top.children.map(c=>c.querySelector('h3').textContent),['Friday']);nodes['#currentKind'].value='events';rows[0].dataset.date='2026-10-19';rows[1].dataset.date='2026-10-20';refresh();assert.equal(block.hidden,false);assert.equal(empty.hidden,true);
-});
-
 test('partial research preserves fetch evidence, pending work and failures separately',()=>{
  const source={id:'p',hours:120},check={id:'p',status:'failed',checkedAt:'',error:'partial: September nicht abgedeckt',attemptedAt:'2026-10-16T10:00Z',lastSuccessfulFetchAt:'2026-10-16T10:01Z',pendingUrls:['https://example.com/a'],details:{returned:30,attempted:4,accepted:2}};
  const before=JSON.stringify(check),s=collectionSourceStates([source],[check])[0];

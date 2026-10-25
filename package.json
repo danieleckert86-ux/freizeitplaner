@@ -7,13 +7,14 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --experimental-strip-types --test tests/outdoor-selection.test.mjs tests/collection.test.mjs tests/known-activities.test.mjs tests/activity-guide.test.mjs tests/activity-stock.test.mjs tests/taste-profile.test.mjs tests/media-rating.test.mjs tests/taste-settings.test.mjs tests/database.test.mjs tests/hike-eligibility.test.mjs tests/recommendation-eligibility.test.mjs tests/media-simple.test.mjs"
+    "test": "node --experimental-strip-types --test tests/outdoor-selection.test.mjs tests/collection.test.mjs tests/known-activities.test.mjs tests/activity-guide.test.mjs tests/activity-stock.test.mjs tests/taste-profile.test.mjs tests/media-rating.test.mjs tests/taste-settings.test.mjs tests/database.test.mjs tests/hike-eligibility.test.mjs tests/recommendation-eligibility.test.mjs tests/media-simple.test.mjs tests/idea-library.test.mjs tests/idea-app.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.0",
+    "happy-dom": "^21.0.4",
     "postcss": "^8.4.0",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.7.0",

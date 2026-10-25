@@ -1,0 +1,22 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {Window} from 'happy-dom';
+import {initIdeaApp} from '../src/idea-app.ts';
+import {fixture} from './idea-fixtures.mjs';
+const settle=async()=>{for(let i=0;i<12;i++)await new Promise(resolve=>setTimeout(resolve,0));};
+test('real app loads existing collection without research; CRUD, safe text, linking and reload use the existing store',async()=>{
+ const window=new Window({url:'https://app.example/#ideen'});
+ for(const key of ['window','document','location','history','FormData','HTMLElement','HTMLInputElement','HTMLSelectElement'])globalThis[key]=window[key];
+ globalThis.confirm=()=>true;
+ const {database,data}=fixture();window.document.body.innerHTML='<div id="app"></div>';const root=window.document.querySelector('#app');initIdeaApp(root,database);await settle();
+ const click=(action)=>{const node=root.querySelector('[data-action="'+action+'"]');assert.ok(node,action);node.click();};
+ const change=(selector,value)=>{const node=root.querySelector(selector);node.value=value;node.dispatchEvent(new window.Event('change',{bubbles:true}));};
+ assert.match(root.textContent,/Meine kleine Radtour/);assert.equal(data.writes.length,0);assert.ok(!root.textContent.includes('Neues'));assert.ok(data.requests.every(x=>!['recommendation_data','catalog'].includes(x.table)));
+ click('places');assert.match(root.textContent,/Mein Ort/);click('edit');const form=root.querySelector('#ideaEditor');form.elements.title.value='Mein <script>Ort</script>';form.dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));await settle();
+ assert.equal(data.writes.length,1);assert.equal(data.payload.activityStock[0].title,'Mein <script>Ort</script>');assert.equal(root.querySelectorAll('script').length,0);assert.equal(data.payload.activityStock[0].rating,4);
+ click('reload');await settle();assert.match(root.textContent,/Mein <script>Ort<\/script>/);
+ click('ideas');click('add-linked');const add=root.querySelector('#ideaEditor');add.elements.title.value='Mein Kajakstart';change('#ideaEditor [name=kind]','other');add.querySelector('[name=linkedRoutineIds][value=custom]').checked=true;add.dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));await settle();
+ assert.equal(data.payload.activityStock.length,2);assert.deepEqual(data.payload.activityStock[1].linkedRoutineIds,['custom']);assert.equal(data.payload.activityStock[1].minutes,null);
+ click('edit');click('remove');await settle();assert.equal(data.payload.activityStock.length,1);assert.equal(data.payload.routines[0].id,'custom');assert.equal(data.payload.unknownField.important,'keep');
+ await window.happyDOM.close();
+});

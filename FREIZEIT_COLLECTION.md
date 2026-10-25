@@ -1,3 +1,7 @@
+# Aktueller Fokus: manuelle Freizeitideen · 25.10.2026
+
+Verbindlich ist [manuelle Sammlung](docs/manual-ideas-20261025.md). Neues und Recherche entfallen. Vorhandene Freizeitideen, Orte, Touren, Favoriten, Ausblendungen und Bewertungen bleiben im bestehenden privaten Speicher erhalten. Die folgenden Abschnitte beschreiben historische Stände und aktivieren keine Recherche.
+
 # Freizeitvorrat statt Wochenplaner
 
 Kino ab24.10.2026: aktuelle Berliner Woche aus Thalia, Liliom, CinemaxX Augsburg; IMDb strikt>7,8. Kein Release-/30-Tage-Filter für Kino. Vergangene Programmwochen ausblenden; Stream-Regeln unverändert.

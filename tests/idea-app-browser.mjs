@@ -30,6 +30,10 @@ await page.route('**/*',async route=>{
 try{
  for(const width of [320,390,1024]){
   await page.setViewportSize({width,height:900});await page.goto(base);await page.getByRole('heading',{name:'Meine kleine Radtour',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Bearbeiten',exact:true}).click();
+  await page.getByLabel('Eigene Notiz / Vorbereitung').fill('Vorbereitung '+width);
+  await page.getByRole('button',{name:'Speichern',exact:true}).click();
+  await page.getByText('Vorbereitung '+width,{exact:true}).waitFor();
   await page.getByRole('button',{name:'Orte & Touren',exact:true}).click();
   await page.getByLabel('Sammlungsbereich').selectOption('restaurant');
   await page.getByRole('heading',{name:'Restaurant mit einem besonders langen Namen 0',exact:true}).waitFor();
@@ -47,6 +51,6 @@ try{
   await page.getByRole('heading',{name:'Mein Restaurant '+width,exact:true}).waitFor();
   if(process.env.SCREENSHOT_DIR)await page.screenshot({path:process.env.SCREENSHOT_DIR+'/freizeitideen-'+width+'.png',fullPage:true});
  }
- assert.equal(writes,3);assert.deepEqual(errors,[]);assert.equal(payload.unknownField.important,'keep');assert.equal(payload.activityStock[0].sourceDetails[0].checkedAt,'2026-10-11T10:00:00Z');
- console.log('Chromium: 320/390/1024px, 32 Orte, mobile picker, edit/save/reload, safe widths; 3 fixture writes, 0 production writes.');
+ assert.equal(writes,6);assert.deepEqual(errors,[]);assert.equal(payload.unknownField.important,'keep');assert.equal(payload.activityStock[0].sourceDetails[0].checkedAt,'2026-10-11T10:00:00Z');
+ console.log('Chromium: 320/390/1024px, 32 Orte, mobile picker, edit/save/reload, safe widths; 6 fixture writes, 0 production writes.');
 }finally{await browser.close();if(server)await server.close();}

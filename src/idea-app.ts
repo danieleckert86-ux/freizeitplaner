@@ -67,7 +67,7 @@ export function initIdeaApp(root:HTMLElement,database:SupabaseClient){
  function form(){
   const ed=editor!;const original=ed.original;
   const get=(k:string,fallback:unknown='')=>ed.values?.[k]??(original as unknown as Record<string,unknown>|undefined)?.[k]??fallback;
-  const idea=ed.kind==='idea',a=original as KnownActivity|undefined,p=original as StockItem|undefined;
+  const idea=ed.kind==='idea',a=idea?original as KnownActivity|undefined:undefined,p=idea?undefined:original as StockItem|undefined;
   const formKinds:readonly (readonly [string,string])[]=p&&!collectionKinds.some(([k])=>k===p.kind)?[...collectionKinds,[p.kind,kindLabel(stockKind(p))+' (bisherige Einordnung)']]:collectionKinds;
   const category=ed.values?.activityCategory??(a?categoryOf(a):group);
   const setting=ed.values?.setting??(a&&idea?settingOf(a):get('setting','outside') as string);

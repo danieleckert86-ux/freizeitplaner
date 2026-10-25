@@ -64,3 +64,6 @@ begleitende zentrale Dokumentation. Kein Merge/Produktionsdeploy aus Fachchat04.
 Danach echte Sammlung rein lesend prüfen (zuletzt36Ideen und94Orte/Touren),
 geöffnete alte Tabs neu laden und iPhone/Safari visuell abnehmen. Keine
 Beispieldaten in die echte Sammlung übernehmen.
+
+## Korrektur: Freizeitidee bearbeiten · 25.10.2026
+Der Formularaufbau unterscheidet jetzt vor dem Auslesen der Ortskategorie zwischen Idee und Ort. Zuvor wurde beim Bearbeiten einer bestehenden Idee deren fehlendes Ortsfeld kind ausgewertet; dies brach die Darstellung ab. Regressionen prüfen Bearbeiten, Speichern und Neuladen einer bestehenden Idee mit unveränderten Bewertungen und Orten, zusätzlich im Browser bei320/390/1024px. Produktive Daten bleiben unverändert.

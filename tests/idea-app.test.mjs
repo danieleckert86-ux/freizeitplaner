@@ -20,3 +20,15 @@ test('real app loads existing collection without research; CRUD, safe text, link
  click('edit');click('remove');await settle();assert.equal(data.payload.activityStock.length,1);assert.equal(data.payload.routines[0].id,'custom');assert.equal(data.payload.unknownField.important,'keep');
  await window.happyDOM.close();
 });
+
+test('existing Freizeitidee opens its own editor and saves without treating the routine as a place',async()=>{
+ const window=new Window({url:'https://app.example/#ideen'});
+ for(const key of ['window','document','location','history','FormData','HTMLElement','HTMLInputElement','HTMLSelectElement'])globalThis[key]=window[key];
+ globalThis.confirm=()=>true;
+ const {database,data}=fixture();window.document.body.innerHTML='<div id="app"></div>';const root=window.document.querySelector('#app');initIdeaApp(root,database);await settle();
+ root.querySelector('[data-action="edit"]').click();
+ const form=root.querySelector('#ideaEditor');assert.ok(form);assert.equal(form.elements.title.value,'Meine kleine Radtour');assert.equal(form.elements.kind,undefined);
+ form.elements.next.value='Helme bereitlegen';form.dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));await settle();
+ assert.equal(data.writes.length,1);assert.equal(data.payload.routines[0].next,'Helme bereitlegen');assert.equal(data.payload.routines[0].ratingScore,85);assert.equal(data.payload.activityStock[0].title,'Mein Ort');assert.equal(data.payload.unknownField.important,'keep');
+ root.querySelector('[data-action="reload"]').click();await settle();assert.match(root.textContent,/Helme bereitlegen/);await window.happyDOM.close();
+});

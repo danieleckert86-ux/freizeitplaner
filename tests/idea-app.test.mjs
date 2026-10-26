@@ -23,7 +23,7 @@ test('real app loads existing collection without research; CRUD, safe text, link
  click('back-to-idea');assert.match(root.querySelector('.idea-detail').textContent,/Meine kleine Radtour/);
  data.payload.activityStock.push({...structuredClone(data.payload.activityStock[0]),id:'orphan',kind:'beer-garden',title:'Mein Biergarten ohne Freizeitidee'});
  data.favorites=[{id:'archive',suggestion_id:'film',title:'Mein gemerkter Film',category:'Kino',description:'Alte Merkliste',url:'https://example.org/film',day:'',saved_at:'2026-10-10T12:00:00Z'}];
- const writes=data.writes.length;click('reload');await settle();change('#collectionGroup','unassigned');assert.match(root.querySelector('.idea-detail').textContent,/Mein Biergarten ohne Freizeitidee/);
+ const writes=data.writes.length;click('reload');await settle();change('#collectionGroup','unassigned');root.querySelector('[data-action=select][data-id=orphan]').click();assert.match(root.querySelector('.idea-detail').textContent,/Mein Biergarten ohne Freizeitidee/);
  const archiveSearch=root.querySelector('#collectionSearch');archiveSearch.value='gemerkter Film';archiveSearch.dispatchEvent(new window.Event('input',{bubbles:true}));assert.match(root.querySelector('.idea-detail').textContent,/Mein gemerkter Film/);assert.equal(data.writes.length,writes);
  await window.happyDOM.close();
 });

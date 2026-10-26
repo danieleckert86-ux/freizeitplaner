@@ -6,6 +6,12 @@ import {mediaIdentityKeys} from './recommendation-eligibility.ts';
 
 export const collectionKinds=[...stockKinds,['other','Weitere Orte'] as const] as const;
 export type CollectionKind=typeof collectionKinds[number][0];
+export type LibraryEntry={kind:'idea';item:KnownActivity}|{kind:'place';item:StockItem}|{kind:'archive';item:SavedIdea};
+export function searchLibrary(ideas:readonly KnownActivity[],places:readonly StockItem[],favorites:readonly SavedIdea[],query:string,onlyFavorites=false):LibraryEntry[]{
+ const needle=query.trim().toLocaleLowerCase('de');
+ const rows:LibraryEntry[]=[...ideas.map(item=>({kind:'idea' as const,item})),...places.map(item=>({kind:'place' as const,item})),...favorites.map(item=>({kind:'archive' as const,item}))];
+ return rows.filter(row=>(!onlyFavorites||row.kind==='archive'||row.item.favorite)&&[row.item.title,row.kind==='idea'?row.item.next:row.kind==='place'?[row.item.note,row.item.address].filter(Boolean).join(' '):row.item.description].join(' ').toLocaleLowerCase('de').includes(needle));
+}
 export const stockKind=(p:StockItem)=>normalizedStockKind(p.kind);
 const identityIds=(id:string,url:string)=>[id,id.startsWith('lifestyle-')?id.slice(10):'lifestyle-'+id,...mediaIdentityKeys({imdbUrl:url,moviepilotUrl:url})];
 export function linkedPlaces(idea:KnownActivity,places:readonly StockItem[]){

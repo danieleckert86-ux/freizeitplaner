@@ -11,3 +11,4 @@
 .idea-index[hidden]{display:none}.mobile-picker{width:100%;text-align:left;display:block;background:var(--paper);padding:12px;overflow-wrap:anywhere}.mobile-picker small{display:block;margin-top:6px;font-size:12px;color:var(--muted)}
 .tour-fields summary{cursor:pointer;font-size:13px;min-height:44px;padding:12px 0}.tour-fields .form-pair{margin:8px 0 16px}
 .idea-brand{border:0;background:transparent;padding:0;border-radius:0}
+.back-link{border:0;background:transparent;padding:8px 0;color:var(--muted);font-size:13px;margin-bottom:16px;text-align:left}

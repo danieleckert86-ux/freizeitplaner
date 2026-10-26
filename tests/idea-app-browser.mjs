@@ -34,23 +34,24 @@ try{
   await page.getByLabel('Eigene Notiz / Vorbereitung').fill('Vorbereitung '+width);
   await page.getByRole('button',{name:'Speichern',exact:true}).click();
   await page.getByText('Vorbereitung '+width,{exact:true}).waitFor();
-  await page.getByRole('button',{name:'Orte & Touren',exact:true}).click();
-  await page.getByLabel('Sammlungsbereich').selectOption('restaurant');
-  await page.getByRole('heading',{name:'Restaurant mit einem besonders langen Namen 0',exact:true}).waitFor();
+  assert.equal(await page.locator('nav[aria-label=Hauptbereiche]').count(),0);
+  await page.getByLabel('Sammlungsbereich').selectOption('food');
+  await page.getByRole('heading',{name:'Essen gehen',exact:true}).waitFor();
+  const targetId='restaurant-'+([320,390,1024].indexOf(width));
+  await page.locator('[data-action=open-place][data-id="'+targetId+'"]').click();
+  await page.getByRole('heading',{name:'Restaurant mit einem besonders langen Namen '+[320,390,1024].indexOf(width),exact:true}).waitFor();
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true,'horizontal overflow at '+width);
   assert.equal(await page.getByRole('button',{name:'Neues',exact:true}).count(),0);
-  if(width<740){assert.equal(await page.locator('.idea-index').isVisible(),false);await page.locator('[data-action=toggle-list]').click();assert.equal(await page.locator('.idea-index').isVisible(),true);await page.locator('[data-action=select][data-id=restaurant-1]').click();assert.equal(await page.locator('.idea-index').isVisible(),false);}
+  if(width<740){assert.equal(await page.locator('.idea-index').isVisible(),false);await page.locator('[data-action=toggle-list]').click();assert.equal(await page.locator('.idea-index').isVisible(),true);await page.locator('[data-action=toggle-list]').click();assert.equal(await page.locator('.idea-index').isVisible(),false);}
   await page.getByRole('button',{name:'Bearbeiten',exact:true}).click();
   await page.getByRole('textbox',{name:'Name',exact:true}).fill('Mein Restaurant '+width);
   await page.getByRole('button',{name:'Speichern',exact:true}).click();
   await page.getByRole('heading',{name:'Mein Restaurant '+width,exact:true}).waitFor();
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth),true);
-  await page.reload();await page.getByRole('button',{name:'Orte & Touren',exact:true}).click();await page.getByLabel('Sammlungsbereich').selectOption('restaurant');
-  if(width<740)await page.locator('[data-action=toggle-list]').click();
-  await page.locator('.idea-index').getByRole('button').filter({hasText:'Mein Restaurant '+width}).click();
+  await page.reload();await page.getByLabel('Idee, Ort oder Tour suchen').fill('Mein Restaurant '+width);
   await page.getByRole('heading',{name:'Mein Restaurant '+width,exact:true}).waitFor();
   if(process.env.SCREENSHOT_DIR)await page.screenshot({path:process.env.SCREENSHOT_DIR+'/freizeitideen-'+width+'.png',fullPage:true});
  }
  assert.equal(writes,6);assert.deepEqual(errors,[]);assert.equal(payload.unknownField.important,'keep');assert.equal(payload.activityStock[0].sourceDetails[0].checkedAt,'2026-10-11T10:00:00Z');
- console.log('Chromium: 320/390/1024px, 32 Orte, mobile picker, edit/save/reload, safe widths; 6 fixture writes, 0 production writes.');
+ console.log('Chromium: 320/390/1024px, 32 Orte, single entry, linked places, global search, edit/save/reload, safe widths; 6 fixture writes, 0 production writes.');
 }finally{await browser.close();if(server)await server.close();}

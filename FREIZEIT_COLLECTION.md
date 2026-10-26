@@ -1,3 +1,9 @@
+# Ein Einstieg über Freizeitideen · 26.10.2026
+
+Die obere Umschaltung Freizeitideen / Orte & Touren entfällt. Die Übersicht bleibt bei den Freizeitideen; konkrete Ziele öffnen sich in deren Detailansicht mit einem Zurück-Knopf. Die gemeinsame Suche durchsucht unabhängig vom gewählten Bereich alle Ideen, Orte, Touren und erhaltenen Favoriten. Nicht verknüpfte Ziele und die bisherige Merkliste bleiben unter Weitere gespeicherte Ziele erreichbar. Keine Migration, keine geänderte Speicherung, keine zurückgesetzten Nutzerentscheidungen.
+
+Validierung:127App-Tests, TypeScript, Vite-Build sowie Chromium320/390/1024px erfolgreich. Geprüft: fehlende Umschaltung, verknüpfte Ziele, globale Suche, Bearbeiten/Speichern/Neuladen, unzugeordnete Ziele und alte Merkliste. Alle Schreibtests ausschließlich mit Fixtures. Veröffentlichung durch00.
+
 # Aktueller Fokus: manuelle Freizeitideen · 25.10.2026
 
 Verbindlich ist [manuelle Sammlung](docs/manual-ideas-20261025.md). Neues und Recherche entfallen. Vorhandene Freizeitideen, Orte, Touren, Favoriten, Ausblendungen und Bewertungen bleiben im bestehenden privaten Speicher erhalten. Die folgenden Abschnitte beschreiben historische Stände und aktivieren keine Recherche.

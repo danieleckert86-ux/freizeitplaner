@@ -12,12 +12,19 @@ test('real app loads existing collection without research; CRUD, safe text, link
  const click=(action)=>{const node=root.querySelector('[data-action="'+action+'"]');assert.ok(node,action);node.click();};
  const change=(selector,value)=>{const node=root.querySelector(selector);node.value=value;node.dispatchEvent(new window.Event('change',{bubbles:true}));};
  assert.match(root.textContent,/Meine kleine Radtour/);assert.equal(data.writes.length,0);assert.ok(!root.textContent.includes('Neues'));assert.ok(data.requests.every(x=>!['recommendation_data','catalog'].includes(x.table)));
- click('places');assert.match(root.textContent,/Mein Ort/);click('edit');const form=root.querySelector('#ideaEditor');form.elements.title.value='Mein <script>Ort</script>';form.dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));await settle();
+ assert.equal(root.querySelector('nav[aria-label="Hauptbereiche"]'),null);
+ click('open-place');assert.match(root.textContent,/Mein Ort/);click('edit');const form=root.querySelector('#ideaEditor');form.elements.title.value='Mein <script>Ort</script>';form.dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));await settle();
  assert.equal(data.writes.length,1);assert.equal(data.payload.activityStock[0].title,'Mein <script>Ort</script>');assert.equal(root.querySelectorAll('script').length,0);assert.equal(data.payload.activityStock[0].rating,4);
  click('reload');await settle();assert.match(root.textContent,/Mein <script>Ort<\/script>/);
  click('ideas');click('add-linked');const add=root.querySelector('#ideaEditor');add.elements.title.value='Mein Kajakstart';change('#ideaEditor [name=kind]','other');add.querySelector('[name=linkedRoutineIds][value=custom]').checked=true;add.dispatchEvent(new window.Event('submit',{bubbles:true,cancelable:true}));await settle();
  assert.equal(data.payload.activityStock.length,2);assert.deepEqual(data.payload.activityStock[1].linkedRoutineIds,['custom']);assert.equal(data.payload.activityStock[1].minutes,null);
  click('edit');click('remove');await settle();assert.equal(data.payload.activityStock.length,1);assert.equal(data.payload.routines[0].id,'custom');assert.equal(data.payload.unknownField.important,'keep');
+ const search=root.querySelector('#collectionSearch');search.value='Mein <script>';search.dispatchEvent(new window.Event('input',{bubbles:true}));assert.match(root.querySelector('.idea-detail').textContent,/Mein <script>Ort<\/script>/);assert.equal(root.querySelector('script'),null);
+ click('back-to-idea');assert.match(root.querySelector('.idea-detail').textContent,/Meine kleine Radtour/);
+ data.payload.activityStock.push({...structuredClone(data.payload.activityStock[0]),id:'orphan',kind:'beer-garden',title:'Mein Biergarten ohne Freizeitidee'});
+ data.favorites=[{id:'archive',suggestion_id:'film',title:'Mein gemerkter Film',category:'Kino',description:'Alte Merkliste',url:'https://example.org/film',day:'',saved_at:'2026-10-10T12:00:00Z'}];
+ const writes=data.writes.length;click('reload');await settle();change('#collectionGroup','unassigned');root.querySelector('[data-action=select][data-id=orphan]').click();assert.match(root.querySelector('.idea-detail').textContent,/Mein Biergarten ohne Freizeitidee/);
+ const archiveSearch=root.querySelector('#collectionSearch');archiveSearch.value='gemerkter Film';archiveSearch.dispatchEvent(new window.Event('input',{bubbles:true}));assert.match(root.querySelector('.idea-detail').textContent,/Mein gemerkter Film/);assert.equal(data.writes.length,writes);
  await window.happyDOM.close();
 });
 
